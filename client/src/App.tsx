@@ -18,7 +18,7 @@ const App = () => {
         // Simulate initial page load
         const t = setTimeout(() => {
             setIsLoading(false);
-        }, 800);
+        }, 2400);
         return () => clearTimeout(t);
     }, []);
 

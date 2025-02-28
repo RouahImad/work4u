@@ -156,22 +156,30 @@ export default function HomePage({
                                 spacing={1}
                                 alignItems="center"
                             >
-                                <IconButton
-                                    onClick={() => setDarkMode(!darkMode)}
-                                >
-                                    {darkMode ? (
-                                        <LightIcon sx={{ color: "#ffcc00" }} />
-                                    ) : (
-                                        <DarkIcon sx={{ color: "#333" }} />
-                                    )}
-                                </IconButton>
-                                <IconButton>
-                                    <LoginIcon
-                                        sx={{
-                                            color: darkMode ? "#fff" : "#000",
-                                        }}
-                                    />
-                                </IconButton>
+                                <motion.div whileTap={{ scale: 0.9 }}>
+                                    <IconButton
+                                        onClick={() => setDarkMode(!darkMode)}
+                                    >
+                                        {darkMode ? (
+                                            <LightIcon
+                                                sx={{ color: "#ffcc00" }}
+                                            />
+                                        ) : (
+                                            <DarkIcon sx={{ color: "#333" }} />
+                                        )}
+                                    </IconButton>
+                                </motion.div>
+                                <motion.div whileTap={{ scale: 0.95 }}>
+                                    <IconButton>
+                                        <LoginIcon
+                                            sx={{
+                                                color: darkMode
+                                                    ? "#fff"
+                                                    : "#000",
+                                            }}
+                                        />
+                                    </IconButton>
+                                </motion.div>
                             </Stack>
                         </Box>
                     </Container>
