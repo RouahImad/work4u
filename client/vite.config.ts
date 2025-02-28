@@ -8,7 +8,7 @@ export default defineConfig({
     server: {
         open: true,
     },
-    build: {
-        outDir: "../dist", // Output build files to work4u_FE/dist/ (outside client/)
-    },
+    // build: {
+    //     outDir: "../dist", // Output build files to work4u_FE/dist/ (outside client/)
+    // },
 });
