@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import Home from "./components/Home";
+// import Home from "./components/Home";
 import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
-import { AnimatePresence } from "framer-motion";
+// import { AnimatePresence } from "framer-motion";
 import PageTransition from "./components/PageTransition";
+import AppRoutes from "./components/AppRoutes";
 
 const isDarkMode = localStorage.getItem("darkMode") === "true" ? true : false;
 
@@ -48,17 +49,17 @@ const App = () => {
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
-            <AnimatePresence mode="wait">
-                {isLoading ? (
-                    <PageTransition key="transition" />
-                ) : (
-                    <Home
-                        theme={theme}
-                        darkMode={darkMode}
-                        setDarkMode={setDarkMode}
-                    />
-                )}
-            </AnimatePresence>
+            {isLoading ? (
+                <PageTransition />
+            ) : (
+                <AppRoutes
+                    theme={theme}
+                    darkMode={darkMode}
+                    setDarkMode={setDarkMode}
+                    isAuthenticated={false}
+                    userRole=""
+                />
+            )}
         </ThemeProvider>
     );
 };

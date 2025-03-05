@@ -9,11 +9,11 @@ import {
     Stack,
     Card,
     CardContent,
+    Theme,
 } from "@mui/material";
 import {
     NightsStayRounded as DarkIcon,
     LightMode as LightIcon,
-    Login as LoginIcon,
     Search,
     Work as Briefcase,
     People as Users,
@@ -31,11 +31,12 @@ import {
 import { motion } from "framer-motion";
 import Marquee from "react-fast-marquee";
 import React from "react";
+import { Link } from "react-router-dom";
 
 const services = [
     {
         icon: <Search />,
-        text: "Advanced Job Search",
+        text: "Advanced Search",
         description:
             "Find your ideal job effortlessly with our powerful search filters, allowing you to refine results by location, industry, salary, and more.",
     },
@@ -59,19 +60,19 @@ const services = [
     },
     {
         icon: <ShieldCheck />,
-        text: "Secure Data Protection",
+        text: "Secure Protection",
         description:
             "We prioritize your privacy with security measures, ensuring your personal and professional data remains protected.",
     },
     {
         icon: <Globe />,
-        text: "Global Job Opportunities",
+        text: "Global Opportunities",
         description:
             "Expand your job search beyond borders with international listings from top companies worldwide.",
     },
     {
         icon: <BarChart />,
-        text: "Market Insights & Trends",
+        text: "Market Insights",
         description:
             "Stay ahead of the competition with up-to-date employment trends, salary insights, and industry demands.",
     },
@@ -95,12 +96,12 @@ const services = [
     },
 ];
 
-export default function HomePage({
+export default function Home({
     theme,
     darkMode,
     setDarkMode,
 }: {
-    theme: { palette: { primary: { main: string } } };
+    theme: Theme;
     darkMode: boolean;
     setDarkMode: (darkMode: boolean) => void;
 }) {
@@ -169,16 +170,33 @@ export default function HomePage({
                                         )}
                                     </IconButton>
                                 </motion.div>
-                                <motion.div whileTap={{ scale: 0.95 }}>
-                                    <IconButton>
-                                        <LoginIcon
-                                            sx={{
-                                                color: darkMode
-                                                    ? "#fff"
-                                                    : "#000",
-                                            }}
-                                        />
-                                    </IconButton>
+                                <motion.div
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                >
+                                    <Button
+                                        component={Link}
+                                        to="/login"
+                                        sx={{
+                                            fontWeight: "600",
+                                            fontSize: "15px",
+                                            textTransform: "none",
+                                            borderRadius: "10px",
+                                            color: darkMode ? "#fff" : "#000",
+                                            transition: "all 0.3s",
+                                            "&:hover": {
+                                                backgroundColor: darkMode
+                                                    ? "rgba(255,255,255,0.15)"
+                                                    : theme.palette.primary
+                                                          .light,
+                                                color: "#fff",
+                                                boxShadow:
+                                                    "0 4px 8px rgba(0,0,0,0.1)",
+                                            },
+                                        }}
+                                    >
+                                        <span>Sign In</span>
+                                    </Button>
                                 </motion.div>
                             </Stack>
                         </Box>
@@ -251,10 +269,16 @@ export default function HomePage({
                         sx={{
                             my: 6,
                             py: 6,
-                            px: 4,
+                            px: {
+                                xs: 1,
+                                sm: 2,
+                                md: 3,
+                                lg: 4,
+                            },
                             borderRadius: 4,
                             textAlign: "center",
                             background: darkMode ? "#1e1e1e" : "#f8f9fa",
+                            userSelect: "none",
                         }}
                         component={motion.div}
                         initial={{ opacity: 0, y: 50 }}
@@ -282,6 +306,7 @@ export default function HomePage({
                                         display: "flex",
                                         flexDirection: "column",
                                         alignItems: "center",
+                                        justifyContent: "center",
                                         textAlign: "center",
                                         p: 3,
                                         m: 2,
@@ -358,10 +383,10 @@ export default function HomePage({
                             spacing={2}
                             justifyContent="center"
                         >
-                            <IconButton color="primary">
+                            <IconButton sx={{ color: "#8099e9" }}>
                                 <LinkedIn />
                             </IconButton>
-                            <IconButton color="secondary">
+                            <IconButton sx={{ color: "#e99dcb" }}>
                                 <Email />
                             </IconButton>
                             <IconButton color="success">
