@@ -10,6 +10,7 @@ import {
     Card,
     CardContent,
     Theme,
+    Grid,
 } from "@mui/material";
 import {
     NightsStayRounded as DarkIcon,
@@ -32,6 +33,8 @@ import { motion } from "framer-motion";
 import Marquee from "react-fast-marquee";
 import React from "react";
 import { Link } from "react-router-dom";
+import computerIllustration from "../assets/computer-illustration.png";
+import "../App.css";
 
 const services = [
     {
@@ -136,7 +139,6 @@ export default function Home({
                             >
                                 <span
                                     style={{
-                                        // fontFamily: "Pacifico, cursive",
                                         fontFamily: "Montserrat, sans-serif",
                                     }}
                                 >
@@ -203,67 +205,181 @@ export default function Home({
                     </Container>
                 </AppBar>
 
-                <Container>
-                    {/* Hero Section */}
+                <Container maxWidth="xl" sx={{ p: "0 !important" }}>
+                    {/* Hero Section with Split Layout */}
                     <Box
-                        component={motion.div}
-                        initial={{ opacity: 0, y: -50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
                         sx={{
-                            textAlign: "center",
-                            minHeight: "80vh",
+                            minHeight: "90vh",
                             display: "flex",
-                            flexDirection: "column",
-                            justifyContent: "center",
                             alignItems: "center",
+                            pt: 1,
+                            pb: 4,
+                            background: darkMode
+                                ? "linear-gradient(rgba(18, 18, 18, 0) 0%, rgba(30, 70, 50, 0.3) 80.16%, rgb(18, 18, 18) 100%)"
+                                : "linear-gradient(rgba(255, 255, 255, 0) 0%, rgb(214, 254, 241) 80.16%, rgb(255, 255, 255) 100%)",
                         }}
                     >
-                        <Typography
-                            variant="h2"
-                            component="h1"
-                            fontWeight="bold"
-                            color="primary"
-                            mb={2}
-                        >
-                            Connecting Talent with Opportunity
-                        </Typography>
-                        <Typography
-                            variant="h6"
-                            mb={4}
-                            color="text.secondary"
-                            maxWidth="lg"
-                        >
-                            Find the perfect job or the right candidate with our
-                            AI-driven job application platform.
-                        </Typography>
-                        <Stack direction="row" spacing={2}>
-                            <motion.div whileTap={{ scale: 0.95 }}>
-                                <Button
-                                    variant="contained"
-                                    size="large"
+                        <Grid container spacing={4} alignItems="center" pl={5}>
+                            {/* Left side - Text Content */}
+                            <Grid
+                                item
+                                xs={12}
+                                md={6}
+                                component={motion.div}
+                                initial={{ opacity: 0, x: -50 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 0.7 }}
+                                sx={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    justifyContent: "center",
+                                    alignItems: {
+                                        xs: "center",
+                                        md: "flex-start",
+                                    },
+                                    textAlign: { xs: "center", md: "left" },
+                                    pl: 3,
+                                    pr: 0,
+                                }}
+                            >
+                                <Typography
+                                    variant="h2"
+                                    component="h1"
+                                    fontWeight="bold"
                                     color="primary"
+                                    gutterBottom
                                     sx={{
-                                        color: "#fff",
+                                        fontSize: {
+                                            xs: "2.1rem",
+                                            md: "3.1rem",
+                                        },
+                                        mb: 3,
                                     }}
                                 >
-                                    Sign Up as Employee
-                                </Button>
-                            </motion.div>
-                            <motion.div whileTap={{ scale: 0.95 }}>
-                                <Button
-                                    variant="contained"
-                                    size="large"
-                                    color="secondary"
+                                    Connecting Talent with Opportunity
+                                </Typography>
+                                <Typography
+                                    variant="h6"
+                                    paragraph
                                     sx={{
-                                        color: "#fff",
+                                        mb: 4,
+                                        color: darkMode ? "#fff" : "#333",
                                     }}
                                 >
-                                    Sign Up as Employer
-                                </Button>
-                            </motion.div>
-                        </Stack>
+                                    Find the perfect job or the right candidate
+                                    with our AI-driven job application platform.
+                                    Start your journey with Work4U today!
+                                </Typography>
+                                <Stack
+                                    direction={{ xs: "column", sm: "row" }}
+                                    spacing={{ xs: 2, sm: 3 }}
+                                    alignSelf={{
+                                        xs: "center",
+                                        md: "flex-start",
+                                    }}
+                                >
+                                    <motion.div
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                    >
+                                        <Button
+                                            component={Link}
+                                            to="/register"
+                                            variant="contained"
+                                            size="medium"
+                                            color="primary"
+                                            sx={{
+                                                color: "#fff",
+                                                borderRadius: "10px",
+                                                textTransform: "none",
+                                                py: 1.2,
+                                                px: 3,
+                                                fontSize: "1rem",
+                                                fontWeight: 600,
+                                                boxShadow:
+                                                    "0 2px 8px rgba(0,0,0,0.1)",
+                                            }}
+                                        >
+                                            Sign Up as Job Seeker
+                                        </Button>
+                                    </motion.div>
+                                    <motion.div
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                    >
+                                        <Button
+                                            component={Link}
+                                            to="/register"
+                                            variant="contained"
+                                            size="medium"
+                                            color="secondary"
+                                            sx={{
+                                                color: "#fff",
+                                                borderRadius: "10px",
+                                                textTransform: "none",
+                                                py: 1.2,
+                                                px: 3,
+                                                fontSize: "1rem",
+                                                fontWeight: 600,
+                                                boxShadow:
+                                                    "0 2px 8px rgba(0,0,0,0.1)",
+                                            }}
+                                        >
+                                            Sign Up as Employer
+                                        </Button>
+                                    </motion.div>
+                                </Stack>
+                            </Grid>
+
+                            {/* Right side - Image */}
+                            <Grid
+                                item
+                                xs={12}
+                                md={6}
+                                component={motion.div}
+                                initial={{ opacity: 0, x: 50 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 0.7, delay: 0.2 }}
+                                sx={{
+                                    display: { xs: "none", md: "flex" },
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    p: "0 !important",
+                                }}
+                            >
+                                <div className="floating-image-container">
+                                    <Box
+                                        component="img"
+                                        src={computerIllustration}
+                                        alt="Job Application Platform"
+                                        className="floating-image"
+                                        sx={{
+                                            maxWidth: {
+                                                xs: "90%",
+                                                sm: "85%",
+                                                md: "90%",
+                                            },
+                                            height: "auto",
+                                            maxHeight: {
+                                                xs: "350px",
+                                                md: "450px",
+                                                lg: "500px",
+                                            },
+                                            filter: darkMode
+                                                ? "brightness(0.85)"
+                                                : "none",
+                                            transform: {
+                                                xs: "scale(0.95)",
+                                                md: "scale(1)",
+                                            },
+                                            transition: "filter 0.3s ease",
+                                        }}
+                                    />
+                                </div>
+                            </Grid>
+                        </Grid>
                     </Box>
+
                     {/* Services Section */}
                     <Paper
                         sx={{
