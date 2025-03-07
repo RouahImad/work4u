@@ -120,7 +120,7 @@ const AppRoutes = ({
                             userRole={userRole}
                             allowedRoles={["employee", "admin"]}
                         >
-                            <JobsFeed theme={theme} darkMode={darkMode} />
+                            <JobsFeed theme={theme} />
                         </ProtectedRoute>
                     }
                 />

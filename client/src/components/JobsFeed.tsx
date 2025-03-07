@@ -80,13 +80,7 @@ const mockJobs = [
     },
 ];
 
-const JobsFeed = ({
-    theme,
-}: //  darkMode
-{
-    theme: Theme;
-    // darkMode: boolean
-}) => {
+const JobsFeed = ({ theme }: { theme: Theme }) => {
     const [jobs, setJobs] = useState(mockJobs);
     const [searchTerm, setSearchTerm] = useState("");
     const [loading, setLoading] = useState(false);
