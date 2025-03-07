@@ -222,9 +222,10 @@ export default function Home({
                         <Grid container spacing={4} alignItems="center" pl={5}>
                             {/* Left side - Text Content */}
                             <Grid
+                                className="testtest"
                                 item
                                 xs={12}
-                                md={6}
+                                md={7}
                                 component={motion.div}
                                 initial={{ opacity: 0, x: -50 }}
                                 animate={{ opacity: 1, x: 0 }}
@@ -238,7 +239,11 @@ export default function Home({
                                         md: "flex-start",
                                     },
                                     textAlign: { xs: "center", md: "left" },
-                                    pl: 3,
+                                    pl: {
+                                        xs: "0 !important",
+                                        md: "32px !important",
+                                    },
+                                    pt: "0 !important",
                                     pr: 0,
                                 }}
                             >
@@ -252,6 +257,7 @@ export default function Home({
                                         fontSize: {
                                             xs: "2.1rem",
                                             md: "3.1rem",
+                                            lg: "3.7rem",
                                         },
                                         mb: 3,
                                     }}
@@ -264,6 +270,7 @@ export default function Home({
                                     sx={{
                                         mb: 4,
                                         color: darkMode ? "#fff" : "#333",
+                                        maxWidth: "743px",
                                     }}
                                 >
                                     Find the perfect job or the right candidate
@@ -271,12 +278,13 @@ export default function Home({
                                     Start your journey with Work4U today!
                                 </Typography>
                                 <Stack
-                                    direction={{ xs: "column", sm: "row" }}
+                                    direction="row"
+                                    // direction={{ xs: "column", sm: "row" }}
                                     spacing={{ xs: 2, sm: 3 }}
-                                    alignSelf={{
-                                        xs: "center",
-                                        md: "flex-start",
-                                    }}
+                                    // alignSelf={{
+                                    //     xs: "center",
+                                    //     md: "flex-start",
+                                    // }}
                                 >
                                     <motion.div
                                         whileHover={{ scale: 1.05 }}
@@ -284,7 +292,7 @@ export default function Home({
                                     >
                                         <Button
                                             component={Link}
-                                            to="/register"
+                                            to="/"
                                             variant="contained"
                                             size="medium"
                                             color="primary"
@@ -292,9 +300,18 @@ export default function Home({
                                                 color: "#fff",
                                                 borderRadius: "10px",
                                                 textTransform: "none",
-                                                py: 1.2,
-                                                px: 3,
-                                                fontSize: "1rem",
+                                                py: {
+                                                    xs: 1,
+                                                    sm: 1.2,
+                                                },
+                                                px: {
+                                                    xs: 2,
+                                                    sm: 3,
+                                                },
+                                                fontSize: {
+                                                    xs: "0.85rem",
+                                                    sm: "1rem",
+                                                },
                                                 fontWeight: 600,
                                                 boxShadow:
                                                     "0 2px 8px rgba(0,0,0,0.1)",
@@ -309,7 +326,7 @@ export default function Home({
                                     >
                                         <Button
                                             component={Link}
-                                            to="/register"
+                                            to="/"
                                             variant="contained"
                                             size="medium"
                                             color="secondary"
@@ -317,9 +334,18 @@ export default function Home({
                                                 color: "#fff",
                                                 borderRadius: "10px",
                                                 textTransform: "none",
-                                                py: 1.2,
-                                                px: 3,
-                                                fontSize: "1rem",
+                                                py: {
+                                                    xs: 1,
+                                                    sm: 1.2,
+                                                },
+                                                px: {
+                                                    xs: 2,
+                                                    sm: 3,
+                                                },
+                                                fontSize: {
+                                                    xs: "0.85rem",
+                                                    sm: "1rem",
+                                                },
                                                 fontWeight: 600,
                                                 boxShadow:
                                                     "0 2px 8px rgba(0,0,0,0.1)",
@@ -335,7 +361,7 @@ export default function Home({
                             <Grid
                                 item
                                 xs={12}
-                                md={6}
+                                md={5}
                                 component={motion.div}
                                 initial={{ opacity: 0, x: 50 }}
                                 animate={{ opacity: 1, x: 0 }}
