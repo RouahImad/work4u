@@ -377,6 +377,7 @@ export default function Home({
                                     <Box
                                         component="img"
                                         src={computerIllustration}
+                                        loading="lazy"
                                         alt="Job Application Platform"
                                         className="floating-image"
                                         sx={{
