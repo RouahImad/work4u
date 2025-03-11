@@ -76,16 +76,16 @@ const App = () => {
                         borderRadius: 8,
                     },
                     containedPrimary: {
-                        background:
-                            "linear-gradient(45deg, #4ECDC4 30%, #8FF8EE 90%)",
+                        // background:
+                        //     "linear-gradient(45deg, #4ECDC4 30%, #8FF8EE 90%)",
                         "&:hover": {
                             background:
                                 "linear-gradient(45deg, #2A9D8F 30%, #4ECDC4 90%)",
                         },
                     },
                     containedSecondary: {
-                        background:
-                            "linear-gradient(45deg, #FF6B6B 30%, #FF9E9E 90%)",
+                        // background:
+                        //     "linear-gradient(45deg, #FF6B6B 30%, #FF9E9E 90%)",
                         "&:hover": {
                             background:
                                 "linear-gradient(45deg, #D63447 30%, #FF6B6B 90%)",

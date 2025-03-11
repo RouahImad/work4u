@@ -111,14 +111,12 @@ export default function Home({
     return (
         <>
             <Box>
-                {/* Modern Navbar */}
+                {/* Navbar */}
                 <AppBar
                     position="static"
                     sx={{
-                        background: darkMode ? "#121212" : "#ffffff",
+                        background: "none",
                         boxShadow: "none",
-                        borderBottom: "2px solid",
-                        borderColor: darkMode ? "#333" : "#ddd",
                     }}
                 >
                     <Container>
@@ -168,7 +166,12 @@ export default function Home({
                                                 sx={{ color: "#ffcc00" }}
                                             />
                                         ) : (
-                                            <DarkIcon sx={{ color: "#333" }} />
+                                            <DarkIcon
+                                                sx={{
+                                                    color: theme.palette.primary
+                                                        .main,
+                                                }}
+                                            />
                                         )}
                                     </IconButton>
                                 </motion.div>
@@ -183,15 +186,24 @@ export default function Home({
                                             fontWeight: "600",
                                             fontSize: "15px",
                                             textTransform: "none",
-                                            borderRadius: "10px",
-                                            color: darkMode ? "#fff" : "#000",
+                                            borderRadius: "8px",
+                                            color: darkMode ? "#fff" : "#333",
                                             transition: "all 0.3s",
+                                            border: "2px solid",
+                                            borderColor:
+                                                theme.palette.primary.main,
+                                            padding: "4px 12px",
                                             "&:hover": {
                                                 backgroundColor: darkMode
-                                                    ? "rgba(255,255,255,0.15)"
+                                                    ? "rgba(42, 157, 144, 0.3)"
+                                                    : "rgba(143, 248, 238, 0.3)",
+                                                // color: darkMode
+                                                //     ? "#fff"
+                                                //     : "#333",
+                                                color: darkMode
+                                                    ? theme.palette.primary.dark
                                                     : theme.palette.primary
-                                                          .light,
-                                                color: "#fff",
+                                                          .main,
                                                 boxShadow:
                                                     "0 4px 8px rgba(0,0,0,0.1)",
                                             },
@@ -315,6 +327,8 @@ export default function Home({
                                                 fontWeight: 600,
                                                 boxShadow:
                                                     "0 2px 8px rgba(0,0,0,0.1)",
+                                                // backgroundColor:
+                                                //     theme.palette.primary.main,
                                             }}
                                         >
                                             Sign Up as Job Seeker
@@ -411,6 +425,7 @@ export default function Home({
                     <Paper
                         sx={{
                             my: 6,
+                            mx: 1.5,
                             py: 6,
                             px: {
                                 xs: 1,
@@ -422,7 +437,12 @@ export default function Home({
                             textAlign: "center",
                             background: darkMode ? "#1e1e1e" : "#f8f9fa",
                             userSelect: "none",
+                            boxShadow: {
+                                xs: "none",
+                                md: "0 0 7px rgba(0,0,0,0.2)",
+                            },
                         }}
+                        elevation={0}
                         component={motion.div}
                         initial={{ opacity: 0, y: 50 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -487,12 +507,21 @@ export default function Home({
                                             variant="h6"
                                             fontWeight="bold"
                                             gutterBottom
+                                            sx={{
+                                                color: theme.palette.primary
+                                                    .main,
+                                            }}
                                         >
                                             {service.text}
                                         </Typography>
                                         <Typography
                                             variant="body2"
-                                            color="text.secondary"
+                                            // color="text.secondary"
+                                            sx={{
+                                                color: darkMode
+                                                    ? "#fff"
+                                                    : "#333",
+                                            }}
                                         >
                                             {service.description}
                                         </Typography>
