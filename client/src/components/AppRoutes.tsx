@@ -60,7 +60,8 @@ const AppRoutes = ({
                     }
                 />
                 <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
+                <Route path="/employee/register" element={<Register />} />
+                <Route path="/employer/register" element={<Register />} />
 
                 {/* Role-specific dashboard routes */}
                 <Route
@@ -69,7 +70,7 @@ const AppRoutes = ({
                         <ProtectedRoute
                             isAuthenticated={isAuthenticated}
                             userRole={userRole}
-                            allowedRoles={["employee"]}
+                            allowedRoles={["employee", "admin"]}
                         >
                             <EmployeeDashboard
                                 theme={theme}
@@ -85,7 +86,7 @@ const AppRoutes = ({
                         <ProtectedRoute
                             isAuthenticated={isAuthenticated}
                             userRole={userRole}
-                            allowedRoles={["employer"]}
+                            allowedRoles={["employer", "admin"]}
                         >
                             <EmployerDashboard
                                 theme={theme}

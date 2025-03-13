@@ -9,12 +9,12 @@ import {
     CardContent,
     Button,
     Chip,
-    Avatar,
     InputAdornment,
     CircularProgress,
     Theme,
 } from "@mui/material";
 import { Search, LocationOn, Business, AttachMoney } from "@mui/icons-material";
+import { motion } from "framer-motion";
 
 // Mock job data
 const mockJobs = [
@@ -27,7 +27,6 @@ const mockJobs = [
         description:
             "We are looking for a Full Stack Developer to build and maintain our web applications...",
         tags: ["React", "Node.js", "MongoDB", "TypeScript"],
-        logo: "https://via.placeholder.com/50",
         posted: "2 days ago",
     },
     {
@@ -39,7 +38,6 @@ const mockJobs = [
         description:
             "Join our creative team to design beautiful and functional user interfaces...",
         tags: ["Figma", "Adobe XD", "User Research", "Wireframing"],
-        logo: "https://via.placeholder.com/50",
         posted: "1 week ago",
     },
     {
@@ -51,7 +49,6 @@ const mockJobs = [
         description:
             "Help us build and maintain our cloud infrastructure and CI/CD pipelines...",
         tags: ["AWS", "Docker", "Kubernetes", "CI/CD"],
-        logo: "https://via.placeholder.com/50",
         posted: "3 days ago",
     },
     {
@@ -63,7 +60,6 @@ const mockJobs = [
         description:
             "Use machine learning and statistical analysis to unlock insights from our data...",
         tags: ["Python", "Machine Learning", "SQL", "Data Visualization"],
-        logo: "https://via.placeholder.com/50",
         posted: "Just now",
     },
     {
@@ -75,7 +71,6 @@ const mockJobs = [
         description:
             "Build native mobile applications for iOS and Android platforms...",
         tags: ["Swift", "Kotlin", "React Native", "Mobile Design"],
-        logo: "https://via.placeholder.com/50",
         posted: "5 days ago",
     },
 ];
@@ -239,16 +234,6 @@ const JobsFeed = ({ theme }: { theme: Theme }) => {
                                 >
                                     <CardContent>
                                         <Grid container spacing={2}>
-                                            <Grid item xs={12} sm={2} md={1}>
-                                                <Avatar
-                                                    src={job.logo}
-                                                    alt={job.company}
-                                                    sx={{
-                                                        width: 56,
-                                                        height: 56,
-                                                    }}
-                                                />
-                                            </Grid>
                                             <Grid item xs={12} sm={10} md={11}>
                                                 <Box
                                                     sx={{
@@ -320,12 +305,18 @@ const JobsFeed = ({ theme }: { theme: Theme }) => {
                                                         >
                                                             Posted {job.posted}
                                                         </Typography>
-                                                        <Button
-                                                            variant="outlined"
-                                                            size="small"
+                                                        <motion.div
+                                                            whileTap={{
+                                                                scale: 0.93,
+                                                            }}
                                                         >
-                                                            Apply Now
-                                                        </Button>
+                                                            <Button
+                                                                variant="outlined"
+                                                                size="small"
+                                                            >
+                                                                Apply Now
+                                                            </Button>
+                                                        </motion.div>
                                                     </Box>
                                                 </Box>
                                             </Grid>

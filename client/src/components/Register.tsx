@@ -106,7 +106,6 @@ const Register = () => {
         // In a real app, you would make an API call here
         try {
             // Simulating API call
-            await new Promise((resolve) => setTimeout(resolve, 1000));
 
             // Here you would typically:
             // 1. Send user data to backend
@@ -116,7 +115,7 @@ const Register = () => {
             navigate("/login", {
                 state: {
                     message: "Registration successful! Please sign in.",
-                    severity: "success",
+                    severity: "success", // search later
                 },
             });
         } catch (error) {

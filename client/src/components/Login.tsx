@@ -67,18 +67,11 @@ const Login = () => {
         // For now, simulate successful login
         // In a real app, you would make an API call here
         try {
-            // Simulating API call
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-
             // Here you would typically:
             // 1. Send credentials to backend
             // 2. Receive token and user data
             // 3. Store in context/state/localStorage
             // 4. Redirect based on user role
-
-            // Mock successful login
-            localStorage.setItem("isAuthenticated", "true");
-            localStorage.setItem("userRole", "employee"); // Example role
 
             // Redirect based on role (this is mocked)
             navigate("/employee/dashboard");

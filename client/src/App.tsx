@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 // import Home from "./components/Home";
 import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
 // import { AnimatePresence } from "framer-motion";
@@ -98,17 +98,20 @@ const App = () => {
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
-            {isLoading ? (
+            {/* {isLoading ? (
                 <PageTransition />
-            ) : (
+            ) : ( */}
+            <Fragment>
+                {/* notifcs */}
                 <AppRoutes
                     theme={theme}
                     darkMode={darkMode}
                     setDarkMode={setDarkMode}
-                    isAuthenticated={false}
-                    userRole=""
+                    isAuthenticated={true}
+                    userRole="admin"
                 />
-            )}
+            </Fragment>
+            {/* )} */}
         </ThemeProvider>
     );
 };
