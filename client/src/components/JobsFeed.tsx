@@ -419,6 +419,7 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
                     open={detailOpen}
                     onClose={handleDetailClose}
                     onReport={handleReportClick}
+                    darkmode={darkmode}
                 />
             )}
 

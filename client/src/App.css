@@ -16,3 +16,61 @@
     justify-content: center;
     animation: float 3s ease-in-out infinite;
 }
+
+/* scrollbar for Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #9d4edd transparent;
+}
+
+/* scrollbar for WebKit browsers (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #9d4edd;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #7b2cbf;
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* Dark mode scrollbar variations using CSS variables */
+@media (prefers-color-scheme: dark) {
+    ::-webkit-scrollbar-thumb {
+        background: #7b2cbf;
+        box-shadow: 0 0 8px 1px rgba(157, 78, 221, 0.3);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #9d4edd;
+        box-shadow: 0 0 12px 2px rgba(157, 78, 221, 0.5);
+    }
+}
+
+/* @keyframes scrollGlow {
+        0% {
+            box-shadow: 0 0 5px 1px rgba(157, 78, 221, 0.2);
+        }
+        50% {
+            box-shadow: 0 0 10px 2px rgba(157, 78, 221, 0.4);
+        }
+        100% {
+            box-shadow: 0 0 5px 1px rgba(157, 78, 221, 0.2);
+        }
+    }
+
+        animation: scrollGlow 3s ease-in-out infinite; */

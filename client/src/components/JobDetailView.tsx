@@ -33,6 +33,7 @@ interface JobDetailViewProps {
     open: boolean;
     onClose: () => void;
     onReport: (jobId: number) => void;
+    darkmode: boolean;
 }
 
 const JobDetailView = ({
@@ -40,6 +41,7 @@ const JobDetailView = ({
     open,
     onClose,
     onReport,
+    darkmode,
 }: JobDetailViewProps) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -168,7 +170,13 @@ const JobDetailView = ({
                         <Typography variant="h6" gutterBottom>
                             Job Description
                         </Typography>
-                        <Typography variant="body1" paragraph>
+                        <Typography
+                            variant="body1"
+                            paragraph
+                            sx={{
+                                color: darkmode ? "#FFFFFF" : "#333",
+                            }}
+                        >
                             {job.description}
                             {/* In a real app, this would likely be a longer description */}
                             {/* You could use a rich text renderer here if description contains HTML */}

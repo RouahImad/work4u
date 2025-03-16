@@ -10,8 +10,6 @@ import {
     Button,
     Tooltip,
     MenuItem,
-    useMediaQuery,
-    useTheme,
     Theme,
 } from "@mui/material";
 import {
@@ -44,7 +42,6 @@ const NavBar = ({
     const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
     const navigate = useNavigate();
     const location = useLocation();
-    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
     const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorElNav(event.currentTarget);
@@ -278,21 +275,6 @@ const NavBar = ({
                                 color: isRouteActive("/")
                                     ? theme.palette.primary.main
                                     : "inherit",
-                                position: "relative",
-                                "&::after": isRouteActive("/")
-                                    ? {
-                                          content: '""',
-                                          position: "absolute",
-                                          bottom: 0,
-                                          left: "50%",
-                                          transform: "translateX(-50%)",
-                                          width: "70%",
-                                          height: "3px",
-                                          backgroundColor:
-                                              theme.palette.primary.main,
-                                          borderRadius: "3px 3px 0 0",
-                                      }
-                                    : {},
                             }}
                         >
                             Home
@@ -311,21 +293,6 @@ const NavBar = ({
                                     color: isRouteActive("/jobs")
                                         ? theme.palette.primary.main
                                         : "inherit",
-                                    position: "relative",
-                                    "&::after": isRouteActive("/jobs")
-                                        ? {
-                                              content: '""',
-                                              position: "absolute",
-                                              bottom: 0,
-                                              left: "50%",
-                                              transform: "translateX(-50%)",
-                                              width: "70%",
-                                              height: "3px",
-                                              backgroundColor:
-                                                  theme.palette.primary.main,
-                                              borderRadius: "3px 3px 0 0",
-                                          }
-                                        : {},
                                 }}
                             >
                                 Jobs
@@ -343,21 +310,6 @@ const NavBar = ({
                                 color: isDashboardActive()
                                     ? theme.palette.primary.main
                                     : "inherit",
-                                position: "relative",
-                                "&::after": isDashboardActive()
-                                    ? {
-                                          content: '""',
-                                          position: "absolute",
-                                          bottom: 0,
-                                          left: "50%",
-                                          transform: "translateX(-50%)",
-                                          width: "70%",
-                                          height: "3px",
-                                          backgroundColor:
-                                              theme.palette.primary.main,
-                                          borderRadius: "3px 3px 0 0",
-                                      }
-                                    : {},
                             }}
                         >
                             Dashboard

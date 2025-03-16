@@ -1,26 +1,16 @@
 import { Fragment, useEffect, useState } from "react";
 import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
 // import { AnimatePresence } from "framer-motion";
-import PageTransition from "./components/PageTransition";
 import AppRoutes from "./components/AppRoutes";
 
 const isDarkMode = localStorage.getItem("darkMode") === "true" ? true : false;
 
 const App = () => {
     const [darkMode, setDarkMode] = useState(isDarkMode);
-    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         localStorage.setItem("darkMode", darkMode ? "true" : "false");
     }, [darkMode]);
-
-    useEffect(() => {
-        // Simulate initial page load
-        const t = setTimeout(() => {
-            setIsLoading(false);
-        }, 2400);
-        return () => clearTimeout(t);
-    }, []);
 
     const theme = createTheme({
         palette: {
@@ -168,20 +158,15 @@ const App = () => {
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
-            {isLoading ? (
-                <PageTransition />
-            ) : (
-                <Fragment>
-                    {/* notifcs */}
-                    <AppRoutes
-                        theme={theme}
-                        darkMode={darkMode}
-                        setDarkMode={setDarkMode}
-                        isAuthenticated={true}
-                        userRole="admin"
-                    />
-                </Fragment>
-            )}
+
+            {/* notifcs */}
+            <AppRoutes
+                theme={theme}
+                darkMode={darkMode}
+                setDarkMode={setDarkMode}
+                isAuthenticated={true}
+                userRole="admin"
+            />
         </ThemeProvider>
     );
 };
