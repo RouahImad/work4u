@@ -11,7 +11,6 @@ import {
     CardContent,
     Theme,
     Grid,
-    default as createTheme,
 } from "@mui/material";
 import {
     NightsStayRounded as DarkIcon,

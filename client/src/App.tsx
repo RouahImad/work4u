@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
 // import { AnimatePresence } from "framer-motion";
 import AppRoutes from "./components/AppRoutes";

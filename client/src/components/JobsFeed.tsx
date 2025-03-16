@@ -8,7 +8,7 @@ import {
     Card,
     CardContent,
     Button,
-    Chip,
+    // Chip,
     InputAdornment,
     CircularProgress,
     Theme,
@@ -21,7 +21,7 @@ import {
     Select,
     MenuItem,
     IconButton,
-    Tooltip,
+    // Tooltip,
     CardActionArea,
 } from "@mui/material";
 import {
@@ -29,11 +29,10 @@ import {
     LocationOn,
     Business,
     AttachMoney,
-    Flag,
     Close,
 } from "@mui/icons-material";
-import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+// import { motion } from "framer-motion";
+// import { useNavigate } from "react-router-dom";
 import JobDetailView from "./JobDetailView";
 
 // Mock job data
@@ -106,7 +105,7 @@ const reportReasons = [
 ];
 
 const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     const [jobs, setJobs] = useState(mockJobs);
     const [searchTerm, setSearchTerm] = useState("");
     const [loading, setLoading] = useState(false);
