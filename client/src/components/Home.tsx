@@ -195,11 +195,8 @@ export default function Home({
                                             padding: "4px 12px",
                                             "&:hover": {
                                                 backgroundColor: darkMode
-                                                    ? "rgba(42, 157, 144, 0.3)"
-                                                    : "rgba(143, 248, 238, 0.3)",
-                                                // color: darkMode
-                                                //     ? "#fff"
-                                                //     : "#333",
+                                                    ? "rgba(123, 44, 191, 0.2)" // Subtle dark purple #7B2CBF
+                                                    : "rgba(199, 125, 255, 0.2)", // Subtle light purple #C77DFF
                                                 color: darkMode
                                                     ? theme.palette.primary.dark
                                                     : theme.palette.primary
@@ -227,9 +224,12 @@ export default function Home({
                             pt: 1,
                             pb: 4,
                             background: darkMode
-                                ? // ? "linear-gradient(rgba(18, 18, 18, 0) 0%, rgba(30, 70, 50, 0.3) 80.16%, rgb(18, 18, 18) 100%)"
-                                  "linear-gradient(rgba(18, 18, 18, 0) 0%, rgba(30, 70, 50, 0.3) 80.16%, #1A2E35 100%)"
-                                : "linear-gradient(rgba(255, 255, 255, 0) 0%, rgb(214, 254, 241) 80.16%, rgb(255, 255, 255) 100%)",
+                                ? "linear-gradient(rgba(18, 18, 18, 0) 0%, rgba(157, 78, 221, 0.15) 80.16%, #120025 100%)"
+                                : "linear-gradient(rgba(255, 255, 255, 0) 0%, rgba(225, 190, 255, 0.5) 80.16%, rgb(255, 255, 255) 100%)",
+                            // background: darkMode
+                            //     ? // ? "linear-gradient(rgba(18, 18, 18, 0) 0%, rgba(30, 70, 50, 0.3) 80.16%, rgb(18, 18, 18) 100%)"
+                            //       "linear-gradient(rgba(18, 18, 18, 0) 0%, rgba(30, 70, 50, 0.3) 80.16%, #1A2E35 100%)"
+                            //     : "linear-gradient(rgba(255, 255, 255, 0) 0%, rgb(214, 254, 241) 80.16%, rgb(255, 255, 255) 100%)",
                         }}
                     >
                         <Grid container spacing={4} alignItems="center" pl={5}>
@@ -292,12 +292,7 @@ export default function Home({
                                 </Typography>
                                 <Stack
                                     direction="row"
-                                    // direction={{ xs: "column", sm: "row" }}
-                                    spacing={{ xs: 2, sm: 3 }}
-                                    // alignSelf={{
-                                    //     xs: "center",
-                                    //     md: "flex-start",
-                                    // }}
+                                    spacing={{ xs: 2.5, sm: 3 }}
                                 >
                                     <motion.div
                                         whileHover={{ scale: 1.05 }}

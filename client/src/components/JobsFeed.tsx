@@ -12,9 +12,29 @@ import {
     InputAdornment,
     CircularProgress,
     Theme,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+    IconButton,
+    Tooltip,
+    CardActionArea,
 } from "@mui/material";
-import { Search, LocationOn, Business, AttachMoney } from "@mui/icons-material";
+import {
+    Search,
+    LocationOn,
+    Business,
+    AttachMoney,
+    Flag,
+    Close,
+} from "@mui/icons-material";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import JobDetailView from "./JobDetailView";
 
 // Mock job data
 const mockJobs = [
@@ -75,7 +95,18 @@ const mockJobs = [
     },
 ];
 
-const JobsFeed = ({ theme }: { theme: Theme }) => {
+// Report reason options
+const reportReasons = [
+    "Fraudulent job posting",
+    "Misleading information",
+    "Discriminatory content",
+    "Spam or scam",
+    "Duplicate posting",
+    "Other",
+];
+
+const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
+    const navigate = useNavigate();
     const [jobs, setJobs] = useState(mockJobs);
     const [searchTerm, setSearchTerm] = useState("");
     const [loading, setLoading] = useState(false);
@@ -84,6 +115,20 @@ const JobsFeed = ({ theme }: { theme: Theme }) => {
         company: "",
         salary: "",
     });
+
+    // Selected job state
+    const [selectedJob, setSelectedJob] = useState<(typeof mockJobs)[0] | null>(
+        null
+    );
+    const [detailOpen, setDetailOpen] = useState(false);
+
+    // Report modal state
+    const [reportModalOpen, setReportModalOpen] = useState(false);
+    const [reportReason, setReportReason] = useState("");
+    const [reportDescription, setReportDescription] = useState("");
+    const [currentJobId, setCurrentJobId] = useState<number | null>(null);
+    const [reportSubmitting, setReportSubmitting] = useState(false);
+    const [reportSuccess, setReportSuccess] = useState(false);
 
     // Simulate loading jobs from API
     useEffect(() => {
@@ -105,6 +150,72 @@ const JobsFeed = ({ theme }: { theme: Theme }) => {
             ...filters,
             [name]: value,
         });
+    };
+
+    // Job detail handlers
+    const handleJobClick = (job: (typeof mockJobs)[0]) => {
+        setSelectedJob(job);
+        setDetailOpen(true);
+
+        // Update URL without refreshing the page (for direct linking)
+        // history.pushState(null, "", `/jobs/${job.id}`);
+        // You could also use react-router:
+        // navigate(`/jobs/${job.id}`);
+    };
+
+    const handleDetailClose = () => {
+        setDetailOpen(false);
+        // Reset URL
+        // history.pushState(null, "", "/jobs");
+    };
+
+    // Report handling functions
+    const handleReportClick = (jobId: number) => {
+        setCurrentJobId(jobId);
+        setReportModalOpen(true);
+        setReportReason("");
+        setReportDescription("");
+        setReportSuccess(false);
+    };
+
+    const handleReportClose = () => {
+        setReportModalOpen(false);
+    };
+
+    const handleReportReasonChange = (e: any) => {
+        setReportReason(e.target.value);
+    };
+
+    const handleReportDescriptionChange = (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        setReportDescription(e.target.value);
+    };
+
+    const handleReportSubmit = () => {
+        const currentUserId = "user123"; // Placeholder for actual user ID
+
+        setReportSubmitting(true);
+
+        // Simulate API call to submit report
+        setTimeout(() => {
+            // In a real app, this would be an API call:
+            console.log("Report submitted:", {
+                jobId: currentJobId,
+                userId: currentUserId,
+                reason: reportReason,
+                description: reportDescription,
+                timestamp: new Date().toISOString(),
+            });
+
+            setReportSubmitting(false);
+            setReportSuccess(true);
+
+            // Close dialog after showing success for a moment
+            setTimeout(() => {
+                setReportModalOpen(false);
+            }, 2200);
+        }, 1000);
     };
 
     // Apply filters and search
@@ -210,7 +321,7 @@ const JobsFeed = ({ theme }: { theme: Theme }) => {
                 </Grid>
             </Grid>
 
-            {/* Job listings */}
+            {/* Job listings - Simplified View */}
             {loading ? (
                 <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
                     <CircularProgress />
@@ -222,7 +333,6 @@ const JobsFeed = ({ theme }: { theme: Theme }) => {
                             <Grid item xs={12} key={job.id}>
                                 <Card
                                     sx={{
-                                        p: 1,
                                         borderLeft: `4px solid ${theme.palette.primary.main}`,
                                         transition:
                                             "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
@@ -232,96 +342,55 @@ const JobsFeed = ({ theme }: { theme: Theme }) => {
                                         },
                                     }}
                                 >
-                                    <CardContent>
-                                        <Grid container spacing={2}>
-                                            <Grid item xs={12} sm={10} md={11}>
-                                                <Box
+                                    <CardActionArea
+                                        onClick={() => handleJobClick(job)}
+                                    >
+                                        <CardContent>
+                                            <Box>
+                                                <Typography
+                                                    variant="h6"
+                                                    component="h2"
+                                                    gutterBottom
+                                                >
+                                                    {job.title}
+                                                </Typography>
+                                                <Typography
+                                                    variant="subtitle1"
+                                                    color="text.secondary"
+                                                >
+                                                    {job.company} •{" "}
+                                                    {job.location}
+                                                </Typography>
+                                                <Typography
+                                                    variant="body2"
+                                                    color="text.secondary"
                                                     sx={{
+                                                        mt: 1,
                                                         display: "flex",
                                                         justifyContent:
                                                             "space-between",
-                                                        alignItems:
-                                                            "flex-start",
-                                                        flexWrap: "wrap",
                                                     }}
                                                 >
-                                                    <Box>
-                                                        <Typography
-                                                            variant="h6"
-                                                            component="h2"
-                                                            gutterBottom
-                                                        >
-                                                            {job.title}
-                                                        </Typography>
-                                                        <Typography
-                                                            variant="subtitle1"
-                                                            color="text.secondary"
-                                                            gutterBottom
-                                                        >
-                                                            {job.company} •{" "}
-                                                            {job.location} •{" "}
-                                                            {job.salary}
-                                                        </Typography>
-                                                        <Typography
-                                                            variant="body2"
-                                                            paragraph
-                                                        >
-                                                            {job.description}
-                                                        </Typography>
-                                                        <Box
-                                                            sx={{
-                                                                mt: 2,
-                                                                mb: 1,
-                                                            }}
-                                                        >
-                                                            {job.tags.map(
-                                                                (
-                                                                    tag,
-                                                                    index
-                                                                ) => (
-                                                                    <Chip
-                                                                        key={
-                                                                            index
-                                                                        }
-                                                                        label={
-                                                                            tag
-                                                                        }
-                                                                        size="small"
-                                                                        sx={{
-                                                                            mr: 1,
-                                                                            mb: 1,
-                                                                        }}
-                                                                    />
-                                                                )
-                                                            )}
-                                                        </Box>
-                                                    </Box>
-                                                    <Box>
-                                                        <Typography
-                                                            variant="caption"
-                                                            display="block"
-                                                            gutterBottom
-                                                            sx={{ mb: 2 }}
-                                                        >
-                                                            Posted {job.posted}
-                                                        </Typography>
-                                                        <motion.div
-                                                            whileTap={{
-                                                                scale: 0.93,
-                                                            }}
-                                                        >
-                                                            <Button
-                                                                variant="outlined"
-                                                                size="small"
-                                                            >
-                                                                Apply Now
-                                                            </Button>
-                                                        </motion.div>
-                                                    </Box>
-                                                </Box>
-                                            </Grid>
-                                        </Grid>
-                                    </CardContent>
+                                                    <span
+                                                        style={{
+                                                            color: !darkmode
+                                                                ? "#333"
+                                                                : "",
+                                                        }}
+                                                    >
+                                                        {job.description.substring(
+                                                            0,
+                                                            100
+                                                        )}
+                                                        ...
+                                                    </span>
+                                                    <span>
+                                                        Posted {job.posted}
+                                                    </span>
+                                                </Typography>
+                                            </Box>
+                                        </CardContent>
+                                    </CardActionArea>
                                 </Card>
                             </Grid>
                         ))
@@ -342,6 +411,115 @@ const JobsFeed = ({ theme }: { theme: Theme }) => {
                     )}
                 </Grid>
             )}
+
+            {/* Job Detail View */}
+            {selectedJob && (
+                <JobDetailView
+                    job={selectedJob}
+                    open={detailOpen}
+                    onClose={handleDetailClose}
+                    onReport={handleReportClick}
+                />
+            )}
+
+            {/* Report Job Dialog */}
+            <Dialog
+                open={reportModalOpen}
+                onClose={reportSubmitting ? undefined : handleReportClose}
+                fullWidth
+                maxWidth="sm"
+            >
+                <DialogTitle
+                    sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                    }}
+                >
+                    {reportSuccess ? "Report Submitted" : "Report Job Posting"}
+                    {!reportSubmitting && !reportSuccess && (
+                        <IconButton onClick={handleReportClose} size="small">
+                            <Close />
+                        </IconButton>
+                    )}
+                </DialogTitle>
+                <DialogContent>
+                    {reportSuccess ? (
+                        <Box sx={{ textAlign: "center", py: 2 }}>
+                            <Typography>
+                                Thank you for your report. Our team will review
+                                it shortly.
+                            </Typography>
+                        </Box>
+                    ) : (
+                        <>
+                            <Typography
+                                variant="body2"
+                                sx={{ mb: 3, color: "#333" }}
+                            >
+                                Please provide details about why you're
+                                reporting this job posting. Our team will review
+                                your report and take appropriate action.
+                            </Typography>
+
+                            <FormControl fullWidth sx={{ mb: 3 }}>
+                                <InputLabel>Reason for reporting</InputLabel>
+                                <Select
+                                    value={reportReason}
+                                    onChange={handleReportReasonChange}
+                                    label="Reason for reporting"
+                                    disabled={reportSubmitting}
+                                >
+                                    {reportReasons.map((reason) => (
+                                        <MenuItem key={reason} value={reason}>
+                                            {reason}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+
+                            <TextField
+                                label="Additional details"
+                                multiline
+                                rows={4}
+                                fullWidth
+                                value={reportDescription}
+                                onChange={handleReportDescriptionChange}
+                                disabled={reportSubmitting}
+                                placeholder="Please provide any additional information about this issue"
+                            />
+                        </>
+                    )}
+                </DialogContent>
+                {!reportSuccess && (
+                    <DialogActions>
+                        <Button
+                            onClick={handleReportClose}
+                            disabled={reportSubmitting}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleReportSubmit}
+                            variant="contained"
+                            color="primary"
+                            disabled={!reportReason || reportSubmitting}
+                            startIcon={
+                                reportSubmitting ? (
+                                    <CircularProgress
+                                        size={20}
+                                        color="inherit"
+                                    />
+                                ) : null
+                            }
+                        >
+                            {reportSubmitting
+                                ? "Submitting..."
+                                : "Submit Report"}
+                        </Button>
+                    </DialogActions>
+                )}
+            </Dialog>
         </Container>
     );
 };

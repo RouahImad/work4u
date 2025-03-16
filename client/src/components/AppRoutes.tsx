@@ -1,13 +1,14 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./Home";
 import { Theme } from "@mui/material";
+import NavBar from "./NavBar";
 // Import other pages
-import EmployeeDashboard from "./dashboards/EmployeeDashboard"; // Create this component
-import EmployerDashboard from "./dashboards/EmployerDashboard"; // Create this component
-import AdminDashboard from "./dashboards/AdminDashboard"; // Create this component
-import JobsFeed from "./JobsFeed"; // Create this component
-import Login from "./Login"; // Create this component
-import Register from "./Register"; // Create this component
+import EmployeeDashboard from "./dashboards/EmployeeDashboard";
+import EmployerDashboard from "./dashboards/EmployerDashboard";
+import AdminDashboard from "./dashboards/AdminDashboard";
+import JobsFeed from "./JobsFeed";
+import Login from "./Login";
+import Register from "./Register";
 
 // Protected route wrapper component
 const ProtectedRoute = ({
@@ -15,11 +16,17 @@ const ProtectedRoute = ({
     userRole,
     allowedRoles,
     children,
+    theme,
+    darkMode,
+    setDarkMode,
 }: {
     isAuthenticated: boolean;
     userRole: string;
     allowedRoles?: string[];
     children: React.ReactNode;
+    theme: Theme;
+    darkMode: boolean;
+    setDarkMode: (darkMode: boolean) => void;
 }) => {
     if (!isAuthenticated) {
         return <Navigate to="/login" replace />;
@@ -29,7 +36,17 @@ const ProtectedRoute = ({
         return <Navigate to="/" replace />;
     }
 
-    return children;
+    return (
+        <>
+            <NavBar
+                userRole={userRole}
+                darkMode={darkMode}
+                setDarkMode={setDarkMode}
+                theme={theme}
+            />
+            {children}
+        </>
+    );
 };
 
 const AppRoutes = ({
@@ -71,11 +88,11 @@ const AppRoutes = ({
                             isAuthenticated={isAuthenticated}
                             userRole={userRole}
                             allowedRoles={["employee", "admin"]}
+                            theme={theme}
+                            darkMode={darkMode}
+                            setDarkMode={setDarkMode}
                         >
-                            <EmployeeDashboard
-                                theme={theme}
-                                // darkMode={darkMode}
-                            />
+                            <EmployeeDashboard theme={theme} />
                         </ProtectedRoute>
                     }
                 />
@@ -87,11 +104,11 @@ const AppRoutes = ({
                             isAuthenticated={isAuthenticated}
                             userRole={userRole}
                             allowedRoles={["employer", "admin"]}
+                            theme={theme}
+                            darkMode={darkMode}
+                            setDarkMode={setDarkMode}
                         >
-                            <EmployerDashboard
-                                theme={theme}
-                                // darkMode={darkMode}
-                            />
+                            <EmployerDashboard theme={theme} />
                         </ProtectedRoute>
                     }
                 />
@@ -103,11 +120,11 @@ const AppRoutes = ({
                             isAuthenticated={isAuthenticated}
                             userRole={userRole}
                             allowedRoles={["admin"]}
+                            theme={theme}
+                            darkMode={darkMode}
+                            setDarkMode={setDarkMode}
                         >
-                            <AdminDashboard
-                            // theme={theme}
-                            //  darkMode={darkMode}
-                            />
+                            <AdminDashboard />
                         </ProtectedRoute>
                     }
                 />
@@ -120,8 +137,11 @@ const AppRoutes = ({
                             isAuthenticated={isAuthenticated}
                             userRole={userRole}
                             allowedRoles={["employee", "admin"]}
+                            theme={theme}
+                            darkMode={darkMode}
+                            setDarkMode={setDarkMode}
                         >
-                            <JobsFeed theme={theme} />
+                            <JobsFeed darkmode={darkMode} theme={theme} />
                         </ProtectedRoute>
                     }
                 />
