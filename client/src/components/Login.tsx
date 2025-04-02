@@ -10,12 +10,16 @@ import {
     Grid,
     Link as MuiLink,
     Alert,
+    CircularProgress,
 } from "@mui/material";
 import { LockOutlined } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext"; // Import the auth context
 
 const Login = () => {
     const navigate = useNavigate();
+    const { login } = useAuth(); // Use the auth context
+
     const [formData, setFormData] = useState({
         email: "",
         password: "",
@@ -24,6 +28,7 @@ const Login = () => {
         {}
     );
     const [loginError, setLoginError] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -64,20 +69,22 @@ const Login = () => {
             return;
         }
 
-        // For now, simulate successful login
-        // In a real app, you would make an API call here
-        try {
-            // Here you would typically:
-            // 1. Send credentials to backend
-            // 2. Receive token and user data
-            // 3. Store in context/state/localStorage
-            // 4. Redirect based on user role
+        setIsLoading(true);
+        setLoginError("");
 
-            // Redirect based on role (this is mocked)
+        try {
+            // Call login from auth context
+            // Note: The API expects username but our form has email
+            // Using email as username for this implementation
+            await login(formData.email, formData.password);
+
+            // Redirect based on role
             navigate("/employee/dashboard");
         } catch (error) {
             setLoginError("Invalid email or password");
             console.error("Login error", error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -126,6 +133,7 @@ const Login = () => {
                         onChange={handleChange}
                         error={!!errors.email}
                         helperText={errors.email}
+                        disabled={isLoading}
                     />
                     <TextField
                         margin="normal"
@@ -140,14 +148,16 @@ const Login = () => {
                         onChange={handleChange}
                         error={!!errors.password}
                         helperText={errors.password}
+                        disabled={isLoading}
                     />
                     <Button
                         type="submit"
                         fullWidth
                         variant="contained"
                         sx={{ mt: 3, mb: 2 }}
+                        disabled={isLoading}
                     >
-                        Sign In
+                        {isLoading ? <CircularProgress size={24} /> : "Sign In"}
                     </Button>
                     <Grid container justifyContent="space-between">
                         <Grid item>

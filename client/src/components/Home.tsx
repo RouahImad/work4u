@@ -325,7 +325,7 @@ export default function Home({
                                         >
                                             <Button
                                                 component={Link}
-                                                to="/"
+                                                to="/register/employee"
                                                 variant="contained"
                                                 size="medium"
                                                 color="primary"
@@ -361,7 +361,7 @@ export default function Home({
                                         >
                                             <Button
                                                 component={Link}
-                                                to="/"
+                                                to="/register/employer"
                                                 variant="contained"
                                                 size="medium"
                                                 color="secondary"

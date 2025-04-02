@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
 // import { AnimatePresence } from "framer-motion";
-import AppRoutes from "./components/AppRoutes";
+import AppRoutes from "./router/AppRoutes";
+import { AuthProvider } from "./contexts/AuthContext";
+import NotificationProvider from "./components/notifications/SlideInNotifications";
 
 const isDarkMode = localStorage.getItem("darkMode") === "true" ? true : false;
 
@@ -159,14 +161,17 @@ const App = () => {
         <ThemeProvider theme={theme}>
             <CssBaseline />
 
-            {/* notifcs */}
-            <AppRoutes
-                theme={theme}
-                darkMode={darkMode}
-                setDarkMode={setDarkMode}
-                isAuthenticated={true}
-                userRole="admin"
-            />
+            <NotificationProvider>
+                <AuthProvider>
+                    <AppRoutes
+                        theme={theme}
+                        darkMode={darkMode}
+                        setDarkMode={setDarkMode}
+                        isAuthenticated={true}
+                        userRole="admin"
+                    />
+                </AuthProvider>
+            </NotificationProvider>
         </ThemeProvider>
     );
 };

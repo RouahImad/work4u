@@ -9,24 +9,16 @@ import {
     Avatar,
     Grid,
     Link as MuiLink,
-    FormControl,
-    FormLabel,
-    RadioGroup,
-    FormControlLabel,
-    Radio,
     Alert,
     CircularProgress,
-    // Add these if you need company fields for employers
-    Collapse,
 } from "@mui/material";
-import { PersonAddOutlined } from "@mui/icons-material";
+import { BusinessCenter } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext"; // Import the auth context
-import { authApi } from "../services/api"; // Import the API directly
+import { useAuth } from "../contexts/AuthContext";
 
-const Register = () => {
+const EmployerRegister = () => {
     const navigate = useNavigate();
-    const { login } = useAuth(); // We'll handle registration directly then login
+    const { registerEmployer } = useAuth();
 
     const [formData, setFormData] = useState({
         firstName: "",
@@ -34,8 +26,6 @@ const Register = () => {
         email: "",
         password: "",
         confirmPassword: "",
-        role: "employee", // Default role
-        // Add company fields for employers
         companyName: "",
         companyAddress: "",
         companyWebsite: "",
@@ -109,12 +99,17 @@ const Register = () => {
             newErrors.confirmPassword = "Passwords do not match";
         }
 
-        // Validate company fields if employer role is selected
-        if (formData.role === "employer") {
-            if (!formData.companyName.trim()) {
-                newErrors.companyName =
-                    "Company name is required for employers";
-            }
+        if (!formData.companyName.trim()) {
+            newErrors.companyName = "Company name is required";
+        }
+
+        // Website format validation (optional field)
+        if (
+            formData.companyWebsite &&
+            !formData.companyWebsite.startsWith("http")
+        ) {
+            newErrors.companyWebsite =
+                "Website should include http:// or https://";
         }
 
         setErrors(newErrors);
@@ -132,38 +127,20 @@ const Register = () => {
         setRegisterError("");
 
         try {
-            // Prepare registration data according to API requirements
-            const registrationData = {
+            // Register as employer
+            await registerEmployer({
                 first_name: formData.firstName,
                 last_name: formData.lastName,
                 email: formData.email,
                 password: formData.password,
-                role: formData.role,
-            };
+                role: "employer",
+                company_name: formData.companyName,
+                company_address: formData.companyAddress || undefined,
+                company_website: formData.companyWebsite || undefined,
+            });
 
-            // Add employer-specific fields if role is employer
-            if (formData.role === "employer") {
-                Object.assign(registrationData, {
-                    company_name: formData.companyName,
-                    company_address: formData.companyAddress,
-                    company_website: formData.companyWebsite,
-                });
-            }
-
-            // Register the user
-            await authApi.register(registrationData);
-
-            // After successful registration, log in the user
-            await login(formData.email, formData.password);
-
-            // Redirect based on role
-            if (formData.role === "employee") {
-                navigate("/employee/dashboard");
-            } else if (formData.role === "employer") {
-                navigate("/employer/dashboard");
-            } else {
-                navigate("/");
-            }
+            // Redirect to employer dashboard
+            navigate("/employer/dashboard");
         } catch (error: any) {
             // Handle error responses from the API
             if (error.response?.data?.detail) {
@@ -184,9 +161,6 @@ const Register = () => {
         }
     };
 
-    // Determine if we should show company fields
-    const showCompanyFields = formData.role === "employer";
-
     return (
         <Container component="main" maxWidth="sm">
             <Paper
@@ -200,11 +174,11 @@ const Register = () => {
                     borderRadius: 2,
                 }}
             >
-                <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
-                    <PersonAddOutlined />
+                <Avatar sx={{ m: 1, bgcolor: "primary.main" }}>
+                    <BusinessCenter />
                 </Avatar>
                 <Typography component="h1" variant="h5" mb={3}>
-                    Create an Account
+                    Create Employer Account
                 </Typography>
 
                 {registerError && (
@@ -296,79 +270,54 @@ const Register = () => {
                                 disabled={isLoading}
                             />
                         </Grid>
+
                         <Grid item xs={12}>
-                            <FormControl
-                                component="fieldset"
-                                disabled={isLoading}
-                            >
-                                <FormLabel component="legend">
-                                    I am a:
-                                </FormLabel>
-                                <RadioGroup
-                                    row
-                                    name="role"
-                                    value={formData.role}
-                                    onChange={handleChange}
-                                >
-                                    <FormControlLabel
-                                        value="employee"
-                                        control={<Radio />}
-                                        label="Job Seeker"
-                                    />
-                                    <FormControlLabel
-                                        value="employer"
-                                        control={<Radio />}
-                                        label="Employer"
-                                    />
-                                </RadioGroup>
-                            </FormControl>
+                            <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
+                                Company Information
+                            </Typography>
                         </Grid>
 
-                        {/* Company fields - only show for employers */}
-                        {showCompanyFields && (
-                            <>
-                                <Grid item xs={12}>
-                                    <TextField
-                                        required
-                                        fullWidth
-                                        id="companyName"
-                                        label="Company Name"
-                                        name="companyName"
-                                        value={formData.companyName}
-                                        onChange={handleChange}
-                                        error={!!errors.companyName}
-                                        helperText={errors.companyName}
-                                        disabled={isLoading}
-                                    />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        id="companyAddress"
-                                        label="Company Address"
-                                        name="companyAddress"
-                                        value={formData.companyAddress}
-                                        onChange={handleChange}
-                                        error={!!errors.companyAddress}
-                                        helperText={errors.companyAddress}
-                                        disabled={isLoading}
-                                    />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        id="companyWebsite"
-                                        label="Company Website"
-                                        name="companyWebsite"
-                                        value={formData.companyWebsite}
-                                        onChange={handleChange}
-                                        error={!!errors.companyWebsite}
-                                        helperText={errors.companyWebsite}
-                                        disabled={isLoading}
-                                    />
-                                </Grid>
-                            </>
-                        )}
+                        <Grid item xs={12}>
+                            <TextField
+                                required
+                                fullWidth
+                                id="companyName"
+                                label="Company Name"
+                                name="companyName"
+                                value={formData.companyName}
+                                onChange={handleChange}
+                                error={!!errors.companyName}
+                                helperText={errors.companyName}
+                                disabled={isLoading}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                fullWidth
+                                id="companyAddress"
+                                label="Company Address"
+                                name="companyAddress"
+                                value={formData.companyAddress}
+                                onChange={handleChange}
+                                error={!!errors.companyAddress}
+                                helperText={errors.companyAddress}
+                                disabled={isLoading}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                fullWidth
+                                id="companyWebsite"
+                                label="Company Website (with https://)"
+                                name="companyWebsite"
+                                value={formData.companyWebsite}
+                                onChange={handleChange}
+                                error={!!errors.companyWebsite}
+                                helperText={errors.companyWebsite}
+                                disabled={isLoading}
+                                placeholder="https://example.com"
+                            />
+                        </Grid>
                     </Grid>
                     <Button
                         type="submit"
@@ -378,9 +327,22 @@ const Register = () => {
                         sx={{ mt: 3, mb: 2 }}
                         disabled={isLoading}
                     >
-                        {isLoading ? <CircularProgress size={24} /> : "Sign Up"}
+                        {isLoading ? (
+                            <CircularProgress size={24} />
+                        ) : (
+                            "Create Employer Account"
+                        )}
                     </Button>
-                    <Grid container justifyContent="flex-end">
+                    <Grid container>
+                        <Grid item xs>
+                            <MuiLink
+                                component={Link}
+                                to="/register/employee"
+                                variant="body2"
+                            >
+                                Register as a Job Seeker
+                            </MuiLink>
+                        </Grid>
                         <Grid item>
                             <MuiLink
                                 component={Link}
@@ -397,4 +359,4 @@ const Register = () => {
     );
 };
 
-export default Register;
+export default EmployerRegister;

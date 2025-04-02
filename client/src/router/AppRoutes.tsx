@@ -1,14 +1,15 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Home from "./Home";
+import Home from "../components/Home";
 import { Theme } from "@mui/material";
-import NavBar from "./NavBar";
+import NavBar from "../components/NavBar";
 // Import other pages
-import EmployeeDashboard from "./dashboards/EmployeeDashboard";
-import EmployerDashboard from "./dashboards/EmployerDashboard";
-import AdminDashboard from "./dashboards/AdminDashboard";
-import JobsFeed from "./JobsFeed";
-import Login from "./Login";
-import Register from "./Register";
+import EmployeeDashboard from "../components/dashboards/EmployeeDashboard";
+import EmployerDashboard from "../components/dashboards/EmployerDashboard";
+import AdminDashboard from "../components/dashboards/AdminDashboard";
+import JobsFeed from "../components/JobsFeed";
+import Login from "../components/Login";
+import EmployeeRegister from "../components/EmployeeRegister";
+import EmployerRegister from "../components/EmployerRegister";
 
 // Protected route wrapper component
 const ProtectedRoute = ({
@@ -77,8 +78,26 @@ const AppRoutes = ({
                     }
                 />
                 <Route path="/login" element={<Login />} />
-                <Route path="/employee/register" element={<Register />} />
-                <Route path="/employer/register" element={<Register />} />
+                <Route
+                    path="/employee/register"
+                    element={<Navigate to="/register/employee" replace />}
+                />
+                <Route
+                    path="/employer/register"
+                    element={<Navigate to="/register/employer" replace />}
+                />
+                <Route
+                    path="/register"
+                    element={<Navigate to="/register/employee" replace />}
+                />
+                <Route
+                    path="/register/employee"
+                    element={<EmployeeRegister />}
+                />
+                <Route
+                    path="/register/employer"
+                    element={<EmployerRegister />}
+                />
 
                 {/* Role-specific dashboard routes */}
                 <Route
@@ -87,7 +106,7 @@ const AppRoutes = ({
                         <ProtectedRoute
                             isAuthenticated={isAuthenticated}
                             userRole={userRole}
-                            allowedRoles={["employee", "admin"]}
+                            allowedRoles={["employee"]}
                             theme={theme}
                             darkMode={darkMode}
                             setDarkMode={setDarkMode}
@@ -103,7 +122,7 @@ const AppRoutes = ({
                         <ProtectedRoute
                             isAuthenticated={isAuthenticated}
                             userRole={userRole}
-                            allowedRoles={["employer", "admin"]}
+                            allowedRoles={["employer"]}
                             theme={theme}
                             darkMode={darkMode}
                             setDarkMode={setDarkMode}
