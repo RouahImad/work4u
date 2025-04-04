@@ -10,11 +10,7 @@ import {
     ListItem,
     ListItemText,
     Divider,
-    // Card,
-    // CardContent,
-    Avatar,
     Chip,
-    // LinearProgress,
     Table,
     TableBody,
     TableCell,
@@ -27,15 +23,9 @@ import {
     Badge,
     Theme,
 } from "@mui/material";
-import {
-    Business,
-    // Work,
-    PeopleAlt,
-    // TrendingUp,
-    MoreVert,
-    Add,
-    EditOutlined,
-} from "@mui/icons-material";
+import { MoreVert, Add, EditOutlined } from "@mui/icons-material";
+import { useNotification } from "../notifications/SlideInNotifications";
+import { useAuth } from "../../contexts/AuthContext";
 
 // Mock data
 const jobPostings = [
@@ -120,16 +110,12 @@ const recentActivity = [
     },
 ];
 
-const EmployerDashboard = ({
-    theme,
-}: // darkMode,
-{
-    theme: Theme;
-    // darkMode: boolean;
-}) => {
+const EmployerDashboard = ({ theme }: { theme: Theme }) => {
     const [activeTab, setActiveTab] = useState("overview");
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [selectedJob, setSelectedJob] = useState<number | null>(null);
+    const { pushNotification } = useNotification();
+    const { user } = useAuth(); // Get the user data from context
 
     const handleMenuClick = (
         event: React.MouseEvent<HTMLButtonElement>,
@@ -144,41 +130,50 @@ const EmployerDashboard = ({
         setSelectedJob(null);
     };
 
+    const handleCreateJob = () => {
+        pushNotification("Create job feature coming soon!", "info");
+    };
+
+    const handleViewApplicants = () => {
+        pushNotification("Viewing all applicants feature coming soon!", "info");
+    };
+
+    // Get company information from user data
+    const companyName = user?.company_name || "undefined";
+    const companyAddress = user?.company_address || "undefined";
+    const companyWebsite = user?.company_website || "undefined";
+
     return (
         <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
             <Grid container spacing={3}>
                 {/* Company Profile Summary */}
                 <Grid item xs={12}>
                     <Paper sx={{ p: 3, display: "flex", alignItems: "center" }}>
-                        <Avatar
-                            sx={{ width: 80, height: 80, mr: 3 }}
-                            src="https://via.placeholder.com/150"
-                        />
                         <Box>
                             <Typography
                                 variant="h5"
                                 component="h1"
                                 gutterBottom
                             >
-                                Welcome back, TechSolutions Inc.
+                                Welcome back, {companyName}
                             </Typography>
-                            <Typography variant="body1" color="text.secondary">
-                                Technology & Software Development
-                            </Typography>
-                            <Box sx={{ mt: 1 }}>
-                                <Chip
-                                    icon={<Business fontSize="small" />}
-                                    label="Enterprise Account"
-                                    size="small"
-                                    color="primary"
-                                    sx={{ mr: 1 }}
-                                />
-                                <Chip
-                                    icon={<PeopleAlt fontSize="small" />}
-                                    label="50-200 employees"
-                                    size="small"
-                                />
-                            </Box>
+                            {companyAddress && (
+                                <Typography
+                                    variant="body1"
+                                    color="text.secondary"
+                                >
+                                    {companyAddress}
+                                </Typography>
+                            )}
+                            {companyWebsite && (
+                                <Typography
+                                    variant="body1"
+                                    color="text.secondary"
+                                    sx={{ mt: 0.5 }}
+                                >
+                                    {companyWebsite}
+                                </Typography>
+                            )}
                         </Box>
                         <Button
                             variant="outlined"
@@ -454,6 +449,7 @@ const EmployerDashboard = ({
                                                 variant="contained"
                                                 size="small"
                                                 startIcon={<Add />}
+                                                onClick={handleCreateJob}
                                             >
                                                 Post New Job
                                             </Button>
@@ -513,7 +509,7 @@ const EmployerDashboard = ({
                                                                         0
                                                                     }
                                                                 >
-                                                                    <Typography>
+                                                                    <Typography component="span">
                                                                         {
                                                                             job.applicants
                                                                         }
@@ -603,56 +599,57 @@ const EmployerDashboard = ({
                                     {topApplicants.map((applicant) => (
                                         <Fragment key={applicant.id}>
                                             <ListItem>
-                                                <ListItemText
-                                                    primary={
-                                                        <Box
-                                                            sx={{
-                                                                display: "flex",
-                                                                justifyContent:
-                                                                    "space-between",
-                                                            }}
+                                                {/* Fixed version without nesting errors */}
+                                                <Box sx={{ width: "100%" }}>
+                                                    <Box
+                                                        sx={{
+                                                            display: "flex",
+                                                            justifyContent:
+                                                                "space-between",
+                                                            alignItems:
+                                                                "center",
+                                                            mb: 0.5,
+                                                        }}
+                                                    >
+                                                        <Typography variant="body1">
+                                                            {applicant.name}
+                                                        </Typography>
+                                                        <Chip
+                                                            label={`${applicant.match}%`}
+                                                            size="small"
+                                                            color="primary"
+                                                        />
+                                                    </Box>
+                                                    <Box
+                                                        sx={{
+                                                            display: "flex",
+                                                            justifyContent:
+                                                                "space-between",
+                                                            alignItems:
+                                                                "center",
+                                                        }}
+                                                    >
+                                                        <Typography
+                                                            variant="body2"
+                                                            color="text.secondary"
                                                         >
-                                                            <Typography variant="body1">
-                                                                {applicant.name}
-                                                            </Typography>
-                                                            <Chip
-                                                                label={`${applicant.match}%`}
-                                                                size="small"
-                                                                color="primary"
-                                                            />
-                                                        </Box>
-                                                    }
-                                                    secondary={
-                                                        <Box
-                                                            sx={{
-                                                                display: "flex",
-                                                                justifyContent:
-                                                                    "space-between",
-                                                                alignItems:
-                                                                    "center",
-                                                            }}
-                                                        >
-                                                            <Typography variant="body2">
-                                                                {
-                                                                    applicant.position
-                                                                }
-                                                            </Typography>
-                                                            <Chip
-                                                                label={
-                                                                    applicant.status
-                                                                }
-                                                                size="small"
-                                                                color={
-                                                                    applicant.status ===
-                                                                    "New"
-                                                                        ? "secondary"
-                                                                        : "default"
-                                                                }
-                                                                variant="outlined"
-                                                            />
-                                                        </Box>
-                                                    }
-                                                />
+                                                            {applicant.position}
+                                                        </Typography>
+                                                        <Chip
+                                                            label={
+                                                                applicant.status
+                                                            }
+                                                            size="small"
+                                                            color={
+                                                                applicant.status ===
+                                                                "New"
+                                                                    ? "secondary"
+                                                                    : "default"
+                                                            }
+                                                            variant="outlined"
+                                                        />
+                                                    </Box>
+                                                </Box>
                                             </ListItem>
                                             <Divider component="li" />
                                         </Fragment>
@@ -661,6 +658,7 @@ const EmployerDashboard = ({
                                 <Button
                                     size="small"
                                     sx={{ mt: 1, alignSelf: "flex-end" }}
+                                    onClick={handleViewApplicants}
                                 >
                                     View all applicants
                                 </Button>
@@ -713,7 +711,11 @@ const EmployerDashboard = ({
                                 <Typography variant="h6" component="h2">
                                     Manage Job Postings
                                 </Typography>
-                                <Button variant="contained" startIcon={<Add />}>
+                                <Button
+                                    variant="contained"
+                                    startIcon={<Add />}
+                                    onClick={handleCreateJob}
+                                >
                                     Create New Job
                                 </Button>
                             </Box>

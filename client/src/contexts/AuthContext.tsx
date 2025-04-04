@@ -13,6 +13,11 @@ interface User {
     username: string;
     email: string;
     role?: string;
+    first_name: string;
+    last_name: string;
+    company_name?: string;
+    company_address?: string;
+    company_website?: string;
 }
 
 // Define interfaces for registration
@@ -31,8 +36,8 @@ interface EmployeeRegistrationData extends BaseRegistrationData {
 interface EmployerRegistrationData extends BaseRegistrationData {
     role: "employer";
     company_name: string;
-    company_address?: string;
-    company_website?: string;
+    company_address: string;
+    company_website: string;
 }
 
 interface AuthContextType {

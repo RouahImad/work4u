@@ -64,12 +64,11 @@ const NavBar = ({
             logout();
 
             // Show logout notification
-            pushNotification("You have been successfully logged out", "info");
 
             // Redirect to login page
             setTimeout(() => {
                 navigate("/login");
-            }, 700);
+            }, 1000);
         }
     };
 
@@ -142,7 +141,7 @@ const NavBar = ({
                         <span
                             style={{
                                 fontFamily: "Pacifico, cursive",
-                                color: theme.palette.secondary.main,
+                                color: "#FF5050",
                             }}
                         >
                             4U

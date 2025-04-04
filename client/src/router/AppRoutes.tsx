@@ -10,6 +10,7 @@ import JobsFeed from "../components/JobsFeed";
 import Login from "../components/Login";
 import EmployeeRegister from "../components/EmployeeRegister";
 import EmployerRegister from "../components/EmployerRegister";
+import { useAuth } from "../contexts/AuthContext";
 
 // Protected route wrapper component
 const ProtectedRoute = ({
@@ -54,15 +55,12 @@ const AppRoutes = ({
     theme,
     darkMode,
     setDarkMode,
-    isAuthenticated,
-    userRole,
 }: {
     theme: Theme;
     darkMode: boolean;
     setDarkMode: (darkMode: boolean) => void;
-    isAuthenticated: boolean;
-    userRole: string;
 }) => {
+    const { userRole, isAuthenticated } = useAuth();
     return (
         <BrowserRouter>
             <Routes>

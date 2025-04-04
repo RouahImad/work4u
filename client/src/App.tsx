@@ -167,8 +167,6 @@ const App = () => {
                         theme={theme}
                         darkMode={darkMode}
                         setDarkMode={setDarkMode}
-                        isAuthenticated={true}
-                        userRole="admin"
                     />
                 </AuthProvider>
             </NotificationProvider>
