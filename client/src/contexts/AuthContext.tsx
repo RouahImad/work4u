@@ -6,6 +6,7 @@ import {
     ReactNode,
 } from "react";
 import { authApi } from "../services/api";
+import { useNotification } from "../components/notifications/SlideInNotifications";
 
 interface User {
     id: number;
@@ -45,6 +46,8 @@ interface AuthContextType {
     registerEmployer: (data: EmployerRegistrationData) => Promise<void>;
     logout: () => void;
     updateUserProfile: (data: { email?: string }) => Promise<void>;
+    // Flag to indicate components should not show their own notifications
+    handlesOwnNotifications: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -59,6 +62,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     );
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const { pushNotification } = useNotification();
+
+    // This flag indicates that auth actions handle their own notifications
+    const handlesOwnNotifications = true;
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -103,8 +110,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setUserRole(userRole);
 
             setIsAuthenticated(true);
+
+            // Show success notification
+            pushNotification("Successfully logged in!", "success");
         } catch (err: any) {
-            setError(err.response?.data?.detail || "Failed to login");
+            const errorMessage =
+                err.response?.data?.detail || "Failed to login";
+            setError(errorMessage);
+
+            // Show error notification
+            pushNotification(errorMessage, "error");
             throw err;
         } finally {
             setLoading(false);
@@ -118,6 +133,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
             await authApi.register(data);
 
+            // Show success notification
+            pushNotification(
+                "Employee account created successfully!",
+                "success"
+            );
+
             // After registration, log the user in
             await login(data.email, data.password);
 
@@ -125,7 +146,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             localStorage.setItem("userRole", "employee");
             setUserRole("employee");
         } catch (err: any) {
-            setError(err.response?.data?.detail || "Failed to register");
+            const errorMessage =
+                err.response?.data?.detail || "Failed to register";
+            setError(errorMessage);
+
+            // Show error notification
+            pushNotification(errorMessage, "error");
             throw err;
         } finally {
             setLoading(false);
@@ -139,6 +165,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
             await authApi.register(data);
 
+            // Show success notification
+            pushNotification(
+                "Employer account created successfully!",
+                "success"
+            );
+
             // After registration, log the user in
             await login(data.email, data.password);
 
@@ -146,7 +178,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             localStorage.setItem("userRole", "employer");
             setUserRole("employer");
         } catch (err: any) {
-            setError(err.response?.data?.detail || "Failed to register");
+            const errorMessage =
+                err.response?.data?.detail || "Failed to register";
+            setError(errorMessage);
+
+            // Show error notification
+            pushNotification(errorMessage, "error");
             throw err;
         } finally {
             setLoading(false);
@@ -160,6 +197,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
         setIsAuthenticated(false);
         setUserRole("");
+
+        // Show logout notification
+        pushNotification("You have been logged out successfully", "info");
     };
 
     const updateUserProfile = async (data: { email?: string }) => {
@@ -188,6 +228,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 registerEmployer,
                 logout,
                 updateUserProfile,
+                handlesOwnNotifications, // Add this to the context
             }}
         >
             {children}

@@ -15,10 +15,12 @@ import {
 import { BusinessCenter } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useNotification } from "../components/notifications/SlideInNotifications";
 
 const EmployerRegister = () => {
     const navigate = useNavigate();
-    const { registerEmployer } = useAuth();
+    const { registerEmployer, handlesOwnNotifications } = useAuth();
+    const { pushNotification } = useNotification();
 
     const [formData, setFormData] = useState({
         firstName: "",
@@ -139,22 +141,41 @@ const EmployerRegister = () => {
                 company_website: formData.companyWebsite || undefined,
             });
 
-            // Redirect to employer dashboard
-            navigate("/employer/dashboard");
+            // Only show notification if auth context doesn't handle it
+            if (!handlesOwnNotifications) {
+                pushNotification(
+                    "Employer account created successfully! Redirecting to dashboard...",
+                    "success"
+                );
+            }
+
+            // Redirect to employer dashboard after a short delay to show the notification
+            setTimeout(() => {
+                navigate("/employer/dashboard");
+            }, 1500);
         } catch (error: any) {
             // Handle error responses from the API
+            let errorMessage = "Registration failed. Please try again.";
+
             if (error.response?.data?.detail) {
-                setRegisterError(error.response.data.detail);
+                errorMessage = error.response.data.detail;
+                setRegisterError(errorMessage);
             } else if (error.response?.data) {
                 // Handle validation errors
                 const fieldErrors = error.response.data;
-                const errorMessages = Object.entries(fieldErrors)
+                errorMessage = Object.entries(fieldErrors)
                     .map(([field, messages]) => `${field}: ${messages}`)
                     .join(", ");
-                setRegisterError(errorMessages);
+                setRegisterError(errorMessage);
             } else {
-                setRegisterError("Registration failed. Please try again.");
+                setRegisterError(errorMessage);
             }
+
+            // Only show notification if auth context doesn't handle it
+            if (!handlesOwnNotifications) {
+                pushNotification(errorMessage, "error");
+            }
+
             console.error(error);
         } finally {
             setIsLoading(false);

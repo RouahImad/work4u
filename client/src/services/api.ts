@@ -1,11 +1,12 @@
 import axios from "axios";
 
 // You can adjust this URL based on your environment configuration
-const API_URL = import.meta.env.VITE_APP_API_URL || "http://localhost:8000";
+const API_URL = import.meta.env.VITE_APP_API_URL || "http://127.0.0.1:8000";
 
 // Create axios instance
 const apiClient = axios.create({
     baseURL: API_URL,
+    withCredentials: true, // This is important for sending cookies
     headers: {
         "Content-Type": "application/json",
     },
@@ -21,6 +22,72 @@ apiClient.interceptors.request.use(
         return config;
     },
     (error) => Promise.reject(error)
+);
+
+// Add response interceptor to handle 401 errors (unauthorized)
+apiClient.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const originalRequest = error.config;
+
+        // Skip token refresh logic if the user is attempting to login
+        // We don't want to redirect back to login if they're already there
+        const isLoginAttempt =
+            originalRequest.url === "/api/token/" &&
+            originalRequest.method === "post";
+
+        // If the error is 401 and we haven't already tried to refresh the token
+        // and it's not a login attempt
+        if (
+            error.response?.status === 401 &&
+            !originalRequest._retry &&
+            !isLoginAttempt
+        ) {
+            originalRequest._retry = true;
+
+            try {
+                const refreshToken = localStorage.getItem("refreshToken");
+
+                if (!refreshToken) {
+                    // No refresh token available, redirect to login
+
+                    window.location.href = "/login";
+                    return Promise.reject(error);
+                }
+
+                // Try to get a new access token
+                const response = await axios.post(
+                    `${API_URL}/api/token/refresh/`,
+                    {
+                        refresh: refreshToken,
+                    }
+                );
+
+                if (response.data.access) {
+                    // Store the new access token
+                    localStorage.setItem("accessToken", response.data.access);
+
+                    // Update the Authorization header
+                    originalRequest.headers.Authorization = `Bearer ${response.data.access}`;
+
+                    // Retry the original request
+                    return apiClient(originalRequest);
+                }
+            } catch (refreshError) {
+                // If refreshing token fails, redirect to login
+                localStorage.removeItem("accessToken");
+                localStorage.removeItem("refreshToken");
+                localStorage.removeItem("userRole");
+
+                if (!window.location.pathname.includes("/login")) {
+                    window.location.href = "/login";
+                }
+                return Promise.reject(refreshError);
+            }
+        }
+
+        return Promise.reject(error);
+    }
 );
 
 // Auth services

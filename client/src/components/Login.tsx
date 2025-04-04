@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Box,
     Container,
@@ -15,10 +15,13 @@ import {
 import { LockOutlined } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext"; // Import the auth context
+import { useNotification } from "../components/notifications/SlideInNotifications"; // Import the notification hook
 
 const Login = () => {
     const navigate = useNavigate();
-    const { login } = useAuth(); // Use the auth context
+    const { login, userRole, isAuthenticated, handlesOwnNotifications } =
+        useAuth(); // Get userRole and isAuthenticated
+    const { pushNotification } = useNotification();
 
     const [formData, setFormData] = useState({
         email: "",
@@ -30,12 +33,35 @@ const Login = () => {
     const [loginError, setLoginError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
+    // Effect to redirect user if already authenticated (e.g. if they manually navigate to /login)
+    useEffect(() => {
+        if (isAuthenticated && userRole) {
+            redirectBasedOnRole(userRole);
+        }
+    }, [isAuthenticated, userRole]);
+
+    const redirectBasedOnRole = (role: string) => {
+        switch (role) {
+            case "admin":
+                navigate("/admin/dashboard");
+                break;
+            case "employer":
+                navigate("/employer/dashboard");
+                break;
+            case "employee":
+            default:
+                navigate("/employee/dashboard");
+                break;
+        }
+    };
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData({
             ...formData,
             [name]: value,
         });
+
         // Clear errors when typing
         if (errors[name as keyof typeof errors]) {
             setErrors({
@@ -74,14 +100,34 @@ const Login = () => {
 
         try {
             // Call login from auth context
-            // Note: The API expects username but our form has email
-            // Using email as username for this implementation
             await login(formData.email, formData.password);
 
-            // Redirect based on role
-            navigate("/employee/dashboard");
-        } catch (error) {
-            setLoginError("Invalid email or password");
+            // Get the user role from the context after login
+            const role = localStorage.getItem("userRole") || "employee";
+
+            // Only show notification if auth context doesn't handle it
+            if (!handlesOwnNotifications) {
+                const roleDisplay =
+                    role.charAt(0).toUpperCase() + role.slice(1);
+                pushNotification(
+                    `Successfully logged in as ${roleDisplay}! Redirecting...`,
+                    "success"
+                );
+            }
+
+            // Redirect based on role - add a slight delay to show the notification
+            setTimeout(() => {
+                redirectBasedOnRole(role);
+            }, 1000);
+        } catch (error: any) {
+            if (!handlesOwnNotifications) {
+                const errorMessage =
+                    error.response?.data?.detail || "Invalid email or password";
+                pushNotification(errorMessage, "error");
+            }
+            setLoginError(
+                error.response?.data?.detail || "Invalid email or password"
+            );
             console.error("Login error", error);
         } finally {
             setIsLoading(false);

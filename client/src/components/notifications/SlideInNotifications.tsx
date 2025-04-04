@@ -137,7 +137,7 @@ export const useNotification = () => {
 };
 
 // Default notification timeout
-const NOTIFICATION_TTL = 50000; // 50 seconds
+const NOTIFICATION_TTL = 5000; // 5 seconds
 
 // Function to get the appropriate icon based on notification type
 const getNotificationIcon = (

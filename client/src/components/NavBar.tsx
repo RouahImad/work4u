@@ -23,6 +23,8 @@ import {
 } from "@mui/icons-material";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useAuth } from "../contexts/AuthContext"; // Import auth context
+import { useNotification } from "../components/notifications/SlideInNotifications"; // Import notification hook
 
 interface NavBarProps {
     userRole: string;
@@ -42,6 +44,8 @@ const NavBar = ({
     const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
     const navigate = useNavigate();
     const location = useLocation();
+    const { logout } = useAuth(); // Get the logout function from auth context
+    const { pushNotification } = useNotification(); // Get notification function
 
     const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorElNav(event.currentTarget);
@@ -52,11 +56,21 @@ const NavBar = ({
     };
 
     const handleLogout = () => {
+        // First, check if a custom logout handler was provided
         if (onLogout) {
             onLogout();
+        } else {
+            // Use the auth context's logout function
+            logout();
+
+            // Show logout notification
+            pushNotification("You have been successfully logged out", "info");
+
+            // Redirect to login page
+            setTimeout(() => {
+                navigate("/login");
+            }, 700);
         }
-        // Default logout behavior if no handler provided
-        navigate("/login");
     };
 
     const handleDashboardClick = () => {
@@ -225,6 +239,18 @@ const NavBar = ({
                                     Dashboard
                                 </Typography>
                             </MenuItem>
+
+                            {/* Add logout to mobile menu */}
+                            <MenuItem
+                                onClick={handleLogout}
+                                sx={{
+                                    color: "inherit",
+                                }}
+                            >
+                                <Typography textAlign="center">
+                                    Logout
+                                </Typography>
+                            </MenuItem>
                         </Menu>
                     </Box>
 
@@ -341,9 +367,14 @@ const NavBar = ({
                         </motion.div>
 
                         <Tooltip title="Logout">
-                            <IconButton onClick={handleLogout} color="inherit">
-                                <Logout />
-                            </IconButton>
+                            <motion.div whileTap={{ scale: 0.9 }}>
+                                <IconButton
+                                    onClick={handleLogout}
+                                    color="inherit"
+                                >
+                                    <Logout />
+                                </IconButton>
+                            </motion.div>
                         </Tooltip>
                     </Box>
                 </Toolbar>
