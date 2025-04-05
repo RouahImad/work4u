@@ -34,9 +34,9 @@ interface Job {
     accepted: boolean;
     user_id: number;
     company_name: string;
-    company_address?: string;
-    company_website?: string;
-    salary?: string; // Starting salary
+    company_address: string;
+    company_website: string;
+    salary: string; // Starting salary
 }
 
 interface JobDetailViewProps {
@@ -243,7 +243,6 @@ const JobDetailView = ({
                                 </Box>
                             )}
 
-                            {/* Salary with separator - can break to new line */}
                             {job.salary && (
                                 <Box
                                     sx={{

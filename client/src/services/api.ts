@@ -1,6 +1,42 @@
 import axios from "axios";
+import CryptoJS from "crypto-js";
 
 const API_URL = import.meta.env.VITE_APP_API_URL || "http://127.0.0.1:8000";
+const ENCRYPTION_KEY = import.meta.env.VITE_ENCRYPTION_KEY || null;
+console.log("API URL:", API_URL);
+
+// Encryption/decryption functions
+const encryptData = (data: string): string => {
+    return CryptoJS.AES.encrypt(data, ENCRYPTION_KEY).toString();
+};
+
+const decryptData = (encryptedData: string): string => {
+    const bytes = CryptoJS.AES.decrypt(encryptedData, ENCRYPTION_KEY);
+    return bytes.toString(CryptoJS.enc.Utf8);
+};
+
+// Secure storage helpers
+const secureStorage = {
+    setItem: (key: string, value: string): void => {
+        localStorage.setItem(key, encryptData(value));
+    },
+
+    getItem: (key: string): string | null => {
+        const item = localStorage.getItem(key);
+        if (!item) return null;
+        try {
+            return decryptData(item);
+        } catch (error) {
+            // If decryption fails, remove the corrupted item
+            localStorage.removeItem(key);
+            return null;
+        }
+    },
+
+    removeItem: (key: string): void => {
+        localStorage.removeItem(key);
+    },
+};
 
 // Create axios instance
 const apiClient = axios.create({
@@ -30,7 +66,6 @@ apiClient.interceptors.response.use(
         const originalRequest = error.config;
 
         // Skip token refresh logic if the user is attempting to login
-        // We don't want to redirect back to login if they're already there
         const isLoginAttempt =
             originalRequest.url === "/api/token/" &&
             originalRequest.method === "post";
@@ -45,37 +80,49 @@ apiClient.interceptors.response.use(
             originalRequest._retry = true;
 
             try {
-                const refreshToken = localStorage.getItem("refreshToken");
+                // Get encrypted credentials and decrypt them
+                const encryptedEmail = localStorage.getItem("userEmail");
+                const encryptedPassword = localStorage.getItem("userPassword");
 
-                if (!refreshToken) {
-                    // No refresh token available, redirect to login
-
+                if (!encryptedEmail || !encryptedPassword) {
                     window.location.href = "/login";
                     return Promise.reject(error);
                 }
 
-                // Try to get a new access token
-                const response = await axios.post(
-                    `${API_URL}/api/token/refresh/`,
-                    {
-                        refresh: refreshToken,
-                    }
-                );
+                // Decrypt credentials
+                const email = secureStorage.getItem("userEmail");
+                const password = secureStorage.getItem("userPassword");
+
+                if (!email || !password) {
+                    window.location.href = "/login";
+                    return Promise.reject(error);
+                }
+
+                const response = await axios.post(`${API_URL}/api/token/`, {
+                    username: email,
+                    password: password,
+                });
 
                 if (response.data.access) {
-                    // Store the new access token
                     localStorage.setItem("accessToken", response.data.access);
 
-                    // Update the Authorization header
+                    if (response.data.refresh) {
+                        localStorage.setItem(
+                            "refreshToken",
+                            response.data.refresh
+                        );
+                    }
+
                     originalRequest.headers.Authorization = `Bearer ${response.data.access}`;
 
                     // Retry the original request
                     return apiClient(originalRequest);
                 }
             } catch (refreshError) {
-                // If refreshing token fails, redirect to login
                 localStorage.removeItem("accessToken");
                 localStorage.removeItem("refreshToken");
+                localStorage.removeItem("userEmail");
+                localStorage.removeItem("userPassword");
                 localStorage.removeItem("userRole");
 
                 if (!window.location.pathname.includes("/login")) {
@@ -88,6 +135,9 @@ apiClient.interceptors.response.use(
         return Promise.reject(error);
     }
 );
+
+// Export secureStorage for use in other components
+export { secureStorage };
 
 // Auth services
 export const authApi = {
@@ -107,8 +157,18 @@ export const authApi = {
 
     getCurrentUser: () => apiClient.get("/api/current-user/"),
 
-    updateUser: (userData: { email?: string }) =>
-        apiClient.put("/api/update-user/", userData),
+    updateUser: (userData: {
+        first_name?: string;
+        last_name?: string;
+        email?: string;
+        password?: string;
+        company_name?: string;
+        company_address?: string;
+        company_website?: string;
+    }) => apiClient.put("/api/update-user/", userData),
+
+    deleteAccount: (id: number) =>
+        apiClient.delete("/api/delete-account/" + id + "/"),
 };
 
 // Post management services

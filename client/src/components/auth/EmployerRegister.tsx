@@ -11,15 +11,17 @@ import {
     Link as MuiLink,
     Alert,
     CircularProgress,
+    InputAdornment,
+    IconButton,
 } from "@mui/material";
-import { PersonAddOutlined } from "@mui/icons-material";
+import { BusinessCenter, Visibility, VisibilityOff } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
-import { useNotification } from "../components/notifications/SlideInNotifications";
+import { useAuth } from "../../contexts/AuthContext";
+import { useNotification } from "../../components/notifications/SlideInNotifications";
 
-const EmployeeRegister = () => {
+const EmployerRegister = () => {
     const navigate = useNavigate();
-    const { registerEmployee, handlesOwnNotifications } = useAuth();
+    const { registerEmployer, handlesOwnNotifications } = useAuth();
     const { pushNotification } = useNotification();
 
     const [formData, setFormData] = useState({
@@ -28,7 +30,14 @@ const EmployeeRegister = () => {
         email: "",
         password: "",
         confirmPassword: "",
+        companyName: "",
+        companyAddress: "",
+        companyWebsite: "",
     });
+
+    // Add password visibility state
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const [errors, setErrors] = useState<{
         firstName?: string;
@@ -36,10 +45,24 @@ const EmployeeRegister = () => {
         email?: string;
         password?: string;
         confirmPassword?: string;
+        companyName?: string;
+        companyAddress?: string;
+        companyWebsite?: string;
     }>({});
 
     const [registerError, setRegisterError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+
+    // Add toggle handlers for password visibility
+    const handleTogglePasswordVisibility = () => {
+        setShowPassword((prevShowPassword) => !prevShowPassword);
+    };
+
+    const handleToggleConfirmPasswordVisibility = () => {
+        setShowConfirmPassword(
+            (prevShowConfirmPassword) => !prevShowConfirmPassword
+        );
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -64,6 +87,9 @@ const EmployeeRegister = () => {
             email?: string;
             password?: string;
             confirmPassword?: string;
+            companyName?: string;
+            companyAddress?: string;
+            companyWebsite?: string;
         } = {};
 
         if (!formData.firstName.trim()) {
@@ -82,14 +108,27 @@ const EmployeeRegister = () => {
 
         if (!formData.password) {
             newErrors.password = "Password is required";
-        } else if (formData.password.length < 6) {
-            newErrors.password = "Password must be at least 6 characters";
+        } else if (formData.password.length < 8) {
+            newErrors.password = "Password must be at least 8 characters";
         }
 
         if (!formData.confirmPassword) {
             newErrors.confirmPassword = "Please confirm your password";
         } else if (formData.password !== formData.confirmPassword) {
             newErrors.confirmPassword = "Passwords do not match";
+        }
+
+        if (!formData.companyName.trim()) {
+            newErrors.companyName = "Company name is required";
+        }
+
+        // Website format validation (optional field)
+        if (
+            formData.companyWebsite &&
+            !formData.companyWebsite.startsWith("http")
+        ) {
+            newErrors.companyWebsite =
+                "Website should include http:// or https://";
         }
 
         setErrors(newErrors);
@@ -107,26 +146,29 @@ const EmployeeRegister = () => {
         setRegisterError("");
 
         try {
-            // Register as employee
-            await registerEmployee({
+            // Register as employer
+            await registerEmployer({
                 first_name: formData.firstName,
                 last_name: formData.lastName,
                 email: formData.email,
                 password: formData.password,
-                role: "employee",
+                role: "employer",
+                company_name: formData.companyName,
+                company_address: formData.companyAddress,
+                company_website: formData.companyWebsite,
             });
 
             // Only show notification if auth context doesn't handle it
             if (!handlesOwnNotifications) {
                 pushNotification(
-                    "Account created successfully! Redirecting to dashboard...",
+                    "Employer account created successfully! Redirecting to dashboard...",
                     "success"
                 );
             }
 
-            // Redirect to employee dashboard after a short delay to show the notification
+            // Redirect to employer dashboard after a short delay to show the notification
             setTimeout(() => {
-                navigate("/employee/dashboard");
+                navigate("/employer/dashboard");
             }, 1500);
         } catch (error: any) {
             // Handle error responses from the API
@@ -170,11 +212,11 @@ const EmployeeRegister = () => {
                     borderRadius: 2,
                 }}
             >
-                <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
-                    <PersonAddOutlined />
+                <Avatar sx={{ m: 1, bgcolor: "primary.main" }}>
+                    <BusinessCenter />
                 </Avatar>
                 <Typography component="h1" variant="h5" mb={3}>
-                    Create Job Seeker Account
+                    Create Employer Account
                 </Typography>
 
                 {registerError && (
@@ -241,7 +283,7 @@ const EmployeeRegister = () => {
                                 fullWidth
                                 name="password"
                                 label="Password"
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 id="password"
                                 autoComplete="new-password"
                                 value={formData.password}
@@ -249,6 +291,28 @@ const EmployeeRegister = () => {
                                 error={!!errors.password}
                                 helperText={errors.password}
                                 disabled={isLoading}
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                aria-label="toggle password visibility"
+                                                onClick={
+                                                    handleTogglePasswordVisibility
+                                                }
+                                                edge="end"
+                                                disabled={isLoading}
+                                                size="large"
+                                                sx={{ color: "text.secondary" }}
+                                            >
+                                                {showPassword ? (
+                                                    <VisibilityOff />
+                                                ) : (
+                                                    <Visibility />
+                                                )}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                }}
                             />
                         </Grid>
                         <Grid item xs={12}>
@@ -257,13 +321,83 @@ const EmployeeRegister = () => {
                                 fullWidth
                                 name="confirmPassword"
                                 label="Confirm Password"
-                                type="password"
+                                type={showConfirmPassword ? "text" : "password"}
                                 id="confirmPassword"
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
                                 error={!!errors.confirmPassword}
                                 helperText={errors.confirmPassword}
                                 disabled={isLoading}
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                aria-label="toggle confirm password visibility"
+                                                onClick={
+                                                    handleToggleConfirmPasswordVisibility
+                                                }
+                                                edge="end"
+                                                disabled={isLoading}
+                                                size="large"
+                                                sx={{ color: "text.secondary" }}
+                                            >
+                                                {showConfirmPassword ? (
+                                                    <VisibilityOff />
+                                                ) : (
+                                                    <Visibility />
+                                                )}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                }}
+                            />
+                        </Grid>
+
+                        <Grid item xs={12}>
+                            <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
+                                Company Information
+                            </Typography>
+                        </Grid>
+
+                        <Grid item xs={12}>
+                            <TextField
+                                required
+                                fullWidth
+                                id="companyName"
+                                label="Company Name"
+                                name="companyName"
+                                value={formData.companyName}
+                                onChange={handleChange}
+                                error={!!errors.companyName}
+                                helperText={errors.companyName}
+                                disabled={isLoading}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                fullWidth
+                                id="companyAddress"
+                                label="Company Address"
+                                name="companyAddress"
+                                value={formData.companyAddress}
+                                onChange={handleChange}
+                                error={!!errors.companyAddress}
+                                helperText={errors.companyAddress}
+                                disabled={isLoading}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                fullWidth
+                                id="companyWebsite"
+                                label="Company Website (with https://)"
+                                name="companyWebsite"
+                                value={formData.companyWebsite}
+                                onChange={handleChange}
+                                error={!!errors.companyWebsite}
+                                helperText={errors.companyWebsite}
+                                disabled={isLoading}
+                                placeholder="https://example.com"
                             />
                         </Grid>
                     </Grid>
@@ -275,16 +409,20 @@ const EmployeeRegister = () => {
                         sx={{ mt: 3, mb: 2 }}
                         disabled={isLoading}
                     >
-                        {isLoading ? <CircularProgress size={24} /> : "Sign Up"}
+                        {isLoading ? (
+                            <CircularProgress size={24} />
+                        ) : (
+                            "Create Employer Account"
+                        )}
                     </Button>
                     <Grid container>
                         <Grid item xs>
                             <MuiLink
                                 component={Link}
-                                to="/register/employer"
+                                to="/register/employee"
                                 variant="body2"
                             >
-                                Register as an Employer
+                                Register as a Job Seeker
                             </MuiLink>
                         </Grid>
                         <Grid item>
@@ -303,4 +441,4 @@ const EmployeeRegister = () => {
     );
 };
 
-export default EmployeeRegister;
+export default EmployerRegister;

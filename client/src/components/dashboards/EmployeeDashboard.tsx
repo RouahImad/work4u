@@ -19,16 +19,15 @@ import {
 } from "@mui/material";
 import {
     Work,
-    // CheckCircle,
     Schedule,
     NotificationsActive,
-    InsertDriveFile,
-    Star,
-    // School,
     TrendingUp,
 } from "@mui/icons-material";
+import { useAuth } from "../../contexts/AuthContext";
+import ChangePasswordDialog from "../profile/ChangePasswordDialog ";
+import DeleteAccountDialog from "../profile/DeleteAccountDialog ";
+import EditProfileDialog from "../profile/EditProfileDialog ";
 
-// Mock data
 const applications = [
     {
         id: 1,
@@ -58,17 +57,6 @@ const applications = [
         status: "Screening",
         date: "2023-05-01",
     },
-];
-
-const recommendedJobs = [
-    { id: 1, title: "Frontend Developer", company: "WebTech", match: 95 },
-    {
-        id: 2,
-        title: "React Native Developer",
-        company: "MobileApps",
-        match: 88,
-    },
-    { id: 3, title: "Software Engineer", company: "SoftSolutions", match: 82 },
 ];
 
 const notifications = [
@@ -101,51 +89,57 @@ const statusColors: Record<string, string> = {
     Hired: "#2ecc71",
 };
 
-const EmployeeDashboard = ({
-    theme,
-}: // darkMode,
-{
-    theme: Theme;
-    // darkMode: boolean;
-}) => {
+const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
     const [activeTab, setActiveTab] = useState("overview");
+    const { user } = useAuth();
+
+    // State for dialogs
+    const [editProfileOpen, setEditProfileOpen] = useState(false);
+    const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+    const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
+
+    // Create a properly formatted display name
+    const displayName = user ? `${user.first_name} ${user.last_name}` : "User";
+
+    // Get user email
+    const userEmail = user?.email || "No email available";
+
+    // Dialog handlers
+    const handleEditProfileOpen = () => setEditProfileOpen(true);
+    const handleEditProfileClose = () => setEditProfileOpen(false);
+
+    const handleChangePasswordOpen = () => setChangePasswordOpen(true);
+    const handleChangePasswordClose = () => setChangePasswordOpen(false);
+
+    const handleDeleteAccountOpen = () => setDeleteAccountOpen(true);
+    const handleDeleteAccountClose = () => setDeleteAccountOpen(false);
 
     return (
         <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
             <Grid container spacing={3}>
-                {/* Profile Summary */}
+                {/* Profile Summary - Updated with real user data */}
                 <Grid item xs={12}>
                     <Paper sx={{ p: 3, display: "flex", alignItems: "center" }}>
                         <Avatar
                             sx={{ width: 80, height: 80, mr: 3 }}
-                            src="https://via.placeholder.com/150"
-                        />
+                            // Generate avatar from initials if no image
+                            alt={displayName}
+                            src={`https://ui-avatars.com/api/?name=${user?.first_name}+${user?.last_name}&background=random`}
+                        >
+                            {user?.first_name?.[0]}
+                            {user?.last_name?.[0]}
+                        </Avatar>
                         <Box>
                             <Typography
                                 variant="h5"
                                 component="h1"
                                 gutterBottom
                             >
-                                Welcome back, Alex Johnson
+                                Welcome back, {displayName}
                             </Typography>
                             <Typography variant="body1" color="text.secondary">
-                                Full Stack Developer | New York, NY
+                                {userEmail} | {user?.role || "Employee"}
                             </Typography>
-                            <Box sx={{ mt: 1 }}>
-                                <Chip
-                                    icon={<InsertDriveFile fontSize="small" />}
-                                    label="Resume Uploaded"
-                                    size="small"
-                                    color="success"
-                                    sx={{ mr: 1 }}
-                                />
-                                <Chip
-                                    icon={<Star fontSize="small" />}
-                                    label="Profile Strength: Strong"
-                                    size="small"
-                                    color="primary"
-                                />
-                            </Box>
                         </Box>
                     </Paper>
                 </Grid>
@@ -196,24 +190,6 @@ const EmployeeDashboard = ({
                             }}
                         >
                             Applications
-                        </Button>
-                        <Button
-                            onClick={() => setActiveTab("recommendations")}
-                            sx={{
-                                mr: 2,
-                                color:
-                                    activeTab === "recommendations"
-                                        ? "primary.main"
-                                        : "text.primary",
-                                borderBottom:
-                                    activeTab === "recommendations"
-                                        ? `2px solid ${theme.palette.primary.main}`
-                                        : "none",
-                                borderRadius: 0,
-                                pb: 1,
-                            }}
-                        >
-                            Job Recommendations
                         </Button>
                         <Button
                             onClick={() => setActiveTab("profile")}
@@ -629,77 +605,6 @@ const EmployeeDashboard = ({
                     </Grid>
                 )}
 
-                {activeTab === "recommendations" && (
-                    <Grid item xs={12}>
-                        <Paper sx={{ p: 3 }}>
-                            <Typography
-                                variant="h6"
-                                component="h2"
-                                gutterBottom
-                            >
-                                Recommended Jobs for You
-                            </Typography>
-                            <Grid container spacing={2}>
-                                {recommendedJobs.map((job) => (
-                                    <Grid
-                                        item
-                                        xs={12}
-                                        sm={6}
-                                        md={4}
-                                        key={job.id}
-                                    >
-                                        <Card
-                                            sx={{
-                                                height: "100%",
-                                                display: "flex",
-                                                flexDirection: "column",
-                                                transition:
-                                                    "transform 0.2s ease-in-out",
-                                                "&:hover": {
-                                                    transform: "scale(1.02)",
-                                                    boxShadow: 3,
-                                                },
-                                            }}
-                                        >
-                                            <CardContent sx={{ flexGrow: 1 }}>
-                                                <Box sx={{ mb: 2 }}>
-                                                    <Chip
-                                                        label={`${job.match}% Match`}
-                                                        color="primary"
-                                                        size="small"
-                                                        sx={{ mb: 1 }}
-                                                    />
-                                                    <Typography
-                                                        variant="h6"
-                                                        component="div"
-                                                        sx={{ mb: 1 }}
-                                                    >
-                                                        {job.title}
-                                                    </Typography>
-                                                    <Typography
-                                                        variant="body2"
-                                                        color="text.secondary"
-                                                        gutterBottom
-                                                    >
-                                                        {job.company}
-                                                    </Typography>
-                                                </Box>
-                                                <Button
-                                                    variant="outlined"
-                                                    size="small"
-                                                    fullWidth
-                                                >
-                                                    View Job
-                                                </Button>
-                                            </CardContent>
-                                        </Card>
-                                    </Grid>
-                                ))}
-                            </Grid>
-                        </Paper>
-                    </Grid>
-                )}
-
                 {activeTab === "profile" && (
                     <Grid item xs={12}>
                         <Paper sx={{ p: 3 }}>
@@ -729,9 +634,22 @@ const EmployeeDashboard = ({
                                                     Name
                                                 </Typography>
                                                 <Typography variant="body1">
-                                                    Alex Johnson
+                                                    {displayName}
                                                 </Typography>
                                             </Box>
+                                            {user?.username && (
+                                                <Box sx={{ mb: 2 }}>
+                                                    <Typography
+                                                        variant="body2"
+                                                        color="text.secondary"
+                                                    >
+                                                        Username
+                                                    </Typography>
+                                                    <Typography variant="body1">
+                                                        {user.username}
+                                                    </Typography>
+                                                </Box>
+                                            )}
                                             <Box sx={{ mb: 2 }}>
                                                 <Typography
                                                     variant="body2"
@@ -740,7 +658,7 @@ const EmployeeDashboard = ({
                                                     Email
                                                 </Typography>
                                                 <Typography variant="body1">
-                                                    alex.johnson@example.com
+                                                    {userEmail}
                                                 </Typography>
                                             </Box>
                                             <Box sx={{ mb: 2 }}>
@@ -748,106 +666,32 @@ const EmployeeDashboard = ({
                                                     variant="body2"
                                                     color="text.secondary"
                                                 >
-                                                    Location
+                                                    Role
                                                 </Typography>
-                                                <Typography variant="body1">
-                                                    New York, NY
-                                                </Typography>
-                                            </Box>
-                                            <Box>
                                                 <Typography
-                                                    variant="body2"
-                                                    color="text.secondary"
+                                                    variant="body1"
+                                                    sx={{
+                                                        textTransform:
+                                                            "capitalize",
+                                                    }}
                                                 >
-                                                    Phone
-                                                </Typography>
-                                                <Typography variant="body1">
-                                                    (555) 123-4567
+                                                    {user?.role || "Employee"}
                                                 </Typography>
                                             </Box>
                                             <Button
                                                 variant="outlined"
                                                 size="small"
                                                 sx={{ mt: 2 }}
+                                                onClick={handleEditProfileOpen}
                                             >
                                                 Edit Information
                                             </Button>
                                         </CardContent>
                                     </Card>
-
-                                    <Card>
-                                        <CardContent>
-                                            <Typography
-                                                variant="h6"
-                                                gutterBottom
-                                                component="div"
-                                            >
-                                                Education
-                                            </Typography>
-                                            <Box sx={{ mb: 2 }}>
-                                                <Typography variant="body1">
-                                                    Bachelor of Science in
-                                                    Computer Science
-                                                </Typography>
-                                                <Typography
-                                                    variant="body2"
-                                                    color="text.secondary"
-                                                >
-                                                    University of Technology
-                                                </Typography>
-                                                <Typography
-                                                    variant="body2"
-                                                    color="text.secondary"
-                                                >
-                                                    2017 - 2021
-                                                </Typography>
-                                            </Box>
-                                            <Button
-                                                variant="outlined"
-                                                size="small"
-                                            >
-                                                Add Education
-                                            </Button>
-                                        </CardContent>
-                                    </Card>
                                 </Grid>
 
+                                {/* Account settings card */}
                                 <Grid item xs={12} md={6}>
-                                    <Card sx={{ mb: 3 }}>
-                                        <CardContent>
-                                            <Typography
-                                                variant="h6"
-                                                gutterBottom
-                                                component="div"
-                                            >
-                                                Work Experience
-                                            </Typography>
-                                            <Box sx={{ mb: 2 }}>
-                                                <Typography variant="body1">
-                                                    Junior Developer
-                                                </Typography>
-                                                <Typography
-                                                    variant="body2"
-                                                    color="text.secondary"
-                                                >
-                                                    TechStart Inc.
-                                                </Typography>
-                                                <Typography
-                                                    variant="body2"
-                                                    color="text.secondary"
-                                                >
-                                                    2021 - Present
-                                                </Typography>
-                                            </Box>
-                                            <Button
-                                                variant="outlined"
-                                                size="small"
-                                            >
-                                                Add Experience
-                                            </Button>
-                                        </CardContent>
-                                    </Card>
-
                                     <Card>
                                         <CardContent>
                                             <Typography
@@ -855,31 +699,30 @@ const EmployeeDashboard = ({
                                                 gutterBottom
                                                 component="div"
                                             >
-                                                Skills
+                                                Account Settings
                                             </Typography>
                                             <Box sx={{ mb: 2 }}>
-                                                {[
-                                                    "React",
-                                                    "TypeScript",
-                                                    "Node.js",
-                                                    "MongoDB",
-                                                    "Git",
-                                                    "AWS",
-                                                ].map((skill) => (
-                                                    <Chip
-                                                        key={skill}
-                                                        label={skill}
-                                                        size="small"
-                                                        sx={{ mr: 1, mb: 1 }}
-                                                    />
-                                                ))}
+                                                <Button
+                                                    variant="outlined"
+                                                    size="small"
+                                                    sx={{ mr: 1 }}
+                                                    onClick={
+                                                        handleChangePasswordOpen
+                                                    }
+                                                >
+                                                    Change Password
+                                                </Button>
+                                                <Button
+                                                    variant="outlined"
+                                                    size="small"
+                                                    color="error"
+                                                    onClick={
+                                                        handleDeleteAccountOpen
+                                                    }
+                                                >
+                                                    Delete Account
+                                                </Button>
                                             </Box>
-                                            <Button
-                                                variant="outlined"
-                                                size="small"
-                                            >
-                                                Edit Skills
-                                            </Button>
                                         </CardContent>
                                     </Card>
                                 </Grid>
@@ -888,6 +731,20 @@ const EmployeeDashboard = ({
                     </Grid>
                 )}
             </Grid>
+
+            {/* Dialogs */}
+            <EditProfileDialog
+                open={editProfileOpen}
+                onClose={handleEditProfileClose}
+            />
+            <ChangePasswordDialog
+                open={changePasswordOpen}
+                onClose={handleChangePasswordClose}
+            />
+            <DeleteAccountDialog
+                open={deleteAccountOpen}
+                onClose={handleDeleteAccountClose}
+            />
         </Container>
     );
 };

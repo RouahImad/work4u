@@ -5,14 +5,14 @@ import {
     useEffect,
     ReactNode,
 } from "react";
-import { authApi } from "../services/api";
+import { authApi, secureStorage } from "../services/api";
 import { useNotification } from "../components/notifications/SlideInNotifications";
 
 interface User {
     id: number;
     username: string;
     email: string;
-    role?: string;
+    role: string;
     first_name: string;
     last_name: string;
     company_name?: string;
@@ -50,8 +50,13 @@ interface AuthContextType {
     registerEmployee: (data: EmployeeRegistrationData) => Promise<void>;
     registerEmployer: (data: EmployerRegistrationData) => Promise<void>;
     logout: () => void;
-    updateUserProfile: (data: { email?: string }) => Promise<void>;
-    // Flag to indicate components should not show their own notifications
+    updateUserProfile: (data: {
+        first_name?: string;
+        last_name?: string;
+        email?: string;
+    }) => Promise<void>;
+    updatePassword: (newPassword: string) => Promise<void>;
+    deleteAccount: () => Promise<void>;
     handlesOwnNotifications: boolean;
 }
 
@@ -69,7 +74,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [error, setError] = useState<string | null>(null);
     const { pushNotification } = useNotification();
 
-    // This flag indicates that auth actions handle their own notifications
     const handlesOwnNotifications = true;
 
     useEffect(() => {
@@ -103,6 +107,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
             localStorage.setItem("accessToken", access);
             localStorage.setItem("refreshToken", refresh);
+
+            // Store encrypted credentials for token refresh
+            secureStorage.setItem("userEmail", email);
+            secureStorage.setItem("userPassword", password);
 
             // Fetch user data
             const userResponse = await authApi.getCurrentUser();
@@ -198,15 +206,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
         localStorage.removeItem("userRole");
+        secureStorage.removeItem("userEmail");
+        secureStorage.removeItem("userPassword");
         setUser(null);
         setIsAuthenticated(false);
         setUserRole("");
 
-        // Show logout notification
         pushNotification("You have been logged out successfully", "info");
     };
 
-    const updateUserProfile = async (data: { email?: string }) => {
+    const updateUserProfile = async (data: {
+        first_name?: string;
+        last_name?: string;
+        email?: string;
+        username?: string;
+    }) => {
         try {
             setLoading(true);
             const response = await authApi.updateUser(data);
@@ -214,6 +228,68 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } catch (err: any) {
             setError(err.response?.data?.detail || "Failed to update profile");
             throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const updatePassword = async (newPassword: string) => {
+        try {
+            setLoading(true);
+            await authApi.updateUser({
+                password: newPassword,
+            });
+
+            secureStorage.setItem("userPassword", newPassword);
+
+            pushNotification("Password updated successfully", "success");
+        } catch (err: any) {
+            const errorMessage =
+                err.response?.data?.detail || "Failed to update password";
+            setError(errorMessage);
+
+            pushNotification(errorMessage, "error");
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const deleteAccount = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            if (!user) {
+                throw new Error("User not found");
+            }
+            await authApi.deleteAccount(user.id);
+
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            localStorage.removeItem("userRole");
+            secureStorage.removeItem("userEmail");
+            secureStorage.removeItem("userPassword");
+
+            setUser(null);
+            setIsAuthenticated(false);
+            setUserRole("");
+
+            if (!handlesOwnNotifications) {
+                pushNotification(
+                    "Your account has been deleted successfully",
+                    "success"
+                );
+            }
+        } catch (err: any) {
+            const errorMessage =
+                err.response?.data?.detail || "Failed to delete account";
+            setError(errorMessage);
+
+            // Show error notification (if not handled by the component)
+            if (!handlesOwnNotifications) {
+                pushNotification(errorMessage, "error");
+            }
         } finally {
             setLoading(false);
         }
@@ -232,7 +308,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 registerEmployer,
                 logout,
                 updateUserProfile,
-                handlesOwnNotifications, // Add this to the context
+                updatePassword,
+                deleteAccount, // Add this line
+                handlesOwnNotifications,
             }}
         >
             {children}

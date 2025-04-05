@@ -2,14 +2,13 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Home from "../components/Home";
 import { Theme } from "@mui/material";
 import NavBar from "../components/NavBar";
-// Import other pages
 import EmployeeDashboard from "../components/dashboards/EmployeeDashboard";
 import EmployerDashboard from "../components/dashboards/EmployerDashboard";
 import AdminDashboard from "../components/dashboards/AdminDashboard";
-import JobsFeed from "../components/JobsFeed";
-import Login from "../components/Login";
-import EmployeeRegister from "../components/EmployeeRegister";
-import EmployerRegister from "../components/EmployerRegister";
+import JobsFeed from "../components/jobs/JobsFeed";
+import Login from "../components/auth/Login";
+import EmployeeRegister from "../components/auth/EmployeeRegister";
+import EmployerRegister from "../components/auth/EmployerRegister";
 import { useAuth } from "../contexts/AuthContext";
 
 // Protected route wrapper component
@@ -24,7 +23,7 @@ const ProtectedRoute = ({
 }: {
     isAuthenticated: boolean;
     userRole: string;
-    allowedRoles?: string[];
+    allowedRoles: string[];
     children: React.ReactNode;
     theme: Theme;
     darkMode: boolean;

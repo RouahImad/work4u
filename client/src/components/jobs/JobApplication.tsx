@@ -13,8 +13,8 @@ import {
     IconButton,
 } from "@mui/material";
 import { Close, UploadFile, CheckCircleOutline } from "@mui/icons-material";
-import { useCVInterview } from "../contexts/CVInterviewContext";
-import { useNotification } from "./notifications/SlideInNotifications";
+import { useCVInterview } from "../../contexts/CVInterviewContext";
+import { useNotification } from "../notifications/SlideInNotifications";
 
 interface JobApplicationProps {
     open: boolean;
@@ -347,6 +347,15 @@ const JobApplication = ({
                             sx={{ display: "block", mt: 1 }}
                         >
                             PDF format only, max 5MB
+                        </Typography>
+
+                        <Typography
+                            variant="caption"
+                            color="info.main"
+                            sx={{ display: "block", mt: 0.5 }}
+                        >
+                            Note: For best results, please ensure your resume is
+                            in English to improve matching accuracy.
                         </Typography>
                     </Box>
                 )}

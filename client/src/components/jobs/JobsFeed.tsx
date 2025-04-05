@@ -7,19 +7,9 @@ import {
     Grid,
     Card,
     CardContent,
-    Button,
     InputAdornment,
     CircularProgress,
     Theme,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
-    IconButton,
     CardActionArea,
     Chip,
 } from "@mui/material";
@@ -27,13 +17,12 @@ import {
     Search,
     LocationOn,
     Business,
-    Close,
     CalendarToday,
 } from "@mui/icons-material";
 import JobDetailView from "./JobDetailView";
-import { useNotification } from "./notifications/SlideInNotifications";
-import axios from "axios";
+import { useNotification } from "../notifications/SlideInNotifications";
 import { format, formatDistanceToNow, isAfter } from "date-fns";
+import ReportJobDialog from "./ReportJobDialog";
 
 interface Job {
     id: number;
@@ -45,21 +34,10 @@ interface Job {
     user_id: number;
     // Additional info
     company_name: string;
-    company_address?: string;
-    company_website?: string;
-    // Optional fields you might need for UI display
-    salary?: string;
+    company_address: string;
+    company_website: string;
+    salary: string;
 }
-
-// Report reason options
-const reportReasons = [
-    "Fraudulent job posting",
-    "Misleading information",
-    "Discriminatory content",
-    "Spam or scam",
-    "Duplicate posting",
-    "Other",
-];
 
 const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
     const [jobs, setJobs] = useState<Job[]>([]);
@@ -77,11 +55,7 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
 
     // Report modal state
     const [reportModalOpen, setReportModalOpen] = useState(false);
-    const [reportReason, setReportReason] = useState("");
-    const [reportDescription, setReportDescription] = useState("");
     const [currentJobId, setCurrentJobId] = useState<number | null>(null);
-    const [reportSubmitting, setReportSubmitting] = useState(false);
-    const [reportSuccess, setReportSuccess] = useState(false);
 
     // Fetch jobs from API
     useEffect(() => {
@@ -247,55 +221,11 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
     const handleReportClick = (jobId: number) => {
         setCurrentJobId(jobId);
         setReportModalOpen(true);
-        setReportReason("");
-        setReportDescription("");
-        setReportSuccess(false);
     };
 
     const handleReportClose = () => {
         setReportModalOpen(false);
-    };
-
-    const handleReportReasonChange = (e: any) => {
-        setReportReason(e.target.value);
-    };
-
-    const handleReportDescriptionChange = (
-        e: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        setReportDescription(e.target.value);
-    };
-
-    const handleReportSubmit = async () => {
-        setReportSubmitting(true);
-
-        try {
-            // Replace with your actual API endpoint
-            await axios.post("/api/jobs/report", {
-                jobId: currentJobId,
-                reason: reportReason,
-                description: reportDescription,
-            });
-
-            setReportSuccess(true);
-            pushNotification(
-                "Your report has been submitted successfully.",
-                "success"
-            );
-
-            // Close dialog after showing success for a moment
-            setTimeout(() => {
-                setReportModalOpen(false);
-            }, 2200);
-        } catch (error) {
-            console.error("Failed to submit report:", error);
-            pushNotification(
-                "Failed to submit report. Please try again.",
-                "error"
-            );
-        } finally {
-            setReportSubmitting(false);
-        }
+        setCurrentJobId(null);
     };
 
     // Apply filters and search
@@ -615,103 +545,12 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
             )}
 
             {/* Report Job Dialog */}
-            <Dialog
+            <ReportJobDialog
                 open={reportModalOpen}
-                onClose={reportSubmitting ? undefined : handleReportClose}
-                fullWidth
-                maxWidth="sm"
-            >
-                <DialogTitle
-                    sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                    }}
-                >
-                    {reportSuccess ? "Report Submitted" : "Report Job Posting"}
-                    {!reportSubmitting && !reportSuccess && (
-                        <IconButton onClick={handleReportClose} size="small">
-                            <Close />
-                        </IconButton>
-                    )}
-                </DialogTitle>
-                <DialogContent>
-                    {reportSuccess ? (
-                        <Box sx={{ textAlign: "center", py: 2 }}>
-                            <Typography>
-                                Thank you for your report. Our team will review
-                                it shortly.
-                            </Typography>
-                        </Box>
-                    ) : (
-                        <>
-                            <Typography
-                                variant="body2"
-                                sx={{ mb: 3, color: darkmode ? "" : "#333" }}
-                            >
-                                Please provide details about why you're
-                                reporting this job posting. Our team will review
-                                your report and take appropriate action.
-                            </Typography>
-
-                            <FormControl fullWidth sx={{ mb: 3 }}>
-                                <InputLabel>Reason for reporting</InputLabel>
-                                <Select
-                                    value={reportReason}
-                                    onChange={handleReportReasonChange}
-                                    label="Reason for reporting"
-                                    disabled={reportSubmitting}
-                                >
-                                    {reportReasons.map((reason) => (
-                                        <MenuItem key={reason} value={reason}>
-                                            {reason}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-
-                            <TextField
-                                label="Additional details"
-                                multiline
-                                rows={4}
-                                fullWidth
-                                value={reportDescription}
-                                onChange={handleReportDescriptionChange}
-                                disabled={reportSubmitting}
-                                placeholder="Please provide any additional information about this issue"
-                            />
-                        </>
-                    )}
-                </DialogContent>
-                {!reportSuccess && (
-                    <DialogActions>
-                        <Button
-                            onClick={handleReportClose}
-                            disabled={reportSubmitting}
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            onClick={handleReportSubmit}
-                            variant="contained"
-                            color="primary"
-                            disabled={!reportReason || reportSubmitting}
-                            startIcon={
-                                reportSubmitting ? (
-                                    <CircularProgress
-                                        size={20}
-                                        color="inherit"
-                                    />
-                                ) : null
-                            }
-                        >
-                            {reportSubmitting
-                                ? "Submitting..."
-                                : "Submit Report"}
-                        </Button>
-                    </DialogActions>
-                )}
-            </Dialog>
+                onClose={handleReportClose}
+                jobId={currentJobId}
+                darkmode={darkmode}
+            />
         </Container>
     );
 };

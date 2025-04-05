@@ -54,16 +54,11 @@ const NavBar = ({
     };
 
     const handleLogout = () => {
-        // First, check if a custom logout handler was provided
         if (onLogout) {
             onLogout();
         } else {
-            // Use the auth context's logout function
             logout();
 
-            // Show logout notification
-
-            // Redirect to login page
             setTimeout(() => {
                 navigate("/login");
             }, 1000);
