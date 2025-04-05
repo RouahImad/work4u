@@ -1,6 +1,5 @@
 import axios from "axios";
 
-// You can adjust this URL based on your environment configuration
 const API_URL = import.meta.env.VITE_APP_API_URL || "http://127.0.0.1:8000";
 
 // Create axios instance

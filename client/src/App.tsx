@@ -14,6 +14,8 @@ declare module "@mui/material/styles" {
 import AppRoutes from "./router/AppRoutes";
 import { AuthProvider } from "./contexts/AuthContext";
 import NotificationProvider from "./components/notifications/SlideInNotifications";
+import { JobPostProvider } from "./contexts/JobPostContext";
+import { CVInterviewProvider } from "./contexts/CVInterviewContext";
 
 const isDarkMode = localStorage.getItem("darkMode") === "true" ? true : false;
 
@@ -105,36 +107,21 @@ const App = () => {
         },
     });
 
-    //             main: "#4ECDC4", // Teal main color (similar to your gradient)
-    //             light: "#8FF8EE",
-    //             dark: "#2A9D8F",
-    //             main: "#FF6B6B", // Complementary coral color for contrast
-    //             light: "#FF9E9E",
-    //             dark: "#D63447",
-    //             main: "#2DD881", // Bright green that complements teal
-    //             light: "#7DEFA9",
-    //             dark: "#1DB954",
-    //             main: "#FFD166", // Amber/yellow that works with teal
-    //             light: "#FFE29D",
-    //             dark: "#F4A261",
-    //             main: "#EF476F", // Bright pink-red for errors
-    //             light: "#FF7E9D",
-    //             dark: "#D32F2F",
-    //             main: "#118AB2", // Blue-teal for information
-    //             light: "#55C1E3",
-    //             dark: "#0C637A",
-
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
 
             <NotificationProvider>
                 <AuthProvider>
-                    <AppRoutes
-                        theme={theme}
-                        darkMode={darkMode}
-                        setDarkMode={setDarkMode}
-                    />
+                    <JobPostProvider>
+                        <CVInterviewProvider>
+                            <AppRoutes
+                                theme={theme}
+                                darkMode={darkMode}
+                                setDarkMode={setDarkMode}
+                            />
+                        </CVInterviewProvider>
+                    </JobPostProvider>
                 </AuthProvider>
             </NotificationProvider>
         </ThemeProvider>

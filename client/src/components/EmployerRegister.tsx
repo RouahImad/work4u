@@ -137,8 +137,8 @@ const EmployerRegister = () => {
                 password: formData.password,
                 role: "employer",
                 company_name: formData.companyName,
-                company_address: formData.companyAddress || undefined,
-                company_website: formData.companyWebsite || undefined,
+                company_address: formData.companyAddress,
+                company_website: formData.companyWebsite,
             });
 
             // Only show notification if auth context doesn't handle it

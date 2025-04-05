@@ -21,6 +21,8 @@ import {
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { format, isAfter, parseISO } from "date-fns";
+import JobApplication from "./JobApplication";
+import { useState } from "react";
 
 // Update the interface to match your actual job structure
 interface Job {
@@ -54,8 +56,8 @@ const JobDetailView = ({
 }: JobDetailViewProps) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+    const [applicationOpen, setApplicationOpen] = useState(false);
 
-    // Format the dates for display
     const formatDate = (dateString: string) => {
         try {
             return format(new Date(dateString), "MMMM d, yyyy");
@@ -90,6 +92,14 @@ const JobDetailView = ({
             y: 0,
             transition: { delay: 0.2, duration: 0.4 },
         },
+    };
+
+    const handleApplyClick = () => {
+        setApplicationOpen(true);
+    };
+
+    const handleApplicationClose = () => {
+        setApplicationOpen(false);
     };
 
     return (
@@ -390,6 +400,11 @@ const JobDetailView = ({
                                                 <ErrorOutline />
                                             ) : undefined
                                         }
+                                        onClick={
+                                            !applicationClosed
+                                                ? handleApplyClick
+                                                : undefined
+                                        }
                                         sx={{
                                             px: 4,
                                             py: 1,
@@ -408,6 +423,13 @@ const JobDetailView = ({
                     </Box>
                 </Box>
             </Paper>
+            {/* Job Application Dialog */}
+            <JobApplication
+                open={applicationOpen}
+                onClose={handleApplicationClose}
+                jobId={job.id}
+                jobTitle={job.title}
+            />
         </Dialog>
     );
 };

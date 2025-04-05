@@ -98,7 +98,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             setError(null);
             setLoading(true);
-            // Use email as username as per API endpoint requirement
             const response = await authApi.login({ username: email, password });
             const { access, refresh } = response.data;
 

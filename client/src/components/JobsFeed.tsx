@@ -88,7 +88,6 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
         const fetchJobs = async () => {
             setLoading(true);
             try {
-                // Replace with your actual API endpoint
                 // const response = await axios.get("/api/jobs");
                 // setJobs(response.data);
                 setJobs([
@@ -450,7 +449,12 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
                                                 >
                                                     <Chip
                                                         icon={
-                                                            <CalendarToday fontSize="small" />
+                                                            <CalendarToday
+                                                                fontSize="small"
+                                                                sx={{
+                                                                    color: "inherit",
+                                                                }}
+                                                            />
                                                         }
                                                         label={`${
                                                             isAfter(
@@ -468,10 +472,24 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
                                                             "MMM d, yyyy"
                                                         )}`}
                                                         size="small"
-                                                        color="primary"
                                                         variant="outlined"
                                                         sx={{
                                                             padding: "4px 6px",
+                                                            color: isAfter(
+                                                                new Date(),
+                                                                new Date(
+                                                                    job.final_date
+                                                                )
+                                                            )
+                                                                ? "#D32F2F"
+                                                                : theme.palette
+                                                                      .primary
+                                                                      .main,
+                                                            borderColor:
+                                                                "currentcolor",
+                                                            "& .MuiChip-icon": {
+                                                                color: "inherit", // This is a fallback to ensure icon color matches
+                                                            },
                                                         }}
                                                     />
                                                 </Box>
@@ -519,6 +537,48 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
                                                         )}
                                                     </span>
                                                 </Typography>
+
+                                                <Box
+                                                    sx={{
+                                                        display: "flex",
+                                                        justifyContent:
+                                                            "flex-end",
+                                                        mt: 1.5,
+                                                        alignItems: "center",
+                                                    }}
+                                                >
+                                                    <Typography
+                                                        variant="body2"
+                                                        color="primary"
+                                                        sx={{
+                                                            fontWeight:
+                                                                "medium",
+                                                            display: "flex",
+                                                            alignItems:
+                                                                "center",
+                                                        }}
+                                                    >
+                                                        View details
+                                                        <Box
+                                                            component="span"
+                                                            sx={{
+                                                                ml: 0.5,
+                                                                display:
+                                                                    "inline-flex",
+                                                                alignItems:
+                                                                    "center",
+                                                                transition:
+                                                                    "transform 0.2s",
+                                                                "&:hover": {
+                                                                    transform:
+                                                                        "translateX(2px)",
+                                                                },
+                                                            }}
+                                                        >
+                                                            →
+                                                        </Box>
+                                                    </Typography>
+                                                </Box>
                                             </Box>
                                         </CardContent>
                                     </CardActionArea>
