@@ -4,32 +4,41 @@ import {
     Chip,
     Button,
     IconButton,
-    // Tooltip,
     Dialog,
     Paper,
     useTheme,
     useMediaQuery,
+    Link,
+    Tooltip,
 } from "@mui/material";
 import {
     Close,
     Flag,
-    LocationOn,
     Business,
-    AttachMoney,
+    CalendarToday,
+    Language,
+    ErrorOutline,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
+import { format, isAfter, parseISO } from "date-fns";
+
+// Update the interface to match your actual job structure
+interface Job {
+    id: number;
+    title: string;
+    description: string;
+    final_date: string;
+    uploaded_at: string;
+    accepted: boolean;
+    user_id: number;
+    company_name: string;
+    company_address?: string;
+    company_website?: string;
+    salary?: string; // Starting salary
+}
 
 interface JobDetailViewProps {
-    job: {
-        id: number;
-        title: string;
-        company: string;
-        location: string;
-        salary: string;
-        description: string;
-        tags: string[];
-        posted: string;
-    };
+    job: Job;
     open: boolean;
     onClose: () => void;
     onReport: (jobId: number) => void;
@@ -45,6 +54,33 @@ const JobDetailView = ({
 }: JobDetailViewProps) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+    // Format the dates for display
+    const formatDate = (dateString: string) => {
+        try {
+            return format(new Date(dateString), "MMMM d, yyyy");
+        } catch (error) {
+            console.error("Date formatting error:", error);
+            return "Unknown date";
+        }
+    };
+
+    // Check if the application deadline has passed
+    const isApplicationClosed = () => {
+        try {
+            const finalDate = parseISO(job.final_date);
+            const today = new Date();
+            return isAfter(today, finalDate);
+        } catch (error) {
+            console.error("Date comparison error:", error);
+            return false; // If there's an error, allow application by default
+        }
+    };
+
+    const applicationClosed = isApplicationClosed();
+
+    // Color for closing date - #D32F2F for light theme, brighter/more visible for dark theme
+    const closingDateColor = darkmode ? "#FF6B6B" : "#D32F2F";
 
     // Animation variants for content
     const contentVariants = {
@@ -79,14 +115,13 @@ const JobDetailView = ({
                     height: "100%",
                 }}
             >
-                {/* Header with close button */}
                 <Box
                     sx={{
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
-                        p: 3,
-                        pb: 1,
+                        p: 2,
+                        pb: 1.5,
                         borderBottom: `1px solid ${theme.palette.divider}`,
                         position: "sticky",
                         top: 0,
@@ -94,18 +129,38 @@ const JobDetailView = ({
                         zIndex: 10,
                     }}
                 >
-                    <Typography
-                        variant="h5"
-                        component="h2"
-                        sx={{ fontWeight: 600 }}
-                    >
-                        {job.title}
-                    </Typography>
+                    <Box>
+                        <Box
+                            sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1,
+                            }}
+                        >
+                            <Typography
+                                variant="h5"
+                                component="h2"
+                                sx={{ fontWeight: 600 }}
+                            >
+                                {job.title}
+                            </Typography>
+
+                            <Chip
+                                label={applicationClosed ? "Closed" : "Active"}
+                                size="small"
+                                color={applicationClosed ? "error" : "success"}
+                                sx={{
+                                    height: 24,
+                                    fontWeight: "bold",
+                                    color: "#fff",
+                                }}
+                            />
+                        </Box>
+                    </Box>
                     <IconButton onClick={onClose} size="medium">
                         <Close />
                     </IconButton>
                 </Box>
-
                 {/* Content */}
                 <Box
                     component={motion.div}
@@ -114,26 +169,103 @@ const JobDetailView = ({
                     animate="visible"
                     sx={{ p: 3 }}
                 >
-                    {/* Company and location info */}
                     <Box sx={{ mb: 3 }}>
                         <Box
                             sx={{
                                 display: "flex",
+                                flexWrap: "wrap",
                                 alignItems: "center",
                                 mb: 1,
+                                gap: 0.5,
+                                rowGap: 0.75,
                             }}
                         >
-                            <Business
+                            <Box
                                 sx={{
-                                    mr: 1,
-                                    color: theme.palette.text.secondary,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    flexShrink: 0,
                                 }}
-                            />
-                            <Typography variant="h6" color="text.primary">
-                                {job.company}
-                            </Typography>
+                            >
+                                <Business
+                                    sx={{
+                                        mr: 1,
+                                        color: theme.palette.text.secondary,
+                                    }}
+                                />
+                                <Typography
+                                    variant="subtitle1"
+                                    color="text.primary"
+                                    sx={{ fontWeight: "medium" }}
+                                >
+                                    {job.company_name}
+                                </Typography>
+                            </Box>
+
+                            {job.company_address && (
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        flexWrap: "wrap",
+                                    }}
+                                >
+                                    <Typography
+                                        variant="subtitle1"
+                                        color="text.secondary"
+                                        sx={{
+                                            mr: 0.5,
+                                        }}
+                                    >
+                                        |
+                                    </Typography>
+                                    <Typography
+                                        variant="subtitle1"
+                                        color="text.primary"
+                                        sx={{
+                                            "@media (max-width: 429px)": {
+                                                mr: 1,
+                                            },
+                                        }}
+                                    >
+                                        {job.company_address}
+                                    </Typography>
+                                </Box>
+                            )}
+
+                            {/* Salary with separator - can break to new line */}
+                            {job.salary && (
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        flexWrap: "wrap",
+                                    }}
+                                >
+                                    <Typography
+                                        variant="subtitle1"
+                                        color="text.secondary"
+                                        sx={{
+                                            display: {
+                                                xs: "none",
+                                                mobile: "block",
+                                            },
+                                            mr: 0.5,
+                                        }}
+                                    >
+                                        |
+                                    </Typography>
+                                    <Typography
+                                        variant="body1"
+                                        color="text.primary"
+                                    >
+                                        ${job.salary} (adjustable)
+                                    </Typography>
+                                </Box>
+                            )}
                         </Box>
 
+                        {/* Application closing date */}
                         <Box
                             sx={{
                                 display: "flex",
@@ -141,28 +273,48 @@ const JobDetailView = ({
                                 mb: 1,
                             }}
                         >
-                            <LocationOn
+                            <CalendarToday
                                 sx={{
                                     mr: 1,
-                                    color: theme.palette.text.secondary,
+                                    color: closingDateColor,
                                 }}
                             />
-                            <Typography variant="body1" color="text.secondary">
-                                {job.location}
+                            <Typography
+                                variant="body1"
+                                fontWeight="medium"
+                                sx={{ color: closingDateColor }}
+                            >
+                                {applicationClosed
+                                    ? "Closed on: "
+                                    : "Closing: "}
+                                {formatDate(job.final_date)}
                             </Typography>
                         </Box>
 
-                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                            <AttachMoney
-                                sx={{
-                                    mr: 1,
-                                    color: theme.palette.text.secondary,
-                                }}
-                            />
-                            <Typography variant="body1" color="text.secondary">
-                                {job.salary}
-                            </Typography>
-                        </Box>
+                        {/* Company website if available */}
+                        {job.company_website && (
+                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                                <Language
+                                    sx={{
+                                        mr: 1,
+                                        color: theme.palette.primary.main,
+                                    }}
+                                />
+                                <Link
+                                    href={
+                                        job.company_website.startsWith("http")
+                                            ? job.company_website
+                                            : `https://${job.company_website}`
+                                    }
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    underline="hover"
+                                    color="primary"
+                                >
+                                    Company Website
+                                </Link>
+                            </Box>
+                        )}
                     </Box>
 
                     {/* Description */}
@@ -172,48 +324,19 @@ const JobDetailView = ({
                         </Typography>
                         <Typography
                             variant="body1"
-                            paragraph
                             sx={{
                                 color: darkmode ? "#FFFFFF" : "#333",
+                                whiteSpace: "pre-line", // Preserve line breaks in description
                             }}
                         >
                             {job.description}
-                            {/* In a real app, this would likely be a longer description */}
-                            {/* You could use a rich text renderer here if description contains HTML */}
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                            elit. Nullam in dui mauris. Vivamus hendrerit arcu
-                            sed erat molestie vehicula. Sed auctor neque eu
-                            tellus rhoncus ut eleifend nibh porttitor. Ut in
-                            nulla enim. Phasellus molestie magna non est
-                            bibendum non venenatis nisl tempor.
                         </Typography>
-                    </Box>
-
-                    {/* Skills/Tags */}
-                    <Box sx={{ mb: 4 }}>
-                        <Typography variant="h6" gutterBottom>
-                            Required Skills
-                        </Typography>
-                        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                            {job.tags.map((tag, index) => (
-                                <Chip
-                                    key={index}
-                                    label={tag}
-                                    color="primary"
-                                    variant="outlined"
-                                    sx={{
-                                        borderRadius: 1.5,
-                                        fontWeight: 500,
-                                    }}
-                                />
-                            ))}
-                        </Box>
                     </Box>
 
                     {/* Posted date */}
                     <Box sx={{ mb: 4 }}>
                         <Typography variant="body2" color="text.secondary">
-                            Posted {job.posted}
+                            Posted {formatDate(job.uploaded_at)}
                         </Typography>
                     </Box>
 
@@ -240,19 +363,47 @@ const JobDetailView = ({
                         </Button>
 
                         <motion.div
-                            whileTap={{ scale: 0.95 }}
+                            whileTap={
+                                !applicationClosed ? { scale: 0.95 } : undefined
+                            }
                             style={{
                                 alignSelf: isMobile ? "stretch" : "flex-end",
                             }}
                         >
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                fullWidth={isMobile}
-                                sx={{ px: 4, py: 1 }}
+                            <Tooltip
+                                title={
+                                    applicationClosed
+                                        ? "Application deadline has passed"
+                                        : ""
+                                }
+                                placement="top"
+                                arrow
                             >
-                                Apply Now
-                            </Button>
+                                <span>
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        fullWidth={isMobile}
+                                        disabled={applicationClosed}
+                                        startIcon={
+                                            applicationClosed ? (
+                                                <ErrorOutline />
+                                            ) : undefined
+                                        }
+                                        sx={{
+                                            px: 4,
+                                            py: 1,
+                                            opacity: applicationClosed
+                                                ? 0.7
+                                                : 1,
+                                        }}
+                                    >
+                                        {applicationClosed
+                                            ? "Applications Closed"
+                                            : "Apply Now"}
+                                    </Button>
+                                </span>
+                            </Tooltip>
                         </motion.div>
                     </Box>
                 </Box>

@@ -8,7 +8,6 @@ import {
     Card,
     CardContent,
     Button,
-    // Chip,
     InputAdornment,
     CircularProgress,
     Theme,
@@ -21,78 +20,36 @@ import {
     Select,
     MenuItem,
     IconButton,
-    // Tooltip,
     CardActionArea,
+    Chip,
 } from "@mui/material";
 import {
     Search,
     LocationOn,
     Business,
-    AttachMoney,
     Close,
+    CalendarToday,
 } from "@mui/icons-material";
-// import { motion } from "framer-motion";
-// import { useNavigate } from "react-router-dom";
 import JobDetailView from "./JobDetailView";
+import { useNotification } from "./notifications/SlideInNotifications";
+import axios from "axios";
+import { format, formatDistanceToNow, isAfter } from "date-fns";
 
-// Mock job data
-const mockJobs = [
-    {
-        id: 1,
-        title: "Full Stack Developer",
-        company: "TechCorp",
-        location: "New York, NY",
-        salary: "$80,000 - $120,000",
-        description:
-            "We are looking for a Full Stack Developer to build and maintain our web applications...",
-        tags: ["React", "Node.js", "MongoDB", "TypeScript"],
-        posted: "2 days ago",
-    },
-    {
-        id: 2,
-        title: "UX/UI Designer",
-        company: "DesignHub",
-        location: "San Francisco, CA",
-        salary: "$90,000 - $110,000",
-        description:
-            "Join our creative team to design beautiful and functional user interfaces...",
-        tags: ["Figma", "Adobe XD", "User Research", "Wireframing"],
-        posted: "1 week ago",
-    },
-    {
-        id: 3,
-        title: "DevOps Engineer",
-        company: "CloudSystems",
-        location: "Remote",
-        salary: "$100,000 - $140,000",
-        description:
-            "Help us build and maintain our cloud infrastructure and CI/CD pipelines...",
-        tags: ["AWS", "Docker", "Kubernetes", "CI/CD"],
-        posted: "3 days ago",
-    },
-    {
-        id: 4,
-        title: "Data Scientist",
-        company: "DataInsights",
-        location: "Boston, MA",
-        salary: "$110,000 - $150,000",
-        description:
-            "Use machine learning and statistical analysis to unlock insights from our data...",
-        tags: ["Python", "Machine Learning", "SQL", "Data Visualization"],
-        posted: "Just now",
-    },
-    {
-        id: 5,
-        title: "Mobile Developer",
-        company: "AppWorks",
-        location: "Austin, TX",
-        salary: "$85,000 - $115,000",
-        description:
-            "Build native mobile applications for iOS and Android platforms...",
-        tags: ["Swift", "Kotlin", "React Native", "Mobile Design"],
-        posted: "5 days ago",
-    },
-];
+interface Job {
+    id: number;
+    title: string;
+    description: string;
+    final_date: string; // Expected ISO date string
+    uploaded_at: string; // Expected ISO date string
+    accepted: boolean;
+    user_id: number;
+    // Additional info
+    company_name: string;
+    company_address?: string;
+    company_website?: string;
+    // Optional fields you might need for UI display
+    salary?: string;
+}
 
 // Report reason options
 const reportReasons = [
@@ -105,20 +62,17 @@ const reportReasons = [
 ];
 
 const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
-    // const navigate = useNavigate();
-    const [jobs, setJobs] = useState(mockJobs);
+    const [jobs, setJobs] = useState<Job[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [loading, setLoading] = useState(false);
     const [filters, setFilters] = useState({
         location: "",
         company: "",
-        salary: "",
     });
+    const { pushNotification } = useNotification();
 
     // Selected job state
-    const [selectedJob, setSelectedJob] = useState<(typeof mockJobs)[0] | null>(
-        null
-    );
+    const [selectedJob, setSelectedJob] = useState<Job | null>(null);
     const [detailOpen, setDetailOpen] = useState(false);
 
     // Report modal state
@@ -129,15 +83,144 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
     const [reportSubmitting, setReportSubmitting] = useState(false);
     const [reportSuccess, setReportSuccess] = useState(false);
 
-    // Simulate loading jobs from API
+    // Fetch jobs from API
     useEffect(() => {
-        setLoading(true);
-        // Simulate API call
-        setTimeout(() => {
-            setJobs(mockJobs);
-            setLoading(false);
-        }, 800);
+        const fetchJobs = async () => {
+            setLoading(true);
+            try {
+                // Replace with your actual API endpoint
+                // const response = await axios.get("/api/jobs");
+                // setJobs(response.data);
+                setJobs([
+                    {
+                        id: 1,
+                        title: "Full Stack Developer",
+                        description:
+                            "We are looking for a Full Stack Developer to build and maintain our web applications Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quamquae consequuntur commodi quas excepturi, quasi, natusrepudiandae porro sapiente, saepe quibusdam quaerat asperioresaccusantium maiores eveniet id ducimus perspiciatis ullam.",
+                        final_date: new Date(
+                            Date.now() + 30 * 24 * 60 * 60 * 1000
+                        ).toISOString(), // 30 days from now
+                        uploaded_at: new Date(
+                            Date.now() - 2 * 24 * 60 * 60 * 1000
+                        ).toISOString(), // 2 days ago
+                        accepted: true,
+                        user_id: 1,
+                        company_name: "TechCorp",
+                        company_address: "New York, NY",
+                        company_website: "https://techcorp.example.com",
+                        salary: "80,000",
+                    },
+                    {
+                        id: 2,
+                        title: "UX/UI Designer",
+                        description:
+                            "Join our creative team to design beautiful and functional user interfaces Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quamquae consequuntur commodi quas excepturi, quasi, natusrepudiandae porro sapiente, saepe quibusdam quaerat asperioresaccusantium maiores eveniet id ducimus perspiciatis ullam.",
+                        final_date: new Date(
+                            Date.now() + 20 * 24 * 60 * 60 * 1000
+                        ).toISOString(), // 20 days from now
+                        uploaded_at: new Date(
+                            Date.now() - 7 * 24 * 60 * 60 * 1000
+                        ).toISOString(), // 7 days ago
+                        accepted: true,
+                        user_id: 2,
+                        company_name: "DesignHub",
+                        company_address: "San Francisco, CA",
+                        company_website: "https://designhub.example.com",
+                        salary: "90,000",
+                    },
+                    {
+                        id: 3,
+                        title: "DevOps Engineer",
+                        description:
+                            "Help us build and maintain our cloud infrastructure and CI/CD pipelines Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quam quae consequuntur commodi quas excepturi, quasi, natus repudiandae porro sapiente, saepe quibusdam quaerat asperiores accusantium maiores eveniet id ducimus perspiciatis ullam.",
+                        final_date: new Date(
+                            Date.now() + 15 * 24 * 60 * 60 * 1000
+                        ).toISOString(), // 15 days from now
+                        uploaded_at: new Date(
+                            Date.now() - 3 * 24 * 60 * 60 * 1000
+                        ).toISOString(), // 3 days ago
+                        accepted: true,
+                        user_id: 1,
+                        company_name: "CloudSystems",
+                        company_address: "Remote",
+                        company_website: "https://cloudsystems.example.com",
+                        salary: "100,000",
+                    },
+                    {
+                        id: 4,
+                        title: "Data Scientist",
+                        description:
+                            "Use machine learning and statistical analysis to unlock insights from our data Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quamquae consequuntur commodi quas excepturi, quasi, natusrepudiandae porro sapiente, saepe quibusdam quaerat asperioresaccusantium maiores eveniet id ducimus perspiciatis ullam.",
+                        final_date: new Date(
+                            Date.now() + 10 * 24 * 60 * 60 * 1000
+                        ).toISOString(), // 10 days from now
+                        uploaded_at: new Date().toISOString(), // Just now
+                        accepted: true,
+                        user_id: 3,
+                        company_name: "DataInsights",
+                        company_address: "Boston, MA",
+                        company_website: "https://datainsights.example.com",
+                        salary: "110,000",
+                    },
+                    {
+                        id: 5,
+                        title: "Mobile Developer",
+                        description:
+                            "Build native mobile applications for iOS and Android platforms Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quamquae consequuntur commodi quas excepturi, quasi, natusrepudiandae porro sapiente, saepe quibusdam quaerat asperioresaccusantium maiores eveniet id ducimus perspiciatis ullam.",
+                        final_date: new Date(
+                            Date.now() - 5 * 24 * 60 * 60 * 1000
+                        ).toISOString(), // 25 days from now
+                        uploaded_at: new Date(
+                            Date.now() - 15 * 24 * 60 * 60 * 1000
+                        ).toISOString(), // 5 days ago
+                        accepted: true,
+                        user_id: 2,
+                        company_name: "AppWorks",
+                        company_address: "Austin, TX",
+                        company_website: "https://appworks.example.com",
+                        salary: "85,000",
+                    },
+                ]);
+            } catch (error) {
+                console.error("Failed to fetch jobs:", error);
+                pushNotification(
+                    "Failed to load jobs. Please try again later.",
+                    "error"
+                );
+            }
+            // finally {
+            //     setLoading(false);
+            // }
+            setTimeout(() => {
+                setLoading(false);
+            }, 2000);
+        };
+
+        fetchJobs();
     }, []);
+
+    // Format the posted date for display
+    const formatPostedDate = (dateString: string) => {
+        try {
+            const date = new Date(dateString);
+            // If it's less than 14 days ago, show "X days ago"
+            const now = new Date();
+            const diffInDays = Math.floor(
+                (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
+            );
+
+            if (diffInDays < 1) {
+                return "Today";
+            } else if (diffInDays < 14) {
+                return formatDistanceToNow(date, { addSuffix: true });
+            } else {
+                return format(date, "MMM d, yyyy");
+            }
+        } catch (error) {
+            console.error("Date formatting error:", error);
+            return "Unknown date";
+        }
+    };
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value);
@@ -152,20 +235,13 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
     };
 
     // Job detail handlers
-    const handleJobClick = (job: (typeof mockJobs)[0]) => {
+    const handleJobClick = (job: Job) => {
         setSelectedJob(job);
         setDetailOpen(true);
-
-        // Update URL without refreshing the page (for direct linking)
-        // history.pushState(null, "", `/jobs/${job.id}`);
-        // You could also use react-router:
-        // navigate(`/jobs/${job.id}`);
     };
 
     const handleDetailClose = () => {
         setDetailOpen(false);
-        // Reset URL
-        // history.pushState(null, "", "/jobs");
     };
 
     // Report handling functions
@@ -191,54 +267,63 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
         setReportDescription(e.target.value);
     };
 
-    const handleReportSubmit = () => {
-        const currentUserId = "user123"; // Placeholder for actual user ID
-
+    const handleReportSubmit = async () => {
         setReportSubmitting(true);
 
-        // Simulate API call to submit report
-        setTimeout(() => {
-            // In a real app, this would be an API call:
-            console.log("Report submitted:", {
+        try {
+            // Replace with your actual API endpoint
+            await axios.post("/api/jobs/report", {
                 jobId: currentJobId,
-                userId: currentUserId,
                 reason: reportReason,
                 description: reportDescription,
-                timestamp: new Date().toISOString(),
             });
 
-            setReportSubmitting(false);
             setReportSuccess(true);
+            pushNotification(
+                "Your report has been submitted successfully.",
+                "success"
+            );
 
             // Close dialog after showing success for a moment
             setTimeout(() => {
                 setReportModalOpen(false);
             }, 2200);
-        }, 1000);
+        } catch (error) {
+            console.error("Failed to submit report:", error);
+            pushNotification(
+                "Failed to submit report. Please try again.",
+                "error"
+            );
+        } finally {
+            setReportSubmitting(false);
+        }
     };
 
     // Apply filters and search
     const filteredJobs = jobs.filter((job) => {
+        // Only show accepted jobs
+        if (!job.accepted) return false;
+
         const matchesSearch =
             job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            job.company_name
+                ?.toLowerCase()
+                .includes(searchTerm.toLowerCase()) ||
             job.description.toLowerCase().includes(searchTerm.toLowerCase());
 
         const matchesLocation = filters.location
-            ? job.location
-                  .toLowerCase()
-                  .includes(filters.location.toLowerCase())
-            : true;
-        const matchesCompany = filters.company
-            ? job.company.toLowerCase().includes(filters.company.toLowerCase())
-            : true;
-        const matchesSalary = filters.salary
-            ? job.salary.toLowerCase().includes(filters.salary.toLowerCase())
+            ? job.company_address
+                  ?.toLowerCase()
+                  .includes(filters.location.toLowerCase()) ?? false
             : true;
 
-        return (
-            matchesSearch && matchesLocation && matchesCompany && matchesSalary
-        );
+        const matchesCompany = filters.company
+            ? job.company_name
+                  ?.toLowerCase()
+                  .includes(filters.company.toLowerCase()) ?? false
+            : true;
+
+        return matchesSearch && matchesLocation && matchesCompany;
     });
 
     return (
@@ -251,7 +336,7 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
             <Box sx={{ mb: 4 }}>
                 <TextField
                     fullWidth
-                    placeholder="Search for jobs, skills or companies"
+                    placeholder="Search for jobs"
                     variant="outlined"
                     value={searchTerm}
                     onChange={handleSearch}
@@ -267,7 +352,7 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
 
             {/* Filters */}
             <Grid container spacing={2} sx={{ mb: 4 }}>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={6}>
                     <TextField
                         fullWidth
                         placeholder="Filter by location"
@@ -284,7 +369,7 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
                         }}
                     />
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={6}>
                     <TextField
                         fullWidth
                         placeholder="Filter by company"
@@ -301,29 +386,22 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
                         }}
                     />
                 </Grid>
-                <Grid item xs={12} sm={4}>
-                    <TextField
-                        fullWidth
-                        placeholder="Filter by salary"
-                        variant="outlined"
-                        name="salary"
-                        value={filters.salary}
-                        onChange={handleFilterChange}
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <AttachMoney />
-                                </InputAdornment>
-                            ),
-                        }}
-                    />
-                </Grid>
             </Grid>
 
-            {/* Job listings - Simplified View */}
+            {/* Job listings */}
             {loading ? (
-                <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
-                    <CircularProgress />
+                <Box
+                    sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        my: 4,
+                    }}
+                >
+                    <CircularProgress sx={{ mb: 2 }} />
+                    <Typography variant="body2" color="text.secondary">
+                        Loading job opportunities...
+                    </Typography>
                 </Box>
             ) : (
                 <Grid container spacing={3}>
@@ -357,9 +435,47 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
                                                     variant="subtitle1"
                                                     color="text.secondary"
                                                 >
-                                                    {job.company} •{" "}
-                                                    {job.location}
+                                                    {job.company_name}
+                                                    {job.company_address
+                                                        ? ` • ${job.company_address}`
+                                                        : ""}
                                                 </Typography>
+
+                                                <Box
+                                                    sx={{
+                                                        mt: 1,
+                                                        display: "flex",
+                                                        gap: 0.5,
+                                                    }}
+                                                >
+                                                    <Chip
+                                                        icon={
+                                                            <CalendarToday fontSize="small" />
+                                                        }
+                                                        label={`${
+                                                            isAfter(
+                                                                new Date(),
+                                                                new Date(
+                                                                    job.final_date
+                                                                )
+                                                            )
+                                                                ? "Closed on"
+                                                                : "Closing"
+                                                        }: ${format(
+                                                            new Date(
+                                                                job.final_date
+                                                            ),
+                                                            "MMM d, yyyy"
+                                                        )}`}
+                                                        size="small"
+                                                        color="primary"
+                                                        variant="outlined"
+                                                        sx={{
+                                                            padding: "4px 6px",
+                                                        }}
+                                                    />
+                                                </Box>
+
                                                 <Typography
                                                     variant="body2"
                                                     color="text.secondary"
@@ -368,6 +484,11 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
                                                         display: "flex",
                                                         justifyContent:
                                                             "space-between",
+                                                        flexDirection: {
+                                                            xs: "column",
+                                                            sm: "row",
+                                                        },
+                                                        gap: { xs: 1, sm: 0 },
                                                     }}
                                                 >
                                                     <span
@@ -375,6 +496,10 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
                                                             color: !darkmode
                                                                 ? "#333"
                                                                 : "",
+                                                            maxWidth: "100%",
+                                                            overflow: "hidden",
+                                                            textOverflow:
+                                                                "ellipsis",
                                                         }}
                                                     >
                                                         {job.description.substring(
@@ -383,8 +508,15 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
                                                         )}
                                                         ...
                                                     </span>
-                                                    <span>
-                                                        Posted {job.posted}
+                                                    <span
+                                                        style={{
+                                                            flexShrink: 0,
+                                                        }}
+                                                    >
+                                                        Posted{" "}
+                                                        {formatPostedDate(
+                                                            job.uploaded_at
+                                                        )}
                                                     </span>
                                                 </Typography>
                                             </Box>
@@ -455,7 +587,7 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
                         <>
                             <Typography
                                 variant="body2"
-                                sx={{ mb: 3, color: "#333" }}
+                                sx={{ mb: 3, color: darkmode ? "" : "#333" }}
                             >
                                 Please provide details about why you're
                                 reporting this job posting. Our team will review

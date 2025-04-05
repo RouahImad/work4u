@@ -24,7 +24,6 @@ import {
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "../contexts/AuthContext"; // Import auth context
-import { useNotification } from "../components/notifications/SlideInNotifications"; // Import notification hook
 
 interface NavBarProps {
     userRole: string;
@@ -45,7 +44,6 @@ const NavBar = ({
     const navigate = useNavigate();
     const location = useLocation();
     const { logout } = useAuth(); // Get the logout function from auth context
-    const { pushNotification } = useNotification(); // Get notification function
 
     const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorElNav(event.currentTarget);
