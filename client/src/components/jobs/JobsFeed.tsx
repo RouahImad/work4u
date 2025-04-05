@@ -12,12 +12,18 @@ import {
     Theme,
     CardActionArea,
     Chip,
+    Button,
+    Collapse,
+    IconButton,
+    Fade,
 } from "@mui/material";
 import {
     Search,
     LocationOn,
     Business,
     CalendarToday,
+    FilterList,
+    Clear,
 } from "@mui/icons-material";
 import JobDetailView from "./JobDetailView";
 import { useNotification } from "../notifications/SlideInNotifications";
@@ -56,6 +62,10 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
     // Report modal state
     const [reportModalOpen, setReportModalOpen] = useState(false);
     const [currentJobId, setCurrentJobId] = useState<number | null>(null);
+
+    // New states for UI control
+    const [searchVisible, setSearchVisible] = useState(false);
+    const [filtersVisible, setFiltersVisible] = useState(false);
 
     // Fetch jobs from API
     useEffect(() => {
@@ -228,6 +238,39 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
         setCurrentJobId(null);
     };
 
+    const toggleSearch = () => {
+        setSearchVisible(!searchVisible);
+        if (filtersVisible && !searchVisible) {
+            setFiltersVisible(false);
+        }
+        // Clear search when hiding
+        if (searchVisible) {
+            setSearchTerm("");
+        }
+    };
+
+    const toggleFilters = () => {
+        setFiltersVisible(!filtersVisible);
+        if (!filtersVisible && !searchVisible) {
+            setSearchVisible(true);
+        }
+        // Clear filters when hiding
+        if (filtersVisible) {
+            setFilters({
+                location: "",
+                company: "",
+            });
+        }
+    };
+
+    const clearAll = () => {
+        setSearchTerm("");
+        setFilters({
+            location: "",
+            company: "",
+        });
+    };
+
     // Apply filters and search
     const filteredJobs = jobs.filter((job) => {
         // Only show accepted jobs
@@ -257,65 +300,148 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
 
     return (
         <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
-            <Typography variant="h4" component="h1" gutterBottom>
-                Find Your Dream Job
-            </Typography>
+            <Box
+                sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    mb: 3,
+                }}
+            >
+                <Typography variant="h4" component="h1">
+                    Find Your Dream Job
+                </Typography>
 
-            {/* Search bar */}
-            <Box sx={{ mb: 4 }}>
-                <TextField
-                    fullWidth
-                    placeholder="Search for jobs"
-                    variant="outlined"
-                    value={searchTerm}
-                    onChange={handleSearch}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <Search />
-                            </InputAdornment>
-                        ),
-                    }}
-                />
+                <Box sx={{ display: "flex", gap: 1 }}>
+                    <Button
+                        variant={searchVisible ? "contained" : "outlined"}
+                        startIcon={<Search />}
+                        onClick={toggleSearch}
+                        size="small"
+                    >
+                        Search
+                    </Button>
+                    <Button
+                        variant={filtersVisible ? "contained" : "outlined"}
+                        startIcon={<FilterList />}
+                        onClick={toggleFilters}
+                        size="small"
+                        disabled={!searchVisible}
+                    >
+                        Filters
+                    </Button>
+                    {(searchTerm || filters.location || filters.company) && (
+                        <IconButton
+                            size="small"
+                            onClick={clearAll}
+                            color="primary"
+                            sx={{ ml: 1 }}
+                        >
+                            <Clear />
+                        </IconButton>
+                    )}
+                </Box>
             </Box>
 
-            {/* Filters */}
-            <Grid container spacing={2} sx={{ mb: 4 }}>
-                <Grid item xs={12} sm={6}>
-                    <TextField
-                        fullWidth
-                        placeholder="Filter by location"
-                        variant="outlined"
-                        name="location"
-                        value={filters.location}
-                        onChange={handleFilterChange}
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <LocationOn />
-                                </InputAdornment>
-                            ),
-                        }}
-                    />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                    <TextField
-                        fullWidth
-                        placeholder="Filter by company"
-                        variant="outlined"
-                        name="company"
-                        value={filters.company}
-                        onChange={handleFilterChange}
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <Business />
-                                </InputAdornment>
-                            ),
-                        }}
-                    />
-                </Grid>
-            </Grid>
+            {/* Search and filters area */}
+            <Collapse in={searchVisible} sx={{ mb: 4 }}>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                    {/* Search bar */}
+                    <Fade in={searchVisible}>
+                        <TextField
+                            fullWidth
+                            placeholder="Search for jobs"
+                            variant="outlined"
+                            value={searchTerm}
+                            onChange={handleSearch}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <Search />
+                                    </InputAdornment>
+                                ),
+                            }}
+                        />
+                    </Fade>
+
+                    {/* Filters */}
+                    <Collapse in={filtersVisible}>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    fullWidth
+                                    placeholder="Filter by location"
+                                    variant="outlined"
+                                    name="location"
+                                    value={filters.location}
+                                    onChange={handleFilterChange}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <LocationOn />
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    fullWidth
+                                    placeholder="Filter by company"
+                                    variant="outlined"
+                                    name="company"
+                                    value={filters.company}
+                                    onChange={handleFilterChange}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <Business />
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                />
+                            </Grid>
+                        </Grid>
+                    </Collapse>
+                </Box>
+            </Collapse>
+
+            {/* Active filters display */}
+            {(searchTerm || filters.location || filters.company) && (
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2 }}>
+                    {searchTerm && (
+                        <Chip
+                            label={`Search: ${searchTerm}`}
+                            onDelete={() => setSearchTerm("")}
+                            size="small"
+                            color="primary"
+                            variant="outlined"
+                        />
+                    )}
+                    {filters.location && (
+                        <Chip
+                            label={`Location: ${filters.location}`}
+                            onDelete={() =>
+                                setFilters({ ...filters, location: "" })
+                            }
+                            size="small"
+                            color="primary"
+                            variant="outlined"
+                        />
+                    )}
+                    {filters.company && (
+                        <Chip
+                            label={`Company: ${filters.company}`}
+                            onDelete={() =>
+                                setFilters({ ...filters, company: "" })
+                            }
+                            size="small"
+                            color="primary"
+                            variant="outlined"
+                        />
+                    )}
+                </Box>
+            )}
 
             {/* Job listings */}
             {loading ? (
@@ -544,7 +670,6 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
                 />
             )}
 
-            {/* Report Job Dialog */}
             <ReportJobDialog
                 open={reportModalOpen}
                 onClose={handleReportClose}

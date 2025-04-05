@@ -351,7 +351,7 @@ const JobApplication = ({
 
                         <Typography
                             variant="caption"
-                            color="info.main"
+                            color="text.lowGray"
                             sx={{ display: "block", mt: 0.5 }}
                         >
                             Note: For best results, please ensure your resume is

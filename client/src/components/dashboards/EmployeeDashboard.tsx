@@ -122,7 +122,6 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
                     <Paper sx={{ p: 3, display: "flex", alignItems: "center" }}>
                         <Avatar
                             sx={{ width: 80, height: 80, mr: 3 }}
-                            // Generate avatar from initials if no image
                             alt={displayName}
                             src={`https://ui-avatars.com/api/?name=${user?.first_name}+${user?.last_name}&background=random`}
                         >

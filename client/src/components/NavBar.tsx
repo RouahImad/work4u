@@ -58,10 +58,6 @@ const NavBar = ({
             onLogout();
         } else {
             logout();
-
-            setTimeout(() => {
-                navigate("/login");
-            }, 1000);
         }
     };
 

@@ -10,6 +10,9 @@ declare module "@mui/material/styles" {
         xl: true;
         mobile: true;
     }
+    interface TypeText {
+        lowGray: string;
+    }
 }
 import AppRoutes from "./router/AppRoutes";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -56,6 +59,7 @@ const App = () => {
             text: {
                 primary: darkMode ? "#FFFFFF" : "#240046",
                 secondary: darkMode ? "#E0AAFF" : "#7B2CBF",
+                lowGray: "#333",
             },
             success: {
                 main: "#00E676",

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Dialog,
     DialogTitle,
@@ -9,6 +9,7 @@ import {
     Grid,
     CircularProgress,
     IconButton,
+    Alert,
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
 import { useAuth } from "../../contexts/AuthContext";
@@ -29,6 +30,13 @@ const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
         email: user?.email || "",
     });
 
+    // Track the initial form data to detect changes
+    const [initialFormData, setInitialFormData] = useState({
+        first_name: "",
+        last_name: "",
+        email: "",
+    });
+
     const [errors, setErrors] = useState<{
         first_name?: string;
         last_name?: string;
@@ -36,6 +44,20 @@ const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
     }>({});
 
     const [isLoading, setIsLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+    // Update form data when user or open state changes
+    useEffect(() => {
+        if (open && user) {
+            const userData = {
+                first_name: user.first_name || "",
+                last_name: user.last_name || "",
+                email: user.email || "",
+            };
+            setFormData(userData);
+            setInitialFormData(userData);
+        }
+    }, [user, open]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -50,6 +72,11 @@ const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
                 ...errors,
                 [name]: undefined,
             });
+        }
+
+        // Clear error message when user makes changes
+        if (errorMessage) {
+            setErrorMessage(null);
         }
     };
 
@@ -78,12 +105,35 @@ const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
         return Object.keys(newErrors).length === 0;
     };
 
+    // Check if form data has changed
+    const hasFormChanged = () => {
+        return (
+            formData.first_name !== initialFormData.first_name ||
+            formData.last_name !== initialFormData.last_name ||
+            formData.email !== initialFormData.email
+        );
+    };
+
+    // Check if form data is valid
+    const isFormValid = () => {
+        return (
+            !!formData.first_name.trim() ||
+            !!formData.last_name.trim() ||
+            !!formData.email ||
+            /\S+@\S+\.\S+/.test(formData.email)
+        );
+    };
+
+    // Determine if save button should be disabled
+    const isSaveDisabled = !hasFormChanged() || !isFormValid() || isLoading;
+
     const handleSubmit = async () => {
-        if (!validateForm()) {
+        if (!validateForm() || !hasFormChanged()) {
             return;
         }
 
         setIsLoading(true);
+        setErrorMessage(null);
 
         try {
             await updateUserProfile(formData);
@@ -91,19 +141,29 @@ const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
             onClose();
         } catch (error: any) {
             console.error("Failed to update profile:", error);
-            pushNotification(
-                error.response?.data?.detail || "Failed to update profile",
-                "error"
+            setErrorMessage(
+                error.response?.data?.detail || "Failed to update profile"
             );
         } finally {
             setIsLoading(false);
         }
     };
 
+    // Handle dialog close with reset
+    const handleClose = () => {
+        if (!isLoading) {
+            // Reset form and errors on close
+            setFormData(initialFormData);
+            setErrors({});
+            setErrorMessage(null);
+            onClose();
+        }
+    };
+
     return (
         <Dialog
             open={open}
-            onClose={!isLoading ? onClose : undefined}
+            onClose={!isLoading ? handleClose : undefined}
             fullWidth
             maxWidth="sm"
         >
@@ -116,12 +176,18 @@ const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
             >
                 Edit Profile Information
                 {!isLoading && (
-                    <IconButton onClick={onClose} size="small">
+                    <IconButton onClick={handleClose} size="small">
                         <Close />
                     </IconButton>
                 )}
             </DialogTitle>
             <DialogContent>
+                {errorMessage && (
+                    <Alert severity="error" sx={{ mb: 2 }}>
+                        {errorMessage}
+                    </Alert>
+                )}
+
                 <Grid container spacing={2} sx={{ mt: 1 }}>
                     <Grid item xs={12} sm={6}>
                         <TextField
@@ -167,14 +233,14 @@ const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
                 </Grid>
             </DialogContent>
             <DialogActions>
-                <Button onClick={onClose} disabled={isLoading}>
+                <Button onClick={handleClose} disabled={isLoading}>
                     Cancel
                 </Button>
                 <Button
                     onClick={handleSubmit}
                     variant="contained"
                     color="primary"
-                    disabled={isLoading}
+                    disabled={isSaveDisabled}
                     startIcon={
                         isLoading ? (
                             <CircularProgress size={20} color="inherit" />

@@ -213,6 +213,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUserRole("");
 
         pushNotification("You have been logged out successfully", "info");
+
+        setTimeout(() => {
+            window.location.href = "/login";
+        }, 1000);
     };
 
     const updateUserProfile = async (data: {
@@ -265,15 +269,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
             await authApi.deleteAccount(user.id);
 
-            localStorage.removeItem("accessToken");
-            localStorage.removeItem("refreshToken");
-            localStorage.removeItem("userRole");
-            secureStorage.removeItem("userEmail");
-            secureStorage.removeItem("userPassword");
-
-            setUser(null);
-            setIsAuthenticated(false);
-            setUserRole("");
+            logout();
 
             if (!handlesOwnNotifications) {
                 pushNotification(

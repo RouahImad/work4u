@@ -87,6 +87,15 @@ const DeleteAccountDialog = ({ open, onClose }: DeleteAccountDialogProps) => {
                     onChange={handleConfirmChange}
                     placeholder="Type DELETE here"
                     disabled={isLoading}
+                    onPaste={(e) => {
+                        e.preventDefault();
+                    }}
+                    onCopy={(e) => {
+                        e.preventDefault();
+                    }}
+                    onCut={(e) => {
+                        e.preventDefault();
+                    }}
                     sx={{ mt: 2 }}
                 />
             </DialogContent>

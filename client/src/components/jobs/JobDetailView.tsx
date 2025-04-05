@@ -268,7 +268,7 @@ const JobDetailView = ({
                                         variant="body1"
                                         color="text.primary"
                                     >
-                                        ${job.salary} (adjustable)
+                                        ${job.salary} (negotiable)
                                     </Typography>
                                 </Box>
                             )}

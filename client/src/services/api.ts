@@ -3,7 +3,6 @@ import CryptoJS from "crypto-js";
 
 const API_URL = import.meta.env.VITE_APP_API_URL || "http://127.0.0.1:8000";
 const ENCRYPTION_KEY = import.meta.env.VITE_ENCRYPTION_KEY || null;
-console.log("API URL:", API_URL);
 
 // Encryption/decryption functions
 const encryptData = (data: string): string => {
