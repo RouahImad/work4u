@@ -267,7 +267,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (!user) {
                 throw new Error("User not found");
             }
-            await authApi.deleteAccount(user.id);
+            await authApi.deleteAccount();
 
             logout();
 
@@ -282,7 +282,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 err.response?.data?.detail || "Failed to delete account";
             setError(errorMessage);
 
-            // Show error notification (if not handled by the component)
             if (!handlesOwnNotifications) {
                 pushNotification(errorMessage, "error");
             }

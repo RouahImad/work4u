@@ -1,4 +1,4 @@
-import { useState, Fragment } from "react";
+import { useState, Fragment, useEffect } from "react";
 import {
     Box,
     Container,
@@ -16,6 +16,8 @@ import {
     Chip,
     LinearProgress,
     Theme,
+    CircularProgress,
+    Alert,
 } from "@mui/material";
 import {
     Work,
@@ -24,74 +26,24 @@ import {
     TrendingUp,
 } from "@mui/icons-material";
 import { useAuth } from "../../contexts/AuthContext";
+import { useDashboard } from "../../contexts/DashboardContext";
 import ChangePasswordDialog from "../profile/ChangePasswordDialog ";
 import DeleteAccountDialog from "../profile/DeleteAccountDialog ";
 import EditProfileDialog from "../profile/EditProfileDialog ";
+import { format } from "date-fns";
 
-const applications = [
-    {
-        id: 1,
-        company: "TechCorp",
-        position: "Full Stack Developer",
-        status: "Interview",
-        date: "2023-05-15",
-    },
-    {
-        id: 2,
-        company: "DesignHub",
-        position: "UX Designer",
-        status: "Applied",
-        date: "2023-05-10",
-    },
-    {
-        id: 3,
-        company: "CloudSystems",
-        position: "DevOps Engineer",
-        status: "Rejected",
-        date: "2023-05-05",
-    },
-    {
-        id: 4,
-        company: "DataInsights",
-        position: "Data Scientist",
-        status: "Screening",
-        date: "2023-05-01",
-    },
-];
-
-const notifications = [
-    {
-        id: 1,
-        message: "Interview scheduled with TechCorp",
-        time: "2 hours ago",
-        read: false,
-    },
-    {
-        id: 2,
-        message: "New message from recruiter",
-        time: "1 day ago",
-        read: true,
-    },
-    {
-        id: 3,
-        message: "Your resume was viewed by 5 employers",
-        time: "3 days ago",
-        read: true,
-    },
-];
-
-// Status color mapping
 const statusColors: Record<string, string> = {
     Applied: "#3498db",
     Interview: "#f39c12",
     Rejected: "#e74c3c",
-    Screening: "#9b59b6",
-    Hired: "#2ecc71",
+    accepte: "#2ecc71",
 };
 
 const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
     const [activeTab, setActiveTab] = useState("overview");
     const { user } = useAuth();
+    const { employeeStats, loading, error, fetchEmployeeStats } =
+        useDashboard();
 
     // State for dialogs
     const [editProfileOpen, setEditProfileOpen] = useState(false);
@@ -103,6 +55,20 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
 
     // Get user email
     const userEmail = user?.email || "No email available";
+
+    // Fetch dashboard stats when component mounts
+    useEffect(() => {
+        fetchEmployeeStats();
+    }, []);
+
+    // Format date function
+    const formatDate = (dateString: string) => {
+        try {
+            return format(new Date(dateString), "MMM dd, yyyy");
+        } catch (error) {
+            return "Invalid date";
+        }
+    };
 
     // Dialog handlers
     const handleEditProfileOpen = () => setEditProfileOpen(true);
@@ -117,7 +83,6 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
     return (
         <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
             <Grid container spacing={3}>
-                {/* Profile Summary - Updated with real user data */}
                 <Grid item xs={12}>
                     <Paper sx={{ p: 3, display: "flex", alignItems: "center" }}>
                         <Avatar
@@ -211,523 +176,641 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
                     </Box>
                 </Grid>
 
-                {activeTab === "overview" && (
-                    <>
-                        {/* Stats Overview */}
-                        <Grid item xs={12} md={8}>
-                            <Grid container spacing={3}>
-                                {/* Application Stats */}
-                                <Grid item xs={12} sm={6}>
-                                    <Paper
-                                        sx={{
-                                            p: 3,
-                                            display: "flex",
-                                            flexDirection: "column",
-                                            height: "100%",
-                                            transition: "transform 0.3s ease",
-                                            "&:hover": {
-                                                transform: "translateY(-5px)",
-                                            },
-                                        }}
-                                    >
-                                        <Box
-                                            sx={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                mb: 2,
-                                            }}
-                                        >
-                                            <Work
-                                                color="primary"
-                                                sx={{ mr: 1 }}
-                                            />
-                                            <Typography
-                                                variant="h6"
-                                                component="div"
-                                            >
-                                                Application Status
-                                            </Typography>
-                                        </Box>
-                                        <Box sx={{ mb: 2 }}>
-                                            <Box
-                                                sx={{
-                                                    display: "flex",
-                                                    justifyContent:
-                                                        "space-between",
-                                                    mb: 1,
-                                                }}
-                                            >
-                                                <Typography variant="body2">
-                                                    Applied
-                                                </Typography>
-                                                <Typography variant="body2">
-                                                    5
-                                                </Typography>
-                                            </Box>
-                                            <LinearProgress
-                                                variant="determinate"
-                                                value={50}
-                                                sx={{
-                                                    mb: 1,
-                                                    height: 8,
-                                                    borderRadius: 4,
-                                                }}
-                                            />
-                                        </Box>
-                                        <Box sx={{ mb: 2 }}>
-                                            <Box
-                                                sx={{
-                                                    display: "flex",
-                                                    justifyContent:
-                                                        "space-between",
-                                                    mb: 1,
-                                                }}
-                                            >
-                                                <Typography variant="body2">
-                                                    Interviews
-                                                </Typography>
-                                                <Typography variant="body2">
-                                                    2
-                                                </Typography>
-                                            </Box>
-                                            <LinearProgress
-                                                variant="determinate"
-                                                value={20}
-                                                sx={{
-                                                    mb: 1,
-                                                    height: 8,
-                                                    borderRadius: 4,
-                                                }}
-                                                color="secondary"
-                                            />
-                                        </Box>
-                                        <Box>
-                                            <Box
-                                                sx={{
-                                                    display: "flex",
-                                                    justifyContent:
-                                                        "space-between",
-                                                    mb: 1,
-                                                }}
-                                            >
-                                                <Typography variant="body2">
-                                                    Offers
-                                                </Typography>
-                                                <Typography variant="body2">
-                                                    1
-                                                </Typography>
-                                            </Box>
-                                            <LinearProgress
-                                                variant="determinate"
-                                                value={10}
-                                                sx={{
-                                                    height: 8,
-                                                    borderRadius: 4,
-                                                }}
-                                                color="success"
-                                            />
-                                        </Box>
-                                    </Paper>
-                                </Grid>
-
-                                {/* Activity Feed */}
-                                <Grid item xs={12} sm={6}>
-                                    <Paper
-                                        sx={{
-                                            p: 3,
-                                            height: "100%",
-                                            transition: "transform 0.3s ease",
-                                            "&:hover": {
-                                                transform: "translateY(-5px)",
-                                            },
-                                        }}
-                                    >
-                                        <Box
-                                            sx={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                mb: 2,
-                                            }}
-                                        >
-                                            <TrendingUp
-                                                color="primary"
-                                                sx={{ mr: 1 }}
-                                            />
-                                            <Typography
-                                                variant="h6"
-                                                component="div"
-                                            >
-                                                Recent Activity
-                                            </Typography>
-                                        </Box>
-                                        <List sx={{ width: "100%", mt: 1 }}>
-                                            <ListItem>
-                                                <ListItemText
-                                                    primary="Applied to Frontend Developer position"
-                                                    secondary="Today"
-                                                />
-                                            </ListItem>
-                                            <Divider component="li" />
-                                            <ListItem>
-                                                <ListItemText
-                                                    primary="Profile viewed by WebTech"
-                                                    secondary="Yesterday"
-                                                />
-                                            </ListItem>
-                                            <Divider component="li" />
-                                            <ListItem>
-                                                <ListItemText
-                                                    primary="Skills assessment completed"
-                                                    secondary="2 days ago"
-                                                />
-                                            </ListItem>
-                                        </List>
-                                    </Paper>
-                                </Grid>
-                            </Grid>
-                        </Grid>
-
-                        {/* Sidebar */}
-                        <Grid item xs={12} md={4}>
-                            {/* Upcoming Events */}
-                            <Paper
-                                sx={{
-                                    p: 3,
-                                    mb: 3,
-                                    transition: "transform 0.3s ease",
-                                    "&:hover": {
-                                        transform: "translateY(-5px)",
-                                    },
-                                }}
-                            >
-                                <Box
-                                    sx={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        mb: 2,
-                                    }}
-                                >
-                                    <Schedule color="primary" sx={{ mr: 1 }} />
-                                    <Typography variant="h6" component="div">
-                                        Upcoming Events
-                                    </Typography>
-                                </Box>
-                                <List dense sx={{ width: "100%" }}>
-                                    <ListItem>
-                                        <ListItemText
-                                            primary="Interview with TechCorp"
-                                            secondary="Tomorrow, 2:00 PM"
-                                        />
-                                    </ListItem>
-                                    <Divider component="li" />
-                                    <ListItem>
-                                        <ListItemText
-                                            primary="Technical Assessment"
-                                            secondary="May 20, 10:00 AM"
-                                        />
-                                    </ListItem>
-                                    <Divider component="li" />
-                                    <ListItem>
-                                        <ListItemText
-                                            primary="Career Fair"
-                                            secondary="May 25, 9:00 AM"
-                                        />
-                                    </ListItem>
-                                </List>
-                            </Paper>
-
-                            {/* Notifications */}
-                            <Paper
-                                sx={{
-                                    p: 3,
-                                    transition: "transform 0.3s ease",
-                                    "&:hover": {
-                                        transform: "translateY(-5px)",
-                                    },
-                                }}
-                            >
-                                <Box
-                                    sx={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "space-between",
-                                        mb: 2,
-                                    }}
-                                >
-                                    <Box
-                                        sx={{
-                                            display: "flex",
-                                            alignItems: "center",
-                                        }}
-                                    >
-                                        <NotificationsActive
-                                            color="primary"
-                                            sx={{ mr: 1 }}
-                                        />
-                                        <Typography
-                                            variant="h6"
-                                            component="div"
-                                        >
-                                            Notifications
-                                        </Typography>
-                                    </Box>
-                                    <Button size="small">
-                                        Mark all as read
-                                    </Button>
-                                </Box>
-                                <List dense sx={{ width: "100%" }}>
-                                    {notifications.map((notification) => (
-                                        <Fragment key={notification.id}>
-                                            <ListItem
-                                                sx={{
-                                                    bgcolor: notification.read
-                                                        ? "transparent"
-                                                        : "action.hover",
-                                                    borderRadius: 1,
-                                                }}
-                                            >
-                                                <ListItemText
-                                                    primary={
-                                                        notification.message
-                                                    }
-                                                    secondary={
-                                                        notification.time
-                                                    }
-                                                />
-                                            </ListItem>
-                                            <Divider component="li" />
-                                        </Fragment>
-                                    ))}
-                                </List>
-                            </Paper>
-                        </Grid>
-                    </>
-                )}
-
-                {activeTab === "applications" && (
+                {/* Show loading indicator or error if applicable */}
+                {loading ? (
                     <Grid item xs={12}>
-                        <Paper sx={{ p: 3 }}>
-                            <Typography
-                                variant="h6"
-                                component="h2"
-                                gutterBottom
-                            >
-                                Your Job Applications
-                            </Typography>
-                            <Box sx={{ width: "100%", overflow: "auto" }}>
-                                <Grid container spacing={2}>
-                                    {applications.map((application) => (
-                                        <Grid item xs={12} key={application.id}>
-                                            <Card variant="outlined">
-                                                <CardContent>
+                        <Box
+                            sx={{
+                                display: "flex",
+                                justifyContent: "center",
+                                p: 4,
+                            }}
+                        >
+                            <CircularProgress />
+                        </Box>
+                    </Grid>
+                ) : error ? (
+                    <Grid item xs={12}>
+                        <Alert severity="error">{error}</Alert>
+                    </Grid>
+                ) : (
+                    <>
+                        {activeTab === "overview" && (
+                            <>
+                                {/* Stats Overview */}
+                                <Grid item xs={12} md={8}>
+                                    <Grid container spacing={3}>
+                                        {/* Application Stats */}
+                                        <Grid item xs={12} sm={6}>
+                                            <Paper
+                                                sx={{
+                                                    p: 3,
+                                                    display: "flex",
+                                                    flexDirection: "column",
+                                                    height: "100%",
+                                                    transition:
+                                                        "transform 0.3s ease",
+                                                    "&:hover": {
+                                                        transform:
+                                                            "translateY(-5px)",
+                                                    },
+                                                }}
+                                            >
+                                                <Box
+                                                    sx={{
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        mb: 2,
+                                                    }}
+                                                >
+                                                    <Work
+                                                        color="primary"
+                                                        sx={{ mr: 1 }}
+                                                    />
+                                                    <Typography
+                                                        variant="h6"
+                                                        component="div"
+                                                    >
+                                                        Application Status
+                                                    </Typography>
+                                                </Box>
+                                                <Box sx={{ mb: 2 }}>
                                                     <Box
                                                         sx={{
                                                             display: "flex",
                                                             justifyContent:
                                                                 "space-between",
-                                                            alignItems:
-                                                                "flex-start",
+                                                            mb: 1,
                                                         }}
                                                     >
-                                                        <Box>
-                                                            <Typography
-                                                                variant="h6"
-                                                                component="div"
-                                                                sx={{ mb: 1 }}
-                                                            >
-                                                                {
-                                                                    application.position
-                                                                }
-                                                            </Typography>
-                                                            <Typography
-                                                                variant="body2"
-                                                                color="text.secondary"
-                                                                gutterBottom
-                                                            >
-                                                                {
-                                                                    application.company
-                                                                }
-                                                            </Typography>
-                                                            <Typography
-                                                                variant="caption"
-                                                                display="block"
-                                                                gutterBottom
-                                                            >
-                                                                Applied on{" "}
-                                                                {
-                                                                    application.date
-                                                                }
-                                                            </Typography>
-                                                        </Box>
-                                                        <Chip
-                                                            label={
-                                                                application.status
-                                                            }
-                                                            sx={{
-                                                                bgcolor:
-                                                                    statusColors[
-                                                                        application.status as keyof typeof statusColors
-                                                                    ],
-                                                                color: "white",
-                                                            }}
-                                                        />
+                                                        <Typography variant="body2">
+                                                            Applications
+                                                        </Typography>
+                                                        <Typography variant="body2">
+                                                            {employeeStats
+                                                                ?.applications
+                                                                ?.length || 0}
+                                                        </Typography>
                                                     </Box>
+                                                    <LinearProgress
+                                                        variant="determinate"
+                                                        value={100}
+                                                        sx={{
+                                                            mb: 1,
+                                                            height: 8,
+                                                            borderRadius: 4,
+                                                        }}
+                                                    />
+                                                </Box>
+                                                <Box sx={{ mb: 2 }}>
                                                     <Box
                                                         sx={{
                                                             display: "flex",
                                                             justifyContent:
-                                                                "flex-end",
-                                                            mt: 2,
+                                                                "space-between",
+                                                            mb: 1,
                                                         }}
                                                     >
-                                                        <Button
-                                                            size="small"
-                                                            variant="text"
-                                                            sx={{ mr: 1 }}
+                                                        <Typography variant="body2">
+                                                            Interviews
+                                                        </Typography>
+                                                        <Typography variant="body2">
+                                                            {employeeStats
+                                                                ?.interview_history
+                                                                ?.length || 0}
+                                                        </Typography>
+                                                    </Box>
+                                                    <LinearProgress
+                                                        variant="determinate"
+                                                        value={
+                                                            employeeStats
+                                                                ?.interview_history
+                                                                ?.length
+                                                                ? (employeeStats
+                                                                      .interview_history
+                                                                      .length /
+                                                                      Math.max(
+                                                                          1,
+                                                                          employeeStats
+                                                                              .applications
+                                                                              .length
+                                                                      )) *
+                                                                  100
+                                                                : 0
+                                                        }
+                                                        sx={{
+                                                            mb: 1,
+                                                            height: 8,
+                                                            borderRadius: 4,
+                                                        }}
+                                                        color="secondary"
+                                                    />
+                                                </Box>
+                                                <Box>
+                                                    <Box
+                                                        sx={{
+                                                            display: "flex",
+                                                            justifyContent:
+                                                                "space-between",
+                                                            mb: 1,
+                                                        }}
+                                                    >
+                                                        <Typography variant="body2">
+                                                            Average Score
+                                                        </Typography>
+                                                        <Typography variant="body2">
+                                                            {employeeStats?.average_score?.toFixed(
+                                                                1
+                                                            ) || 0}
+                                                            %
+                                                        </Typography>
+                                                    </Box>
+                                                    <LinearProgress
+                                                        variant="determinate"
+                                                        value={
+                                                            employeeStats?.average_score ||
+                                                            0
+                                                        }
+                                                        sx={{
+                                                            height: 8,
+                                                            borderRadius: 4,
+                                                        }}
+                                                        color="success"
+                                                    />
+                                                </Box>
+                                            </Paper>
+                                        </Grid>
+
+                                        {/* Activity Feed */}
+                                        <Grid item xs={12} sm={6}>
+                                            <Paper
+                                                sx={{
+                                                    p: 3,
+                                                    height: "100%",
+                                                    transition:
+                                                        "transform 0.3s ease",
+                                                    "&:hover": {
+                                                        transform:
+                                                            "translateY(-5px)",
+                                                    },
+                                                }}
+                                            >
+                                                <Box
+                                                    sx={{
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        mb: 2,
+                                                    }}
+                                                >
+                                                    <TrendingUp
+                                                        color="primary"
+                                                        sx={{ mr: 1 }}
+                                                    />
+                                                    <Typography
+                                                        variant="h6"
+                                                        component="div"
+                                                    >
+                                                        Recent Activity
+                                                    </Typography>
+                                                </Box>
+                                                <List
+                                                    sx={{
+                                                        width: "100%",
+                                                        mt: 1,
+                                                    }}
+                                                >
+                                                    {employeeStats
+                                                        ?.interview_history
+                                                        ?.length ? (
+                                                        employeeStats.interview_history
+                                                            .slice(0, 3)
+                                                            .map(
+                                                                (interview) => (
+                                                                    <Fragment
+                                                                        key={
+                                                                            interview.id
+                                                                        }
+                                                                    >
+                                                                        <ListItem>
+                                                                            <ListItemText
+                                                                                primary={`Interviewed for ${interview.post_title}`}
+                                                                                secondary={formatDate(
+                                                                                    interview.response_date
+                                                                                )}
+                                                                            />
+                                                                        </ListItem>
+                                                                        <Divider component="li" />
+                                                                    </Fragment>
+                                                                )
+                                                            )
+                                                    ) : (
+                                                        <ListItem>
+                                                            <ListItemText
+                                                                primary="No recent activity"
+                                                                secondary="Your activities will appear here"
+                                                            />
+                                                        </ListItem>
+                                                    )}
+                                                </List>
+                                            </Paper>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+
+                                {/* Sidebar */}
+                                <Grid item xs={12} md={4}>
+                                    {/* Upcoming Events */}
+                                    <Paper
+                                        sx={{
+                                            p: 3,
+                                            mb: 3,
+                                            transition: "transform 0.3s ease",
+                                            "&:hover": {
+                                                transform: "translateY(-5px)",
+                                            },
+                                        }}
+                                    >
+                                        <Box
+                                            sx={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                mb: 2,
+                                            }}
+                                        >
+                                            <Schedule
+                                                color="primary"
+                                                sx={{ mr: 1 }}
+                                            />
+                                            <Typography
+                                                variant="h6"
+                                                component="div"
+                                            >
+                                                Upcoming Events
+                                            </Typography>
+                                        </Box>
+                                        <List dense sx={{ width: "100%" }}>
+                                            {employeeStats?.applications
+                                                ?.filter(
+                                                    (app) =>
+                                                        app.status !== "accepte"
+                                                )
+                                                ?.slice(0, 3)
+                                                .map((app, index) => (
+                                                    <Fragment key={index}>
+                                                        <ListItem>
+                                                            <ListItemText
+                                                                primary={`Interview for ${app.post_title}`}
+                                                                secondary={`Application: ${formatDate(
+                                                                    app.application_date
+                                                                )}`}
+                                                            />
+                                                        </ListItem>
+                                                        <Divider component="li" />
+                                                    </Fragment>
+                                                )) || (
+                                                <ListItem>
+                                                    <ListItemText
+                                                        primary="No upcoming events"
+                                                        secondary="Events will appear here when scheduled"
+                                                    />
+                                                </ListItem>
+                                            )}
+                                        </List>
+                                    </Paper>
+
+                                    {/* Recent Scores */}
+                                    <Paper
+                                        sx={{
+                                            p: 3,
+                                            transition: "transform 0.3s ease",
+                                            "&:hover": {
+                                                transform: "translateY(-5px)",
+                                            },
+                                        }}
+                                    >
+                                        <Box
+                                            sx={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "space-between",
+                                                mb: 2,
+                                            }}
+                                        >
+                                            <Box
+                                                sx={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                }}
+                                            >
+                                                <NotificationsActive
+                                                    color="primary"
+                                                    sx={{ mr: 1 }}
+                                                />
+                                                <Typography
+                                                    variant="h6"
+                                                    component="div"
+                                                >
+                                                    Interview Scores
+                                                </Typography>
+                                            </Box>
+                                        </Box>
+                                        <List dense sx={{ width: "100%" }}>
+                                            {employeeStats?.interview_history
+                                                ?.length ? (
+                                                employeeStats.interview_history.map(
+                                                    (interview) => (
+                                                        <Fragment
+                                                            key={interview.id}
                                                         >
-                                                            View Details
+                                                            <ListItem>
+                                                                <ListItemText
+                                                                    primary={`${
+                                                                        interview.post_title
+                                                                    }: ${interview.score.toFixed(
+                                                                        1
+                                                                    )}%`}
+                                                                    secondary={`Question: ${interview.question.substring(
+                                                                        0,
+                                                                        30
+                                                                    )}...`}
+                                                                />
+                                                            </ListItem>
+                                                            <Divider component="li" />
+                                                        </Fragment>
+                                                    )
+                                                )
+                                            ) : (
+                                                <ListItem>
+                                                    <ListItemText
+                                                        primary="No interview scores yet"
+                                                        secondary="Complete interviews to see your scores"
+                                                    />
+                                                </ListItem>
+                                            )}
+                                        </List>
+                                    </Paper>
+                                </Grid>
+                            </>
+                        )}
+
+                        {activeTab === "applications" && (
+                            <Grid item xs={12}>
+                                <Paper sx={{ p: 3 }}>
+                                    <Typography
+                                        variant="h6"
+                                        component="h2"
+                                        gutterBottom
+                                    >
+                                        Your Job Applications
+                                    </Typography>
+                                    {employeeStats?.applications?.length ? (
+                                        <Box
+                                            sx={{
+                                                width: "100%",
+                                                overflow: "auto",
+                                            }}
+                                        >
+                                            <Grid container spacing={2}>
+                                                {employeeStats.applications.map(
+                                                    (application, index) => (
+                                                        <Grid
+                                                            item
+                                                            xs={12}
+                                                            key={index}
+                                                        >
+                                                            <Card variant="outlined">
+                                                                <CardContent>
+                                                                    <Box
+                                                                        sx={{
+                                                                            display:
+                                                                                "flex",
+                                                                            justifyContent:
+                                                                                "space-between",
+                                                                            alignItems:
+                                                                                "flex-start",
+                                                                        }}
+                                                                    >
+                                                                        <Box>
+                                                                            <Typography
+                                                                                variant="h6"
+                                                                                component="div"
+                                                                                sx={{
+                                                                                    mb: 1,
+                                                                                }}
+                                                                            >
+                                                                                {
+                                                                                    application.post_title
+                                                                                }
+                                                                            </Typography>
+                                                                            <Typography
+                                                                                variant="caption"
+                                                                                display="block"
+                                                                                gutterBottom
+                                                                            >
+                                                                                Applied
+                                                                                on{" "}
+                                                                                {formatDate(
+                                                                                    application.application_date
+                                                                                )}
+                                                                            </Typography>
+                                                                        </Box>
+                                                                        <Chip
+                                                                            label={
+                                                                                application.status ===
+                                                                                "accepte"
+                                                                                    ? "Accepted"
+                                                                                    : "Pending"
+                                                                            }
+                                                                            sx={{
+                                                                                bgcolor:
+                                                                                    statusColors[
+                                                                                        application
+                                                                                            .status
+                                                                                    ] ||
+                                                                                    statusColors.Applied,
+                                                                                color: "white",
+                                                                            }}
+                                                                        />
+                                                                    </Box>
+                                                                    <Box
+                                                                        sx={{
+                                                                            display:
+                                                                                "flex",
+                                                                            justifyContent:
+                                                                                "flex-end",
+                                                                            mt: 2,
+                                                                        }}
+                                                                    >
+                                                                        <Button
+                                                                            size="small"
+                                                                            variant="text"
+                                                                            sx={{
+                                                                                mr: 1,
+                                                                            }}
+                                                                        >
+                                                                            View
+                                                                            Details
+                                                                        </Button>
+                                                                        <Button
+                                                                            size="small"
+                                                                            variant="contained"
+                                                                        >
+                                                                            {application.status ===
+                                                                            "accepte"
+                                                                                ? "Contact Employer"
+                                                                                : "Follow Up"}
+                                                                        </Button>
+                                                                    </Box>
+                                                                </CardContent>
+                                                            </Card>
+                                                        </Grid>
+                                                    )
+                                                )}
+                                            </Grid>
+                                        </Box>
+                                    ) : (
+                                        <Typography
+                                            variant="body1"
+                                            align="center"
+                                            sx={{ my: 4 }}
+                                        >
+                                            You haven't applied to any jobs yet.
+                                        </Typography>
+                                    )}
+                                </Paper>
+                            </Grid>
+                        )}
+
+                        {/* Profile tab remains unchanged */}
+                        {activeTab === "profile" && (
+                            <Grid item xs={12}>
+                                <Paper sx={{ p: 3 }}>
+                                    <Typography
+                                        variant="h6"
+                                        component="h2"
+                                        gutterBottom
+                                    >
+                                        Your Profile
+                                    </Typography>
+                                    <Grid container spacing={3}>
+                                        <Grid item xs={12} md={6}>
+                                            <Card sx={{ mb: 3 }}>
+                                                <CardContent>
+                                                    <Typography
+                                                        variant="h6"
+                                                        gutterBottom
+                                                        component="div"
+                                                    >
+                                                        Personal Information
+                                                    </Typography>
+                                                    <Box sx={{ mb: 2 }}>
+                                                        <Typography
+                                                            variant="body2"
+                                                            color="text.secondary"
+                                                        >
+                                                            Name
+                                                        </Typography>
+                                                        <Typography variant="body1">
+                                                            {displayName}
+                                                        </Typography>
+                                                    </Box>
+                                                    {user?.username && (
+                                                        <Box sx={{ mb: 2 }}>
+                                                            <Typography
+                                                                variant="body2"
+                                                                color="text.secondary"
+                                                            >
+                                                                Username
+                                                            </Typography>
+                                                            <Typography variant="body1">
+                                                                {user.username}
+                                                            </Typography>
+                                                        </Box>
+                                                    )}
+                                                    <Box sx={{ mb: 2 }}>
+                                                        <Typography
+                                                            variant="body2"
+                                                            color="text.secondary"
+                                                        >
+                                                            Email
+                                                        </Typography>
+                                                        <Typography variant="body1">
+                                                            {userEmail}
+                                                        </Typography>
+                                                    </Box>
+                                                    <Box sx={{ mb: 2 }}>
+                                                        <Typography
+                                                            variant="body2"
+                                                            color="text.secondary"
+                                                        >
+                                                            Role
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="body1"
+                                                            sx={{
+                                                                textTransform:
+                                                                    "capitalize",
+                                                            }}
+                                                        >
+                                                            {user?.role ||
+                                                                "Employee"}
+                                                        </Typography>
+                                                    </Box>
+                                                    <Button
+                                                        variant="outlined"
+                                                        size="small"
+                                                        sx={{ mt: 2 }}
+                                                        onClick={
+                                                            handleEditProfileOpen
+                                                        }
+                                                    >
+                                                        Edit Information
+                                                    </Button>
+                                                </CardContent>
+                                            </Card>
+                                        </Grid>
+
+                                        {/* Account settings card */}
+                                        <Grid item xs={12} md={6}>
+                                            <Card>
+                                                <CardContent>
+                                                    <Typography
+                                                        variant="h6"
+                                                        gutterBottom
+                                                        component="div"
+                                                    >
+                                                        Account Settings
+                                                    </Typography>
+                                                    <Box sx={{ mb: 2 }}>
+                                                        <Button
+                                                            variant="outlined"
+                                                            size="small"
+                                                            sx={{ mr: 1 }}
+                                                            onClick={
+                                                                handleChangePasswordOpen
+                                                            }
+                                                        >
+                                                            Change Password
                                                         </Button>
                                                         <Button
+                                                            variant="outlined"
                                                             size="small"
-                                                            variant="contained"
+                                                            color="error"
+                                                            onClick={
+                                                                handleDeleteAccountOpen
+                                                            }
                                                         >
-                                                            Follow Up
+                                                            Delete Account
                                                         </Button>
                                                     </Box>
                                                 </CardContent>
                                             </Card>
                                         </Grid>
-                                    ))}
-                                </Grid>
-                            </Box>
-                        </Paper>
-                    </Grid>
-                )}
-
-                {activeTab === "profile" && (
-                    <Grid item xs={12}>
-                        <Paper sx={{ p: 3 }}>
-                            <Typography
-                                variant="h6"
-                                component="h2"
-                                gutterBottom
-                            >
-                                Your Profile
-                            </Typography>
-                            <Grid container spacing={3}>
-                                <Grid item xs={12} md={6}>
-                                    <Card sx={{ mb: 3 }}>
-                                        <CardContent>
-                                            <Typography
-                                                variant="h6"
-                                                gutterBottom
-                                                component="div"
-                                            >
-                                                Personal Information
-                                            </Typography>
-                                            <Box sx={{ mb: 2 }}>
-                                                <Typography
-                                                    variant="body2"
-                                                    color="text.secondary"
-                                                >
-                                                    Name
-                                                </Typography>
-                                                <Typography variant="body1">
-                                                    {displayName}
-                                                </Typography>
-                                            </Box>
-                                            {user?.username && (
-                                                <Box sx={{ mb: 2 }}>
-                                                    <Typography
-                                                        variant="body2"
-                                                        color="text.secondary"
-                                                    >
-                                                        Username
-                                                    </Typography>
-                                                    <Typography variant="body1">
-                                                        {user.username}
-                                                    </Typography>
-                                                </Box>
-                                            )}
-                                            <Box sx={{ mb: 2 }}>
-                                                <Typography
-                                                    variant="body2"
-                                                    color="text.secondary"
-                                                >
-                                                    Email
-                                                </Typography>
-                                                <Typography variant="body1">
-                                                    {userEmail}
-                                                </Typography>
-                                            </Box>
-                                            <Box sx={{ mb: 2 }}>
-                                                <Typography
-                                                    variant="body2"
-                                                    color="text.secondary"
-                                                >
-                                                    Role
-                                                </Typography>
-                                                <Typography
-                                                    variant="body1"
-                                                    sx={{
-                                                        textTransform:
-                                                            "capitalize",
-                                                    }}
-                                                >
-                                                    {user?.role || "Employee"}
-                                                </Typography>
-                                            </Box>
-                                            <Button
-                                                variant="outlined"
-                                                size="small"
-                                                sx={{ mt: 2 }}
-                                                onClick={handleEditProfileOpen}
-                                            >
-                                                Edit Information
-                                            </Button>
-                                        </CardContent>
-                                    </Card>
-                                </Grid>
-
-                                {/* Account settings card */}
-                                <Grid item xs={12} md={6}>
-                                    <Card>
-                                        <CardContent>
-                                            <Typography
-                                                variant="h6"
-                                                gutterBottom
-                                                component="div"
-                                            >
-                                                Account Settings
-                                            </Typography>
-                                            <Box sx={{ mb: 2 }}>
-                                                <Button
-                                                    variant="outlined"
-                                                    size="small"
-                                                    sx={{ mr: 1 }}
-                                                    onClick={
-                                                        handleChangePasswordOpen
-                                                    }
-                                                >
-                                                    Change Password
-                                                </Button>
-                                                <Button
-                                                    variant="outlined"
-                                                    size="small"
-                                                    color="error"
-                                                    onClick={
-                                                        handleDeleteAccountOpen
-                                                    }
-                                                >
-                                                    Delete Account
-                                                </Button>
-                                            </Box>
-                                        </CardContent>
-                                    </Card>
-                                </Grid>
+                                    </Grid>
+                                </Paper>
                             </Grid>
-                        </Paper>
-                    </Grid>
+                        )}
+                    </>
                 )}
             </Grid>
 

@@ -19,6 +19,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import NotificationProvider from "./components/notifications/SlideInNotifications";
 import { JobPostProvider } from "./contexts/JobPostContext";
 import { CVInterviewProvider } from "./contexts/CVInterviewContext";
+import { DashboardProvider } from "./contexts/DashboardContext";
 
 const isDarkMode = localStorage.getItem("darkMode") === "true" ? true : false;
 
@@ -117,15 +118,17 @@ const App = () => {
 
             <NotificationProvider>
                 <AuthProvider>
-                    <JobPostProvider>
-                        <CVInterviewProvider>
-                            <AppRoutes
-                                theme={theme}
-                                darkMode={darkMode}
-                                setDarkMode={setDarkMode}
-                            />
-                        </CVInterviewProvider>
-                    </JobPostProvider>
+                    <DashboardProvider>
+                        <JobPostProvider>
+                            <CVInterviewProvider>
+                                <AppRoutes
+                                    theme={theme}
+                                    darkMode={darkMode}
+                                    setDarkMode={setDarkMode}
+                                />
+                            </CVInterviewProvider>
+                        </JobPostProvider>
+                    </DashboardProvider>
                 </AuthProvider>
             </NotificationProvider>
         </ThemeProvider>

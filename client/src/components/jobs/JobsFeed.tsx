@@ -52,6 +52,7 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
     const [filters, setFilters] = useState({
         location: "",
         company: "",
+        salary: "",
     });
     const { pushNotification } = useNotification();
 
@@ -259,6 +260,7 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
             setFilters({
                 location: "",
                 company: "",
+                salary: "", // Clear salary too
             });
         }
     };
@@ -268,6 +270,7 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
         setFilters({
             location: "",
             company: "",
+            salary: "", // Clear salary too
         });
     };
 
@@ -295,7 +298,15 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
                   .includes(filters.company.toLowerCase()) ?? false
             : true;
 
-        return matchesSearch && matchesLocation && matchesCompany;
+        const matchesSalary = filters.salary
+            ? job.salary &&
+              parseFloat(job.salary.replace(/,/g, "")) >=
+                  parseFloat(filters.salary)
+            : true;
+
+        return (
+            matchesSearch && matchesLocation && matchesCompany && matchesSalary
+        );
     });
 
     return (
@@ -367,7 +378,7 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
                     {/* Filters */}
                     <Collapse in={filtersVisible}>
                         <Grid container spacing={2}>
-                            <Grid item xs={12} sm={6}>
+                            <Grid item xs={12} sm={4}>
                                 <TextField
                                     fullWidth
                                     placeholder="Filter by location"
@@ -384,7 +395,7 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
                                     }}
                                 />
                             </Grid>
-                            <Grid item xs={12} sm={6}>
+                            <Grid item xs={12} sm={4}>
                                 <TextField
                                     fullWidth
                                     placeholder="Filter by company"
@@ -401,13 +412,41 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
                                     }}
                                 />
                             </Grid>
+                            <Grid item xs={12} sm={4}>
+                                <TextField
+                                    fullWidth
+                                    placeholder="Minimum salary"
+                                    variant="outlined"
+                                    name="salary"
+                                    type="number"
+                                    value={filters.salary}
+                                    onChange={handleFilterChange}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <span
+                                                    style={{
+                                                        fontSize: "1.25rem",
+                                                        color: "rgba(0, 0, 0, 0.54)",
+                                                    }}
+                                                >
+                                                    $
+                                                </span>
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                />
+                            </Grid>
                         </Grid>
                     </Collapse>
                 </Box>
             </Collapse>
 
             {/* Active filters display */}
-            {(searchTerm || filters.location || filters.company) && (
+            {(searchTerm ||
+                filters.location ||
+                filters.company ||
+                filters.salary) && (
                 <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2 }}>
                     {searchTerm && (
                         <Chip
@@ -434,6 +473,17 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
                             label={`Company: ${filters.company}`}
                             onDelete={() =>
                                 setFilters({ ...filters, company: "" })
+                            }
+                            size="small"
+                            color="primary"
+                            variant="outlined"
+                        />
+                    )}
+                    {filters.salary && (
+                        <Chip
+                            label={`Min Salary: $${filters.salary}`}
+                            onDelete={() =>
+                                setFilters({ ...filters, salary: "" })
                             }
                             size="small"
                             color="primary"
@@ -530,7 +580,7 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
                                                         size="small"
                                                         variant="outlined"
                                                         sx={{
-                                                            padding: "4px 6px",
+                                                            padding: "13px 6px",
                                                             color: isAfter(
                                                                 new Date(),
                                                                 new Date(

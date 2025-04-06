@@ -166,8 +166,13 @@ export const authApi = {
         company_website?: string;
     }) => apiClient.put("/api/update-user/", userData),
 
-    deleteAccount: (id: number) =>
-        apiClient.delete("/api/delete-account/" + id + "/"),
+    deleteAccount: () => apiClient.delete("/api/users/delete/"),
+
+    // For admins to delete other users
+    deleteUserAsAdmin: (userId: number) =>
+        apiClient.delete("/api/users/delete/", {
+            data: { user_id: userId },
+        }),
 };
 
 // Post management services
@@ -227,4 +232,9 @@ export const cvInterviewApi = {
             post_id: postId,
             candidate_answers: candidateAnswers,
         }),
+};
+
+// Dashboard statistics services
+export const dashboardApi = {
+    getRoleBasedStats: () => apiClient.get("/api/dashboard-stats/"),
 };
