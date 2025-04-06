@@ -193,6 +193,9 @@ export const postApi = {
     ) => apiClient.put(`/post/update/${id}/`, postData),
 
     deletePost: (id: number) => apiClient.delete(`/post/delete/${id}/`),
+
+    reportPost: (reportData: { post_id: number; description: string }) =>
+        apiClient.post("/post/report/", reportData),
 };
 
 // CV and interview services

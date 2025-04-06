@@ -22,6 +22,10 @@ interface JobPostContextType {
     createJob: (jobData: Omit<JobPost, "id">) => Promise<void>;
     updateJob: (id: number, jobData: Partial<JobPost>) => Promise<void>;
     deleteJob: (id: number) => Promise<void>;
+    reportJob: (reportData: {
+        post_id: number;
+        description: string;
+    }) => Promise<void>;
 }
 
 const JobPostContext = createContext<JobPostContextType | undefined>(undefined);
@@ -129,6 +133,31 @@ export const JobPostProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    const reportJob = async (reportData: {
+        post_id: number;
+        description: string;
+    }) => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            await postApi.reportPost(reportData);
+
+            pushNotification(
+                "Your report has been submitted successfully.",
+                "success"
+            );
+        } catch (err: any) {
+            const errorMessage =
+                err.response?.data?.detail || "Failed to report job";
+            setError(errorMessage);
+            pushNotification(errorMessage, "error");
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <JobPostContext.Provider
             value={{
@@ -141,6 +170,7 @@ export const JobPostProvider = ({ children }: { children: ReactNode }) => {
                 createJob,
                 updateJob,
                 deleteJob,
+                reportJob,
             }}
         >
             {children}

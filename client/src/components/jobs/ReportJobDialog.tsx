@@ -12,8 +12,8 @@ import {
     IconButton,
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
-import axios from "axios";
 import { useNotification } from "../notifications/SlideInNotifications";
+import { useJobPost } from "../../contexts/JobPostContext";
 
 interface ReportJobDialogProps {
     open: boolean;
@@ -28,11 +28,11 @@ const ReportJobDialog = ({
     jobId,
     darkmode,
 }: ReportJobDialogProps) => {
-    const [reportReason, setReportReason] = useState("");
     const [reportDescription, setReportDescription] = useState("");
     const [reportSubmitting, setReportSubmitting] = useState(false);
     const [reportSuccess, setReportSuccess] = useState(false);
 
+    const { reportJob } = useJobPost();
     const { pushNotification } = useNotification();
 
     const handleReportDescriptionChange = (
@@ -44,26 +44,28 @@ const ReportJobDialog = ({
     const handleReportSubmit = async () => {
         if (!jobId) return;
 
+        if (!reportDescription.trim()) {
+            pushNotification(
+                "Please provide details about the issue",
+                "warning"
+            );
+            return;
+        }
+
         setReportSubmitting(true);
 
         try {
-            // Replace with your actual API endpoint
-            await axios.post("/api/jobs/report", {
-                jobId: jobId,
-                reason: reportReason,
+            // Updated API endpoint
+            await reportJob({
+                post_id: jobId,
                 description: reportDescription,
             });
 
             setReportSuccess(true);
-            pushNotification(
-                "Your report has been submitted successfully.",
-                "success"
-            );
 
-            // Close dialog after showing success for a moment
             setTimeout(() => {
                 handleClose();
-            }, 2200);
+            }, 1200);
         } catch (error) {
             console.error("Failed to submit report:", error);
             pushNotification(
@@ -79,7 +81,6 @@ const ReportJobDialog = ({
         // Only allow closing if not submitting
         if (!reportSubmitting) {
             // Reset the form state when closing
-            setReportReason("");
             setReportDescription("");
             setReportSuccess(false);
             onClose();
@@ -148,7 +149,7 @@ const ReportJobDialog = ({
                         onClick={handleReportSubmit}
                         variant="contained"
                         color="primary"
-                        disabled={!reportReason || reportSubmitting}
+                        disabled={reportSubmitting}
                         startIcon={
                             reportSubmitting ? (
                                 <CircularProgress size={20} color="inherit" />

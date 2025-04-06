@@ -684,69 +684,169 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
                         {/* Profile tab remains unchanged */}
                         {activeTab === "profile" && (
                             <Grid item xs={12}>
-                                <Paper sx={{ p: 3 }}>
-                                    <Typography
-                                        variant="h6"
-                                        component="h2"
-                                        gutterBottom
+                                <Paper
+                                    sx={{
+                                        p: 0,
+                                        overflow: "hidden",
+                                        borderRadius: 2,
+                                        boxShadow:
+                                            "0 4px 12px rgba(0,0,0,0.05)",
+                                    }}
+                                >
+                                    {/* Profile Header */}
+                                    <Box
+                                        sx={{
+                                            p: 4,
+                                            bgcolor: "primary.main",
+                                            color: "white",
+                                            backgroundImage:
+                                                "linear-gradient(45deg, #3f51b5 30%, #2196f3 90%)",
+                                        }}
                                     >
-                                        Your Profile
-                                    </Typography>
-                                    <Grid container spacing={3}>
-                                        <Grid item xs={12} md={6}>
-                                            <Card sx={{ mb: 3 }}>
-                                                <CardContent>
-                                                    <Typography
-                                                        variant="h6"
-                                                        gutterBottom
-                                                        component="div"
+                                        <Typography
+                                            variant="h5"
+                                            fontWeight="500"
+                                            gutterBottom
+                                        >
+                                            Your Profile
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            Manage your personal information and
+                                            account settings
+                                        </Typography>
+                                    </Box>
+
+                                    {/* Profile Content */}
+                                    <Box sx={{ p: 3 }}>
+                                        <Grid container spacing={3}>
+                                            <Grid item xs={12} md={6}>
+                                                <Card
+                                                    elevation={0}
+                                                    sx={{
+                                                        height: "100%",
+                                                        p: 2,
+                                                        border: 1,
+                                                        borderColor: "divider",
+                                                        borderRadius: 2,
+                                                        transition:
+                                                            "all 0.2s ease",
+                                                        "&:hover": {
+                                                            boxShadow:
+                                                                "0 4px 8px rgba(0,0,0,0.1)",
+                                                        },
+                                                    }}
+                                                >
+                                                    <Box
+                                                        sx={{
+                                                            display: "flex",
+                                                            alignItems:
+                                                                "center",
+                                                            mb: 3,
+                                                            pb: 2,
+                                                            borderBottom: 1,
+                                                            borderColor:
+                                                                "divider",
+                                                        }}
                                                     >
-                                                        Personal Information
-                                                    </Typography>
-                                                    <Box sx={{ mb: 2 }}>
-                                                        <Typography
-                                                            variant="body2"
-                                                            color="text.secondary"
+                                                        <Avatar
+                                                            sx={{
+                                                                width: 60,
+                                                                height: 60,
+                                                                mr: 2,
+                                                                bgcolor:
+                                                                    "primary.main",
+                                                            }}
+                                                            alt={displayName}
+                                                            src={`https://ui-avatars.com/api/?name=${user?.first_name}+${user?.last_name}&background=random`}
                                                         >
-                                                            Name
-                                                        </Typography>
-                                                        <Typography variant="body1">
-                                                            {displayName}
-                                                        </Typography>
-                                                    </Box>
-                                                    {user?.username && (
-                                                        <Box sx={{ mb: 2 }}>
+                                                            {
+                                                                user
+                                                                    ?.first_name?.[0]
+                                                            }
+                                                            {
+                                                                user
+                                                                    ?.last_name?.[0]
+                                                            }
+                                                        </Avatar>
+                                                        <Box>
+                                                            <Typography
+                                                                variant="h6"
+                                                                component="div"
+                                                            >
+                                                                Personal
+                                                                Information
+                                                            </Typography>
                                                             <Typography
                                                                 variant="body2"
                                                                 color="text.secondary"
                                                             >
+                                                                Your basic
+                                                                profile details
+                                                            </Typography>
+                                                        </Box>
+                                                    </Box>
+
+                                                    <Box sx={{ mb: 3 }}>
+                                                        <Typography
+                                                            variant="subtitle2"
+                                                            color="text.secondary"
+                                                            gutterBottom
+                                                        >
+                                                            Name
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="body1"
+                                                            fontWeight="medium"
+                                                        >
+                                                            {displayName}
+                                                        </Typography>
+                                                    </Box>
+
+                                                    {user?.username && (
+                                                        <Box sx={{ mb: 3 }}>
+                                                            <Typography
+                                                                variant="subtitle2"
+                                                                color="text.secondary"
+                                                                gutterBottom
+                                                            >
                                                                 Username
                                                             </Typography>
-                                                            <Typography variant="body1">
+                                                            <Typography
+                                                                variant="body1"
+                                                                fontWeight="medium"
+                                                            >
                                                                 {user.username}
                                                             </Typography>
                                                         </Box>
                                                     )}
-                                                    <Box sx={{ mb: 2 }}>
+
+                                                    <Box sx={{ mb: 3 }}>
                                                         <Typography
-                                                            variant="body2"
+                                                            variant="subtitle2"
                                                             color="text.secondary"
+                                                            gutterBottom
                                                         >
                                                             Email
                                                         </Typography>
-                                                        <Typography variant="body1">
+                                                        <Typography
+                                                            variant="body1"
+                                                            fontWeight="medium"
+                                                        >
                                                             {userEmail}
                                                         </Typography>
                                                     </Box>
-                                                    <Box sx={{ mb: 2 }}>
+
+                                                    <Box sx={{ mb: 3 }}>
                                                         <Typography
-                                                            variant="body2"
+                                                            variant="subtitle2"
                                                             color="text.secondary"
+                                                            gutterBottom
                                                         >
                                                             Role
                                                         </Typography>
                                                         <Typography
                                                             variant="body1"
+                                                            fontWeight="medium"
                                                             sx={{
                                                                 textTransform:
                                                                     "capitalize",
@@ -756,57 +856,173 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
                                                                 "Employee"}
                                                         </Typography>
                                                     </Box>
+
                                                     <Button
-                                                        variant="outlined"
-                                                        size="small"
-                                                        sx={{ mt: 2 }}
+                                                        variant="contained"
+                                                        size="medium"
+                                                        sx={{ mt: 1 }}
                                                         onClick={
                                                             handleEditProfileOpen
                                                         }
+                                                        fullWidth
                                                     >
                                                         Edit Information
                                                     </Button>
-                                                </CardContent>
-                                            </Card>
-                                        </Grid>
+                                                </Card>
+                                            </Grid>
 
-                                        {/* Account settings card */}
-                                        <Grid item xs={12} md={6}>
-                                            <Card>
-                                                <CardContent>
-                                                    <Typography
-                                                        variant="h6"
-                                                        gutterBottom
-                                                        component="div"
+                                            {/* Account settings card */}
+                                            <Grid item xs={12} md={6}>
+                                                <Card
+                                                    elevation={0}
+                                                    sx={{
+                                                        height: "100%",
+                                                        p: 2,
+                                                        border: 1,
+                                                        borderColor: "divider",
+                                                        borderRadius: 2,
+                                                        transition:
+                                                            "all 0.2s ease",
+                                                        "&:hover": {
+                                                            boxShadow:
+                                                                "0 4px 8px rgba(0,0,0,0.1)",
+                                                        },
+                                                    }}
+                                                >
+                                                    <Box
+                                                        sx={{
+                                                            mb: 3,
+                                                            pb: 2,
+                                                            borderBottom: 1,
+                                                            borderColor:
+                                                                "divider",
+                                                        }}
                                                     >
-                                                        Account Settings
-                                                    </Typography>
-                                                    <Box sx={{ mb: 2 }}>
-                                                        <Button
-                                                            variant="outlined"
-                                                            size="small"
-                                                            sx={{ mr: 1 }}
-                                                            onClick={
-                                                                handleChangePasswordOpen
-                                                            }
+                                                        <Typography
+                                                            variant="h6"
+                                                            component="div"
                                                         >
-                                                            Change Password
-                                                        </Button>
-                                                        <Button
-                                                            variant="outlined"
-                                                            size="small"
-                                                            color="error"
-                                                            onClick={
-                                                                handleDeleteAccountOpen
-                                                            }
+                                                            Account Settings
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="body2"
+                                                            color="text.secondary"
                                                         >
-                                                            Delete Account
-                                                        </Button>
+                                                            Manage your account
+                                                            security
+                                                        </Typography>
                                                     </Box>
-                                                </CardContent>
-                                            </Card>
+
+                                                    <Box
+                                                        sx={{
+                                                            p: 3,
+                                                            mb: 2,
+                                                            borderRadius: 2,
+                                                            bgcolor:
+                                                                "action.hover",
+                                                            display: "flex",
+                                                            flexDirection:
+                                                                "column",
+                                                            alignItems:
+                                                                "center",
+                                                        }}
+                                                    >
+                                                        <Box
+                                                            sx={{
+                                                                display: "flex",
+                                                                mb: 2,
+                                                            }}
+                                                        >
+                                                            <Button
+                                                                variant="contained"
+                                                                size="medium"
+                                                                sx={{ mr: 2 }}
+                                                                onClick={
+                                                                    handleChangePasswordOpen
+                                                                }
+                                                            >
+                                                                Change Password
+                                                            </Button>
+                                                            <Button
+                                                                variant="outlined"
+                                                                size="medium"
+                                                                color="error"
+                                                                onClick={
+                                                                    handleDeleteAccountOpen
+                                                                }
+                                                            >
+                                                                Delete Account
+                                                            </Button>
+                                                        </Box>
+                                                        <Typography
+                                                            variant="caption"
+                                                            color="text.secondary"
+                                                            align="center"
+                                                        >
+                                                            Changing your
+                                                            password regularly
+                                                            helps keep your
+                                                            account secure
+                                                        </Typography>
+                                                    </Box>
+
+                                                    {/* <Box
+                                                        sx={{
+                                                            p: 3,
+                                                            borderRadius: 2,
+                                                            bgcolor:
+                                                                theme.palette
+                                                                    .mode ===
+                                                                "dark"
+                                                                    ? "rgba(255,255,255,0.05)"
+                                                                    : "rgba(0,0,0,0.02)",
+                                                            border: 1,
+                                                            borderColor:
+                                                                "divider",
+                                                        }}
+                                                    >
+                                                        <Typography
+                                                            variant="subtitle2"
+                                                            gutterBottom
+                                                        >
+                                                            Account Status
+                                                        </Typography>
+                                                        {/* <Box
+                                                            sx={{
+                                                                display: "flex",
+                                                                alignItems:
+                                                                    "center",
+                                                                justifyContent:
+                                                                    "space-between",
+                                                            }}
+                                                        >
+                                                            <Typography
+                                                                variant="body2"
+                                                                color="text.secondary"
+                                                            >
+                                                                Active since:{" "}
+                                                                {user?.created_at
+                                                                    ? formatDate(
+                                                                          user.created_at
+                                                                      )
+                                                                    : "Not available"}
+                                                            </Typography>
+                                                            <Chip
+                                                                size="small"
+                                                                label="Active"
+                                                                color="success"
+                                                                sx={{
+                                                                    fontWeight:
+                                                                        "medium",
+                                                                }}
+                                                            />
+                                                        </Box> */}
+                                                    {/* </Box> */}
+                                                    {/* */}
+                                                </Card>
+                                            </Grid>
                                         </Grid>
-                                    </Grid>
+                                    </Box>
                                 </Paper>
                             </Grid>
                         )}
