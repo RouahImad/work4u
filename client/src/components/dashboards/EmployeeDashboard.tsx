@@ -19,6 +19,8 @@ import {
     CircularProgress,
     Alert,
     Tooltip,
+    Tabs,
+    Tab,
 } from "@mui/material";
 import {
     Work,
@@ -174,69 +176,39 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
 
                 {/* Dashboard Navigation */}
                 <Grid item xs={12}>
-                    <Box
-                        sx={{
-                            borderBottom: 1,
-                            borderColor: "divider",
-                            mb: 2,
-                            display: "flex",
-                            overflow: "auto",
-                        }}
-                    >
-                        <Button
-                            onClick={() => setActiveTab("overview")}
-                            sx={{
-                                mr: 2,
-                                color:
-                                    activeTab === "overview"
-                                        ? "primary.main"
-                                        : "text.primary",
-                                borderBottom:
-                                    activeTab === "overview"
-                                        ? `2px solid ${theme.palette.primary.main}`
-                                        : "none",
-                                borderRadius: 0,
-                                pb: 1,
-                            }}
+                    <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
+                        <Tabs
+                            value={activeTab}
+                            onChange={(e, newValue) => setActiveTab(newValue)}
+                            aria-label="employee dashboard tabs"
+                            variant="scrollable"
+                            scrollButtons="auto"
                         >
-                            Overview
-                        </Button>
-                        <Button
-                            onClick={() => setActiveTab("applications")}
-                            sx={{
-                                mr: 2,
-                                color:
-                                    activeTab === "applications"
-                                        ? "primary.main"
-                                        : "text.primary",
-                                borderBottom:
-                                    activeTab === "applications"
-                                        ? `2px solid ${theme.palette.primary.main}`
-                                        : "none",
-                                borderRadius: 0,
-                                pb: 1,
-                            }}
-                        >
-                            Applications
-                        </Button>
-                        <Button
-                            onClick={() => setActiveTab("profile")}
-                            sx={{
-                                mr: 2,
-                                color:
-                                    activeTab === "profile"
-                                        ? "primary.main"
-                                        : "text.primary",
-                                borderBottom:
-                                    activeTab === "profile"
-                                        ? `2px solid ${theme.palette.primary.main}`
-                                        : "none",
-                                borderRadius: 0,
-                                pb: 1,
-                            }}
-                        >
-                            Profile
-                        </Button>
+                            <Tab
+                                label="Overview"
+                                value="overview"
+                                sx={{ 
+                                    textTransform: 'none',
+                                    minWidth: 100 
+                                }}
+                            />
+                            <Tab
+                                label="Applications"
+                                value="applications"
+                                sx={{ 
+                                    textTransform: 'none',
+                                    minWidth: 100 
+                                }}
+                            />
+                            <Tab
+                                label="Profile"
+                                value="profile"
+                                sx={{ 
+                                    textTransform: 'none',
+                                    minWidth: 100 
+                                }}
+                            />
+                        </Tabs>
                     </Box>
                 </Grid>
 

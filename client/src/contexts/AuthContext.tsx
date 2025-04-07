@@ -46,6 +46,7 @@ interface AuthContextType {
     userRole: string;
     loading: boolean;
     error: string | null;
+    logAdmin: (email: string, password: string) => void;
     login: (email: string, password: string) => Promise<void>;
     registerEmployee: (data: EmployeeRegistrationData) => Promise<void>;
     registerEmployer: (data: EmployerRegistrationData) => Promise<void>;
@@ -97,6 +98,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         fetchUser();
     }, []);
+
+    const logAdmin = (email: string, password: string) => {
+        setUserRole("admin");
+        localStorage.setItem("userRole", "admin");
+        setIsAuthenticated(true);
+        setUser({
+            id: 0,
+            username: email,
+            email,
+            role: "admin",
+            first_name: "Admin",
+            last_name: "User",
+        } as User);
+        localStorage.setItem("accessToken", "adminAccessToken");
+        localStorage.setItem("refreshToken", "adminRefreshToken");
+        secureStorage.setItem("userEmail", email);
+        secureStorage.setItem("userPassword", password);
+    };
 
     const login = async (email: string, password: string) => {
         try {
@@ -298,6 +317,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 userRole,
                 loading,
                 error,
+                logAdmin,
                 login,
                 registerEmployee,
                 registerEmployer,

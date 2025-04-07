@@ -26,6 +26,7 @@ const Login = () => {
         userRole,
         isAuthenticated,
         handlesOwnNotifications,
+        logAdmin,
         loading: authLoading,
     } = useAuth();
     const { pushNotification } = useNotification();
@@ -110,8 +111,7 @@ const Login = () => {
         const adminPass = import.meta.env.VITE_PASS || "pfe";
 
         if (formData.email === adminMail && formData.password === adminPass) {
-            localStorage.setItem("userRole", "admin");
-            localStorage.setItem("isAuthenticated", "true");
+            logAdmin(adminMail, adminPass);
             pushNotification(
                 "Successfully logged in as admin! Redirecting...",
                 "success"

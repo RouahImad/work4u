@@ -52,13 +52,49 @@ interface EmployerDashboardStats {
     pending_applications: number;
 }
 
+interface ReportDetail {
+    id: number;
+    post_title: string;
+    user_email: string;
+    description: string;
+    reported_at: string;
+}
+
+interface AdminDashboardStats {
+    users: {
+        total: number;
+    };
+    posts: {
+        total: number;
+        average_salaire: number;
+    };
+    cvs: {
+        total: number;
+    };
+    interview_responses: {
+        total: number;
+        average_score: number;
+    };
+    applications: {
+        total: number;
+        pending: number;
+        accepted: number;
+    };
+    reports: {
+        total: number;
+        details: ReportDetail[];
+    };
+}
+
 interface DashboardContextType {
     employeeStats: EmployeeDashboardStats | null;
     employerStats: EmployerDashboardStats | null;
+    adminStats: AdminDashboardStats | null;
     loading: boolean;
     error: string | null;
     fetchEmployeeStats: () => Promise<void>;
     fetchEmployerStats: () => Promise<void>;
+    fetchAdminStats: () => Promise<void>;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(
@@ -70,6 +106,9 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
         useState<EmployeeDashboardStats | null>(null);
     const [employerStats, setEmployerStats] =
         useState<EmployerDashboardStats | null>(null);
+    const [adminStats, setAdminStats] = useState<AdminDashboardStats | null>(
+        null
+    );
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const { pushNotification } = useNotification();
@@ -110,15 +149,35 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    const fetchAdminStats = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const response = await dashboardApi.getRoleBasedStats();
+            setAdminStats(response.data);
+        } catch (err: any) {
+            const errorMessage =
+                err.response?.data?.detail ||
+                "Failed to fetch admin dashboard statistics";
+            setError(errorMessage);
+            pushNotification(errorMessage, "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <DashboardContext.Provider
             value={{
                 employeeStats,
                 employerStats,
+                adminStats,
                 loading,
                 error,
                 fetchEmployeeStats,
                 fetchEmployerStats,
+                fetchAdminStats,
             }}
         >
             {children}
