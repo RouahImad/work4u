@@ -1,16 +1,16 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 import { postApi } from "../services/api";
 import { useNotification } from "../components/notifications/SlideInNotifications";
-import { Job } from "../types/Job.types";
+import { Job, JobPost } from "../types/Job.types";
 
 interface JobPostContextType {
     jobs: Job[];
-    currentJob: Job | null;
+    currentJob: TMP | null;
     loading: boolean;
     error: string | null;
     fetchAllJobs: () => Promise<void>;
     fetchJobById: (id: number) => Promise<void>;
-    createJob: (jobData: Omit<Job, "id">) => Promise<void>;
+    createJob: (jobData: Omit<JobPost, "id">) => Promise<void>;
     updateJob: (id: number, jobData: Partial<Job>) => Promise<void>;
     deleteJob: (id: number) => Promise<void>;
     reportJob: (reportData: {
@@ -19,9 +19,15 @@ interface JobPostContextType {
     }) => Promise<void>;
 }
 
+interface TMP extends JobPost {
+    company_name: string;
+    company_address: string;
+    company_website: string;
+}
+
 const tmp = {
-    companny_name: "Company Name",
-    company_address: "Company Address",
+    companny_name: "Company Con",
+    company_address: "Nyc, ao",
     company_website: "https://company-website.com",
 };
 
@@ -29,7 +35,7 @@ const JobPostContext = createContext<JobPostContextType | undefined>(undefined);
 
 export const JobPostProvider = ({ children }: { children: ReactNode }) => {
     const [jobs, setJobs] = useState<Job[]>([]);
-    const [currentJob, setCurrentJob] = useState<Job | null>(null);
+    const [currentJob, setCurrentJob] = useState<TMP | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const { pushNotification } = useNotification();
@@ -67,7 +73,12 @@ export const JobPostProvider = ({ children }: { children: ReactNode }) => {
             setLoading(true);
             setError(null);
             const response = await postApi.getPostById(id);
-            setCurrentJob(response.data);
+
+            if (!response.data.post) {
+                throw new Error("Job not found");
+            }
+
+            setCurrentJob({ ...response.data.post, ...tmp });
         } catch (err: any) {
             const errorMessage =
                 err.response?.data?.detail || "Failed to fetch job details";

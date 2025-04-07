@@ -11,7 +11,7 @@ import {
     Grid,
 } from "@mui/material";
 import { useJobPost } from "../../contexts/JobPostContext";
-import { useNotification } from "../notifications/SlideInNotifications";
+import { useDashboard } from "../../contexts/DashboardContext";
 
 interface CreateJobDialogProps {
     open: boolean;
@@ -20,7 +20,7 @@ interface CreateJobDialogProps {
 
 const CreateJobDialog: React.FC<CreateJobDialogProps> = ({ open, onClose }) => {
     const { createJob, loading, error } = useJobPost();
-    const { pushNotification } = useNotification();
+    const { fetchEmployerStats } = useDashboard();
 
     // Form state
     const [formData, setFormData] = useState({
@@ -124,6 +124,8 @@ const CreateJobDialog: React.FC<CreateJobDialogProps> = ({ open, onClose }) => {
                 final_date: formData.final_date,
                 salaire: Number(formData.salaire),
             });
+
+            fetchEmployerStats();
 
             onClose();
         } catch (error) {

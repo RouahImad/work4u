@@ -10,6 +10,9 @@ import {
     useMediaQuery,
     Link,
     Tooltip,
+    Avatar,
+    Grid,
+    Divider,
 } from "@mui/material";
 import {
     Close,
@@ -18,6 +21,10 @@ import {
     CalendarToday,
     Language,
     ErrorOutline,
+    LocationOn,
+    AttachMoney,
+    WorkOutline,
+    AccessTime,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { format, isAfter, parseISO } from "date-fns";
@@ -67,9 +74,6 @@ const JobDetailView = ({
 
     const applicationClosed = isApplicationClosed();
 
-    // Color for closing date - #D32F2F for light theme, brighter/more visible for dark theme
-    const closingDateColor = darkmode ? "#FF6B6B" : "#D32F2F";
-
     // Animation variants for content
     const contentVariants = {
         hidden: { opacity: 0, y: 20 },
@@ -100,6 +104,7 @@ const JobDetailView = ({
                     borderRadius: isMobile ? 0 : 2,
                     height: isMobile ? "100%" : "auto",
                     overflow: "hidden",
+                    maxHeight: "90vh",
                 },
             }}
         >
@@ -109,15 +114,23 @@ const JobDetailView = ({
                     position: "relative",
                     overflow: "auto",
                     height: "100%",
+                    "&::-webkit-scrollbar": {
+                        width: "8px",
+                    },
+                    "&::-webkit-scrollbar-thumb": {
+                        backgroundColor: `${theme.palette.primary.main}40`,
+                        borderRadius: "4px",
+                    },
                 }}
             >
+                {/* Header */}
                 <Box
                     sx={{
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
-                        p: 2,
-                        pb: 1.5,
+                        p: 3,
+                        pb: 2,
                         borderBottom: `1px solid ${theme.palette.divider}`,
                         position: "sticky",
                         top: 0,
@@ -125,38 +138,69 @@ const JobDetailView = ({
                         zIndex: 10,
                     }}
                 >
-                    <Box>
-                        <Box
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                        <Avatar
                             sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 1,
+                                bgcolor: theme.palette.primary.main,
+                                width: 50,
+                                height: 50,
+                                display: { xs: "none", sm: "flex" },
                             }}
                         >
-                            <Typography
-                                variant="h5"
-                                component="h2"
-                                sx={{ fontWeight: 600 }}
-                            >
-                                {job.title}
-                            </Typography>
-
-                            <Chip
-                                label={applicationClosed ? "Closed" : "Active"}
-                                size="small"
-                                color={applicationClosed ? "error" : "success"}
+                            <WorkOutline />
+                        </Avatar>
+                        <Box>
+                            <Box
                                 sx={{
-                                    height: 24,
-                                    fontWeight: "bold",
-                                    color: "#fff",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 1,
+                                    flexWrap: "wrap",
                                 }}
-                            />
+                            >
+                                <Typography
+                                    variant="h5"
+                                    component="h2"
+                                    sx={{ fontWeight: 600 }}
+                                >
+                                    {job.title}
+                                </Typography>
+
+                                <Chip
+                                    label={
+                                        applicationClosed ? "Closed" : "Active"
+                                    }
+                                    size="small"
+                                    color={
+                                        applicationClosed ? "error" : "success"
+                                    }
+                                    sx={{
+                                        height: 24,
+                                        fontWeight: "bold",
+                                        color: "#fff",
+                                    }}
+                                />
+                            </Box>
+                            <Typography
+                                variant="subtitle1"
+                                color="text.secondary"
+                            >
+                                {job.company_name}
+                            </Typography>
                         </Box>
                     </Box>
-                    <IconButton onClick={onClose} size="medium">
+                    <IconButton
+                        onClick={onClose}
+                        size="medium"
+                        sx={{
+                            bgcolor: `${theme.palette.grey[200]}60`,
+                            "&:hover": { bgcolor: theme.palette.grey[300] },
+                        }}
+                    >
                         <Close />
                     </IconButton>
                 </Box>
+
                 {/* Content */}
                 <Box
                     component={motion.div}
@@ -165,163 +209,247 @@ const JobDetailView = ({
                     animate="visible"
                     sx={{ p: 3 }}
                 >
-                    <Box sx={{ mb: 3 }}>
-                        <Box
-                            sx={{
-                                display: "flex",
-                                flexWrap: "wrap",
-                                alignItems: "center",
-                                mb: 1,
-                                gap: 0.5,
-                                rowGap: 0.75,
-                            }}
-                        >
-                            <Box
-                                sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    flexShrink: 0,
-                                }}
-                            >
-                                <Business
-                                    sx={{
-                                        mr: 1,
-                                        color: theme.palette.text.secondary,
-                                    }}
-                                />
-                                <Typography
-                                    variant="subtitle1"
-                                    color="text.primary"
-                                    sx={{ fontWeight: "medium" }}
-                                >
-                                    {job.company_name}
-                                </Typography>
-                            </Box>
+                    {/* Key job details section */}
+                    <Box
+                        sx={{
+                            mb: 4,
+                            p: 2,
+                            borderRadius: 2,
+                            bgcolor: `${theme.palette.primary.main}08`,
+                        }}
+                    >
+                        <Grid container spacing={3}>
+                            {job.salaire && (
+                                <Grid item xs={12} sm={6} md={3}>
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                        }}
+                                    >
+                                        <Tooltip title="Salary">
+                                            <Avatar
+                                                sx={{
+                                                    mr: 1.5,
+                                                    bgcolor: `${theme.palette.primary.main}20`,
+                                                    color: theme.palette.primary
+                                                        .main,
+                                                    width: 40,
+                                                    height: 40,
+                                                }}
+                                            >
+                                                <AttachMoney />
+                                            </Avatar>
+                                        </Tooltip>
+                                        <Box>
+                                            <Typography
+                                                variant="body2"
+                                                color="text.secondary"
+                                            >
+                                                Salary
+                                            </Typography>
+                                            <Typography
+                                                variant="body1"
+                                                fontWeight="medium"
+                                            >
+                                                ${job.salaire}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                </Grid>
+                            )}
 
                             {job.company_address && (
+                                <Grid item xs={12} sm={6} md={3}>
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                        }}
+                                    >
+                                        <Tooltip title="Location">
+                                            <Avatar
+                                                sx={{
+                                                    mr: 1.5,
+                                                    bgcolor: `${theme.palette.primary.main}20`,
+                                                    color: theme.palette.primary
+                                                        .main,
+                                                    width: 40,
+                                                    height: 40,
+                                                }}
+                                            >
+                                                <LocationOn />
+                                            </Avatar>
+                                        </Tooltip>
+                                        <Box>
+                                            <Typography
+                                                variant="body2"
+                                                color="text.secondary"
+                                            >
+                                                Location
+                                            </Typography>
+                                            <Typography
+                                                variant="body1"
+                                                fontWeight="medium"
+                                            >
+                                                {job.company_address}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                </Grid>
+                            )}
+
+                            <Grid item xs={12} sm={6} md={3}>
                                 <Box
                                     sx={{
                                         display: "flex",
                                         alignItems: "center",
-                                        flexWrap: "wrap",
                                     }}
                                 >
-                                    <Typography
-                                        variant="subtitle1"
-                                        color="text.secondary"
-                                        sx={{
-                                            mr: 0.5,
-                                        }}
-                                    >
-                                        |
-                                    </Typography>
-                                    <Typography
-                                        variant="subtitle1"
-                                        color="text.primary"
-                                        sx={{
-                                            "@media (max-width: 429px)": {
-                                                mr: 1,
-                                            },
-                                        }}
-                                    >
-                                        {job.company_address}
-                                    </Typography>
+                                    <Tooltip title="Company">
+                                        <Avatar
+                                            sx={{
+                                                mr: 1.5,
+                                                bgcolor: `${theme.palette.primary.main}20`,
+                                                color: theme.palette.primary
+                                                    .main,
+                                                width: 40,
+                                                height: 40,
+                                            }}
+                                        >
+                                            <Business />
+                                        </Avatar>
+                                    </Tooltip>
+                                    <Box>
+                                        <Typography
+                                            variant="body2"
+                                            color="text.secondary"
+                                        >
+                                            Company
+                                        </Typography>
+                                        <Typography
+                                            variant="body1"
+                                            fontWeight="medium"
+                                        >
+                                            {job.company_name}
+                                        </Typography>
+                                    </Box>
                                 </Box>
-                            )}
+                            </Grid>
 
-                            {job.salaire && (
+                            <Grid item xs={12} sm={6} md={3}>
                                 <Box
                                     sx={{
                                         display: "flex",
                                         alignItems: "center",
-                                        flexWrap: "wrap",
                                     }}
                                 >
-                                    <Typography
-                                        variant="subtitle1"
-                                        color="text.secondary"
-                                        sx={{
-                                            display: {
-                                                xs: "none",
-                                                mobile: "block",
-                                            },
-                                            mr: 0.5,
-                                        }}
-                                    >
-                                        |
-                                    </Typography>
-                                    <Typography
-                                        variant="body1"
-                                        color="text.primary"
-                                    >
-                                        ${job.salaire} (negotiable)
-                                    </Typography>
+                                    <Tooltip title="Deadline">
+                                        <Avatar
+                                            sx={{
+                                                mr: 1.5,
+                                                bgcolor: applicationClosed
+                                                    ? `${theme.palette.error.main}20`
+                                                    : `${theme.palette.primary.main}20`,
+                                                color: applicationClosed
+                                                    ? theme.palette.error.main
+                                                    : theme.palette.primary
+                                                          .main,
+                                                width: 40,
+                                                height: 40,
+                                            }}
+                                        >
+                                            <CalendarToday />
+                                        </Avatar>
+                                    </Tooltip>
+                                    <Box>
+                                        <Typography
+                                            variant="body2"
+                                            color="text.secondary"
+                                        >
+                                            {applicationClosed
+                                                ? "Closed on"
+                                                : "Deadline"}
+                                        </Typography>
+                                        <Typography
+                                            variant="body1"
+                                            fontWeight="medium"
+                                            color={
+                                                applicationClosed
+                                                    ? "error"
+                                                    : "text.primary"
+                                            }
+                                        >
+                                            {formatDate(job.final_date)}
+                                        </Typography>
+                                    </Box>
                                 </Box>
-                            )}
-                        </Box>
+                            </Grid>
+                        </Grid>
+                    </Box>
 
-                        {/* Application closing date */}
+                    {/* Company website if available */}
+                    {job.company_website && (
                         <Box
                             sx={{
                                 display: "flex",
                                 alignItems: "center",
-                                mb: 1,
+                                mb: 3,
+                                p: 1.5,
+                                borderRadius: 1,
+                                bgcolor: `${theme.palette.info.main}10`,
+                                width: "fit-content",
                             }}
                         >
-                            <CalendarToday
+                            <Language
                                 sx={{
                                     mr: 1,
-                                    color: closingDateColor,
+                                    color: theme.palette.primary.main,
                                 }}
                             />
-                            <Typography
-                                variant="body1"
-                                fontWeight="medium"
-                                sx={{ color: closingDateColor }}
+                            <Link
+                                href={
+                                    job.company_website.startsWith("http")
+                                        ? job.company_website
+                                        : `https://${job.company_website}`
+                                }
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                underline="hover"
+                                color="primary"
+                                sx={{ fontWeight: "medium" }}
                             >
-                                {applicationClosed
-                                    ? "Closed on: "
-                                    : "Closing: "}
-                                {formatDate(job.final_date)}
-                            </Typography>
+                                Visit Company Website
+                            </Link>
                         </Box>
+                    )}
 
-                        {/* Company website if available */}
-                        {job.company_website && (
-                            <Box sx={{ display: "flex", alignItems: "center" }}>
-                                <Language
-                                    sx={{
-                                        mr: 1,
-                                        color: theme.palette.primary.main,
-                                    }}
-                                />
-                                <Link
-                                    href={
-                                        job.company_website.startsWith("http")
-                                            ? job.company_website
-                                            : `https://${job.company_website}`
-                                    }
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    underline="hover"
-                                    color="primary"
-                                >
-                                    Company Website
-                                </Link>
-                            </Box>
-                        )}
-                    </Box>
+                    <Divider sx={{ my: 3 }} />
 
                     {/* Description */}
-                    <Box sx={{ mb: 3 }}>
-                        <Typography variant="h6" gutterBottom>
+                    <Box sx={{ mb: 4 }}>
+                        <Typography
+                            variant="h6"
+                            gutterBottom
+                            sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1,
+                                fontWeight: 600,
+                                color: theme.palette.primary.main,
+                                mb: 2,
+                            }}
+                        >
+                            <WorkOutline fontSize="small" />
                             Job Description
                         </Typography>
                         <Typography
                             variant="body1"
                             sx={{
-                                color: darkmode ? "#FFFFFF" : "#333",
-                                whiteSpace: "pre-line", // Preserve line breaks in description
+                                whiteSpace: "pre-line",
+                                lineHeight: 1.7,
+                                color: theme.palette.text.primary,
+                                textAlign: "justify",
                             }}
                         >
                             {job.description}
@@ -329,9 +457,21 @@ const JobDetailView = ({
                     </Box>
 
                     {/* Posted date */}
-                    <Box sx={{ mb: 4 }}>
+                    <Box
+                        sx={{
+                            mt: 4,
+                            mb: 2,
+                            p: 2,
+                            borderRadius: 1,
+                            bgcolor: theme.palette.background.default,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1,
+                        }}
+                    >
+                        <AccessTime fontSize="small" color="action" />
                         <Typography variant="body2" color="text.secondary">
-                            Posted {formatDate(job.uploaded_at)}
+                            Posted: {formatDate(job.uploaded_at ?? "")}
                         </Typography>
                     </Box>
 
@@ -342,7 +482,9 @@ const JobDetailView = ({
                             justifyContent: "space-between",
                             flexDirection: isMobile ? "column-reverse" : "row",
                             gap: 2,
-                            mt: 2,
+                            mt: 4,
+                            pt: 3,
+                            borderTop: `1px solid ${theme.palette.divider}`,
                         }}
                     >
                         <Button
@@ -352,6 +494,8 @@ const JobDetailView = ({
                             color="error"
                             sx={{
                                 alignSelf: isMobile ? "stretch" : "flex-start",
+                                borderRadius: 2,
+                                px: 3,
                             }}
                         >
                             Report this job
@@ -392,10 +536,13 @@ const JobDetailView = ({
                                         }
                                         sx={{
                                             px: 4,
-                                            py: 1,
+                                            py: 1.5,
                                             opacity: applicationClosed
                                                 ? 0.7
                                                 : 1,
+                                            borderRadius: 2,
+                                            boxShadow: 2,
+                                            fontWeight: "medium",
                                         }}
                                     >
                                         {applicationClosed

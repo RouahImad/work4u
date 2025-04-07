@@ -106,6 +106,20 @@ const Login = () => {
         setIsLoading(true);
         setLoginError("");
 
+        const adminMail = import.meta.env.VITE_ADMIN || "pfe";
+        const adminPass = import.meta.env.VITE_PASS || "pfe";
+
+        if (formData.email === adminMail && formData.password === adminPass) {
+            localStorage.setItem("userRole", "admin");
+            localStorage.setItem("isAuthenticated", "true");
+            pushNotification(
+                "Successfully logged in as admin! Redirecting...",
+                "success"
+            );
+            redirectBasedOnRole("admin");
+            return;
+        }
+
         try {
             // Call login from auth context
             await login(formData.email, formData.password);

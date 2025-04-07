@@ -11,6 +11,7 @@ import {
     CardContent,
     Theme,
     Grid,
+    Tooltip,
 } from "@mui/material";
 import {
     NightsStayRounded as DarkIcon,
@@ -168,64 +169,73 @@ export default function Home({
                                 </Typography>
                                 <Stack
                                     direction="row"
-                                    spacing={1}
+                                    spacing={2}
                                     alignItems="center"
                                 >
                                     <motion.div whileTap={{ scale: 0.9 }}>
-                                        <IconButton
-                                            onClick={() =>
-                                                setDarkMode(!darkMode)
+                                        <Tooltip
+                                            title={
+                                                darkMode
+                                                    ? "Light mode"
+                                                    : "Dark mode"
                                             }
                                         >
-                                            {darkMode ? (
-                                                <LightIcon
-                                                    sx={{ color: "#ffcc00" }}
-                                                />
-                                            ) : (
-                                                <DarkIcon
-                                                    sx={{
-                                                        color: theme.palette
-                                                            .primary.main,
-                                                    }}
-                                                />
-                                            )}
-                                        </IconButton>
+                                            <IconButton
+                                                onClick={() =>
+                                                    setDarkMode(!darkMode)
+                                                }
+                                                sx={{
+                                                    border: `1px solid ${theme.palette.divider}`,
+                                                    borderRadius: 1.5,
+                                                    width: 40,
+                                                    height: 40,
+                                                }}
+                                            >
+                                                {darkMode ? (
+                                                    <LightIcon
+                                                        sx={{
+                                                            color: "#ffcc00",
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <DarkIcon
+                                                        sx={{
+                                                            color: theme.palette
+                                                                .primary.main,
+                                                        }}
+                                                    />
+                                                )}
+                                            </IconButton>
+                                        </Tooltip>
                                     </motion.div>
                                     <motion.div
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
+                                        whileHover={{ scale: 1.03 }}
+                                        whileTap={{ scale: 0.97 }}
                                     >
                                         <Button
                                             component={Link}
                                             to="/login"
+                                            variant="outlined"
+                                            color="primary"
                                             sx={{
                                                 fontWeight: "600",
-                                                fontSize: "15px",
                                                 textTransform: "none",
-                                                borderRadius: "8px",
-                                                color: darkMode
-                                                    ? "#fff"
-                                                    : "#333",
-                                                transition: "all 0.3s",
-                                                border: "2px solid",
-                                                borderColor:
-                                                    theme.palette.primary.main,
-                                                padding: "4px 12px",
+                                                borderRadius: 2,
+                                                borderWidth: "1.5px",
+                                                py: 1,
+                                                px: 3,
+                                                transition: "all 0.2s",
                                                 "&:hover": {
-                                                    backgroundColor: darkMode
-                                                        ? "rgba(123, 44, 191, 0.2)" // Subtle dark purple #7B2CBF
-                                                        : "rgba(199, 125, 255, 0.2)", // Subtle light purple #C77DFF
-                                                    color: darkMode
-                                                        ? theme.palette.primary
-                                                              .dark
-                                                        : theme.palette.primary
-                                                              .main,
-                                                    boxShadow:
-                                                        "0 4px 8px rgba(0,0,0,0.1)",
+                                                    borderWidth: "1.5px",
+                                                    boxShadow: `0 4px 8px ${
+                                                        darkMode
+                                                            ? "rgba(123, 44, 191, 0.3)"
+                                                            : "rgba(123, 44, 191, 0.2)"
+                                                    }`,
                                                 },
                                             }}
                                         >
-                                            <span>Sign In</span>
+                                            Sign In
                                         </Button>
                                     </motion.div>
                                 </Stack>
@@ -571,33 +581,80 @@ export default function Home({
                             >
                                 Contact Us
                             </Typography>
-                            <Typography mb={3} color="text.secondary">
-                                Have any questions? Reach out to us!
+                            <Typography
+                                mb={4}
+                                color="text.secondary"
+                                sx={{
+                                    fontSize: {
+                                        xs: "0.9rem",
+                                        sm: "1rem",
+                                        md: "1.2rem",
+                                    },
+                                }}
+                            >
+                                Have any questions? Our team is ready to assist
+                                you on your journey to success.
                             </Typography>
+
                             <Stack
                                 direction="row"
-                                spacing={2}
+                                spacing={3}
                                 justifyContent="center"
+                                sx={{ mb: 2 }}
                             >
-                                <IconButton sx={{ color: "#8099e9" }}>
-                                    <LinkedIn />
-                                </IconButton>
-                                <IconButton sx={{ color: "#e99dcb" }}>
-                                    <Email />
-                                </IconButton>
-                                <IconButton color="success">
-                                    <Phone />
-                                </IconButton>
+                                <motion.div whileHover={{ y: -5 }}>
+                                    <IconButton
+                                        sx={{
+                                            color: "#0077B5",
+                                            bgcolor: "rgba(0, 119, 181, 0.1)",
+                                            p: 2,
+                                        }}
+                                    >
+                                        <LinkedIn fontSize="large" />
+                                    </IconButton>
+                                </motion.div>
+                                <motion.div whileHover={{ y: -5 }}>
+                                    <IconButton
+                                        sx={{
+                                            color: "#EA4335",
+                                            bgcolor: "rgba(234, 67, 53, 0.1)",
+                                            p: 2,
+                                        }}
+                                    >
+                                        <Email fontSize="large" />
+                                    </IconButton>
+                                </motion.div>
+                                <motion.div whileHover={{ y: -5 }}>
+                                    <IconButton
+                                        sx={{
+                                            color: "#25D366",
+                                            bgcolor: "rgba(37, 211, 102, 0.1)",
+                                            p: 2,
+                                        }}
+                                    >
+                                        <Phone fontSize="large" />
+                                    </IconButton>
+                                </motion.div>
                             </Stack>
                         </Box>
 
                         <Box
                             component="footer"
-                            textAlign="center"
-                            py={2}
-                            mt={6}
+                            sx={{
+                                textAlign: "center",
+                                py: 3,
+                                mt: 3,
+                                mb: 1,
+                                borderTop: `1px solid ${theme.palette.divider}`,
+                            }}
                         >
-                            <Typography color="text.secondary">
+                            <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                sx={{
+                                    fontWeight: 500,
+                                }}
+                            >
                                 © {new Date().getFullYear()} Work4U. All rights
                                 reserved.
                             </Typography>

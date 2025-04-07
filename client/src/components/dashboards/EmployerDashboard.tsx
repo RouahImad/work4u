@@ -36,11 +36,13 @@ import { format } from "date-fns";
 import CreateJobDialog from "../jobs/CreateJobDialog";
 import UpdateJobDialog from "../jobs/UpdateJobDialog";
 import { useJobPost } from "../../contexts/JobPostContext";
+import JobView from "../jobs/JobView";
+import { JobPost } from "../../types/Job.types";
 
 const EmployerDashboard = ({ theme }: { theme: Theme }) => {
     const [activeTab, setActiveTab] = useState("overview");
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    // const [selectedJob, setSelectedJob] = useState<number | null>(null);
+    const [viewedJob, setViewedJob] = useState<JobPost | null>(null);
     const { pushNotification } = useNotification();
     const { user } = useAuth();
     const { employerStats, loading, error, fetchEmployerStats } =
@@ -52,6 +54,7 @@ const EmployerDashboard = ({ theme }: { theme: Theme }) => {
     const [createJobDialogOpen, setCreateJobDialogOpen] = useState(false);
     const [updateJobDialogOpen, setUpdateJobDialogOpen] = useState(false);
     const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
+    const [jobViewOpen, setJobViewOpen] = useState(false);
     const { updateJob, deleteJob } = useJobPost();
 
     useEffect(() => {
@@ -68,7 +71,7 @@ const EmployerDashboard = ({ theme }: { theme: Theme }) => {
 
     const handleMenuClose = () => {
         setAnchorEl(null);
-        setSelectedJobId(null);
+        // setSelectedJobId(null);
     };
 
     const handleCreateJob = () => {
@@ -122,15 +125,20 @@ const EmployerDashboard = ({ theme }: { theme: Theme }) => {
         handleMenuClose();
     };
 
-    const handleCreateJobDialogClose = () => {
+    const handleCreateJobDialogClose = (): void => {
         setCreateJobDialogOpen(false);
-        fetchEmployerStats(); // Refresh the dashboard data after creating a job
     };
 
     const handleUpdateJobDialogClose = () => {
         setUpdateJobDialogOpen(false);
-        setSelectedJobId(null);
-        fetchEmployerStats(); // Refresh the dashboard data after updating a job
+    };
+
+    const handleViewJob = (jobId: number) => {
+        setSelectedJobId(jobId);
+        setJobViewOpen(true);
+        console.log("herrre ", jobId);
+
+        handleMenuClose();
     };
 
     // Format date function
@@ -611,16 +619,13 @@ const EmployerDashboard = ({ theme }: { theme: Theme }) => {
                                             open={Boolean(anchorEl)}
                                             onClose={handleMenuClose}
                                         >
-                                            <MenuItem onClick={handleMenuClose}>
-                                                View Details
-                                            </MenuItem>
                                             <MenuItem
                                                 onClick={() =>
                                                     selectedJobId &&
-                                                    handleEditJob(selectedJobId)
+                                                    handleViewJob(selectedJobId)
                                                 }
                                             >
-                                                Edit Posting
+                                                View Details
                                             </MenuItem>
                                             <MenuItem onClick={handleMenuClose}>
                                                 View Applicants
@@ -1251,27 +1256,47 @@ const EmployerDashboard = ({ theme }: { theme: Theme }) => {
                 )}
             </Grid>
             {/* Dialogs */}
-            <EmployerProfileDialog
-                open={editProfileOpen}
-                onClose={handleEditProfileClose}
-            />
-            <ChangePasswordDialog
-                open={changePasswordOpen}
-                onClose={handleChangePasswordClose}
-            />
-            <DeleteAccountDialog
-                open={deleteAccountOpen}
-                onClose={handleDeleteAccountClose}
-            />
-            <CreateJobDialog
-                open={createJobDialogOpen}
-                onClose={handleCreateJobDialogClose}
-            />
-            <UpdateJobDialog
-                open={updateJobDialogOpen}
-                onClose={handleUpdateJobDialogClose}
-                jobId={selectedJobId}
-            />
+            {editProfileOpen && (
+                <EmployerProfileDialog
+                    open={editProfileOpen}
+                    onClose={handleEditProfileClose}
+                />
+            )}
+            {changePasswordOpen && (
+                <ChangePasswordDialog
+                    open={changePasswordOpen}
+                    onClose={handleChangePasswordClose}
+                />
+            )}
+            {deleteAccountOpen && (
+                <DeleteAccountDialog
+                    open={deleteAccountOpen}
+                    onClose={handleDeleteAccountClose}
+                />
+            )}
+            {createJobDialogOpen && (
+                <CreateJobDialog
+                    open={createJobDialogOpen}
+                    onClose={handleCreateJobDialogClose}
+                />
+            )}
+            {updateJobDialogOpen && selectedJobId && (
+                <UpdateJobDialog
+                    open={updateJobDialogOpen}
+                    onClose={handleUpdateJobDialogClose}
+                    jobId={selectedJobId}
+                    job={viewedJob}
+                />
+            )}
+            {jobViewOpen && selectedJobId && (
+                <JobView
+                    open={jobViewOpen}
+                    onClose={() => setJobViewOpen(false)}
+                    jobId={selectedJobId}
+                    onEdit={handleEditJob}
+                    setViewedJob={setViewedJob}
+                />
+            )}
         </Container>
     );
 };

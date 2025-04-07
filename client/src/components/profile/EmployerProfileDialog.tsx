@@ -24,6 +24,7 @@ const EmployerProfileDialog = ({
     open,
     onClose,
 }: EmployerProfileDialogProps) => {
+    if (!open) return null;
     const { user, updateUserProfile } = useAuth();
     const { pushNotification } = useNotification();
 

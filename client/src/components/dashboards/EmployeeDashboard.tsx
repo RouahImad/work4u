@@ -18,20 +18,24 @@ import {
     Theme,
     CircularProgress,
     Alert,
+    Tooltip,
 } from "@mui/material";
 import {
     Work,
     Schedule,
     NotificationsActive,
     TrendingUp,
+    QuestionAnswer,
 } from "@mui/icons-material";
 import { useAuth } from "../../contexts/AuthContext";
 import { useDashboard } from "../../contexts/DashboardContext";
 import ChangePasswordDialog from "../profile/ChangePasswordDialog ";
 import DeleteAccountDialog from "../profile/DeleteAccountDialog ";
 import EditProfileDialog from "../profile/EditProfileDialog ";
+import InterviewDialog from "../jobs/InterviewDialog";
 import { format } from "date-fns";
 import { EditOutlined } from "@mui/icons-material";
+import { useNotification } from "../notifications/SlideInNotifications";
 
 const statusColors: Record<string, string> = {
     Applied: "#3498db",
@@ -45,11 +49,17 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
     const { user } = useAuth();
     const { employeeStats, loading, error, fetchEmployeeStats } =
         useDashboard();
+    const { pushNotification } = useNotification();
 
     // State for dialogs
     const [editProfileOpen, setEditProfileOpen] = useState(false);
     const [changePasswordOpen, setChangePasswordOpen] = useState(false);
     const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
+    
+    // Interview dialog state
+    const [interviewDialogOpen, setInterviewDialogOpen] = useState(false);
+    const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
+    const [selectedPostTitle, setSelectedPostTitle] = useState<string>("");
 
     // Create a properly formatted display name
     const displayName = user ? `${user.first_name} ${user.last_name}` : "User";
@@ -80,6 +90,21 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
 
     const handleDeleteAccountOpen = () => setDeleteAccountOpen(true);
     const handleDeleteAccountClose = () => setDeleteAccountOpen(false);
+
+    // Interview dialog handlers
+    const handleInterviewStart = (postId: number, postTitle: string) => {
+        setSelectedPostId(postId);
+        setSelectedPostTitle(postTitle);
+        setInterviewDialogOpen(true);
+    };
+
+    const handleInterviewClose = () => {
+        setInterviewDialogOpen(false);
+        setSelectedPostId(null);
+        setSelectedPostTitle("");
+        // Refresh data after interview completion
+        fetchEmployeeStats();
+    };
 
     return (
         <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
@@ -678,18 +703,38 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
                                                                             justifyContent:
                                                                                 "flex-end",
                                                                             mt: 2,
+                                                                            gap: 1
                                                                         }}
                                                                     >
                                                                         <Button
                                                                             size="small"
                                                                             variant="text"
-                                                                            sx={{
-                                                                                mr: 1,
-                                                                            }}
                                                                         >
                                                                             View
                                                                             Details
                                                                         </Button>
+                                                                        
+                                                                        {/* Interview button */}
+                                                                        {application.interview_id === 0 && 
+                                                                          application.status !== "accepte" && (
+                                                                            <Tooltip title="Take an automated interview for this position">
+                                                                              <Button
+                                                                                size="small"
+                                                                                variant="outlined"
+                                                                                color="secondary"
+                                                                                startIcon={<QuestionAnswer />}
+                                                                                onClick={() => 
+                                                                                    handleInterviewStart(
+                                                                                        application.cv_id, 
+                                                                                        application.post_title
+                                                                                    )
+                                                                                }
+                                                                              >
+                                                                                Take Interview
+                                                                              </Button>
+                                                                            </Tooltip>
+                                                                        )}
+                                                                        
                                                                         <Button
                                                                             size="small"
                                                                             variant="contained"
@@ -1105,6 +1150,17 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
                 open={deleteAccountOpen}
                 onClose={handleDeleteAccountClose}
             />
+            
+            {/* Interview Dialog */}
+            {selectedPostId && (
+                <InterviewDialog
+                    open={interviewDialogOpen}
+                    onClose={handleInterviewClose}
+                    postId={selectedPostId}
+                    postTitle={selectedPostTitle}
+                    interviewTime={30} // 30-minute interview
+                />
+            )}
         </Container>
     );
 };

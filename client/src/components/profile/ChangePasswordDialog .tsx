@@ -23,6 +23,7 @@ interface ChangePasswordDialogProps {
 }
 
 const ChangePasswordDialog = ({ open, onClose }: ChangePasswordDialogProps) => {
+    if (!open) return null;
     const { updatePassword } = useAuth();
     const { pushNotification } = useNotification();
 
