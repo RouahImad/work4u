@@ -26,35 +26,20 @@ import {
     Clear,
 } from "@mui/icons-material";
 import JobDetailView from "./JobDetailView";
-import { useNotification } from "../notifications/SlideInNotifications";
 import { format, formatDistanceToNow, isAfter } from "date-fns";
 import ReportJobDialog from "./ReportJobDialog";
-
-interface Job {
-    id: number;
-    title: string;
-    description: string;
-    final_date: string; // Expected ISO date string
-    uploaded_at: string; // Expected ISO date string
-    accepted: boolean;
-    user_id: number;
-    // Additional info
-    company_name: string;
-    company_address: string;
-    company_website: string;
-    salary: string;
-}
+import { useJobPost } from "../../contexts/JobPostContext";
+import { Job } from "../../types/Job.types";
 
 const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
-    const [jobs, setJobs] = useState<Job[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [loading, setLoading] = useState(false);
     const [filters, setFilters] = useState({
         location: "",
         company: "",
-        salary: "",
+        salaire: "",
     });
-    const { pushNotification } = useNotification();
+    const { fetchAllJobs, jobs } = useJobPost();
 
     // Selected job state
     const [selectedJob, setSelectedJob] = useState<Job | null>(null);
@@ -64,120 +49,21 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
     const [reportModalOpen, setReportModalOpen] = useState(false);
     const [currentJobId, setCurrentJobId] = useState<number | null>(null);
 
-    // New states for UI control
     const [searchVisible, setSearchVisible] = useState(false);
     const [filtersVisible, setFiltersVisible] = useState(false);
 
-    // Fetch jobs from API
     useEffect(() => {
         const fetchJobs = async () => {
             setLoading(true);
             try {
-                // const response = await axios.get("/api/jobs");
-                // setJobs(response.data);
-                setJobs([
-                    {
-                        id: 1,
-                        title: "Full Stack Developer",
-                        description:
-                            "We are looking for a Full Stack Developer to build and maintain our web applications Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quamquae consequuntur commodi quas excepturi, quasi, natusrepudiandae porro sapiente, saepe quibusdam quaerat asperioresaccusantium maiores eveniet id ducimus perspiciatis ullam.",
-                        final_date: new Date(
-                            Date.now() + 30 * 24 * 60 * 60 * 1000
-                        ).toISOString(), // 30 days from now
-                        uploaded_at: new Date(
-                            Date.now() - 2 * 24 * 60 * 60 * 1000
-                        ).toISOString(), // 2 days ago
-                        accepted: true,
-                        user_id: 1,
-                        company_name: "TechCorp",
-                        company_address: "New York, NY",
-                        company_website: "https://techcorp.example.com",
-                        salary: "80,000",
-                    },
-                    {
-                        id: 2,
-                        title: "UX/UI Designer",
-                        description:
-                            "Join our creative team to design beautiful and functional user interfaces Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quamquae consequuntur commodi quas excepturi, quasi, natusrepudiandae porro sapiente, saepe quibusdam quaerat asperioresaccusantium maiores eveniet id ducimus perspiciatis ullam.",
-                        final_date: new Date(
-                            Date.now() + 20 * 24 * 60 * 60 * 1000
-                        ).toISOString(), // 20 days from now
-                        uploaded_at: new Date(
-                            Date.now() - 7 * 24 * 60 * 60 * 1000
-                        ).toISOString(), // 7 days ago
-                        accepted: true,
-                        user_id: 2,
-                        company_name: "DesignHub",
-                        company_address: "San Francisco, CA",
-                        company_website: "https://designhub.example.com",
-                        salary: "90,000",
-                    },
-                    {
-                        id: 3,
-                        title: "DevOps Engineer",
-                        description:
-                            "Help us build and maintain our cloud infrastructure and CI/CD pipelines Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quam quae consequuntur commodi quas excepturi, quasi, natus repudiandae porro sapiente, saepe quibusdam quaerat asperiores accusantium maiores eveniet id ducimus perspiciatis ullam.",
-                        final_date: new Date(
-                            Date.now() + 15 * 24 * 60 * 60 * 1000
-                        ).toISOString(), // 15 days from now
-                        uploaded_at: new Date(
-                            Date.now() - 3 * 24 * 60 * 60 * 1000
-                        ).toISOString(), // 3 days ago
-                        accepted: true,
-                        user_id: 1,
-                        company_name: "CloudSystems",
-                        company_address: "Remote",
-                        company_website: "https://cloudsystems.example.com",
-                        salary: "100,000",
-                    },
-                    {
-                        id: 4,
-                        title: "Data Scientist",
-                        description:
-                            "Use machine learning and statistical analysis to unlock insights from our data Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quamquae consequuntur commodi quas excepturi, quasi, natusrepudiandae porro sapiente, saepe quibusdam quaerat asperioresaccusantium maiores eveniet id ducimus perspiciatis ullam.",
-                        final_date: new Date(
-                            Date.now() + 10 * 24 * 60 * 60 * 1000
-                        ).toISOString(), // 10 days from now
-                        uploaded_at: new Date().toISOString(), // Just now
-                        accepted: true,
-                        user_id: 3,
-                        company_name: "DataInsights",
-                        company_address: "Boston, MA",
-                        company_website: "https://datainsights.example.com",
-                        salary: "110,000",
-                    },
-                    {
-                        id: 5,
-                        title: "Mobile Developer",
-                        description:
-                            "Build native mobile applications for iOS and Android platforms Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quamquae consequuntur commodi quas excepturi, quasi, natusrepudiandae porro sapiente, saepe quibusdam quaerat asperioresaccusantium maiores eveniet id ducimus perspiciatis ullam.",
-                        final_date: new Date(
-                            Date.now() - 5 * 24 * 60 * 60 * 1000
-                        ).toISOString(), // 25 days from now
-                        uploaded_at: new Date(
-                            Date.now() - 15 * 24 * 60 * 60 * 1000
-                        ).toISOString(), // 5 days ago
-                        accepted: true,
-                        user_id: 2,
-                        company_name: "AppWorks",
-                        company_address: "Austin, TX",
-                        company_website: "https://appworks.example.com",
-                        salary: "85,000",
-                    },
-                ]);
-            } catch (error) {
-                console.error("Failed to fetch jobs:", error);
-                pushNotification(
-                    "Failed to load jobs. Please try again later.",
-                    "error"
-                );
+                await fetchAllJobs();
+                console.log(filters);
+            } finally {
+                setLoading(false);
             }
-            // finally {
-            //     setLoading(false);
-            // }
             setTimeout(() => {
                 setLoading(false);
-            }, 2000);
+            }, 700);
         };
 
         fetchJobs();
@@ -260,7 +146,7 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
             setFilters({
                 location: "",
                 company: "",
-                salary: "", // Clear salary too
+                salaire: "",
             });
         }
     };
@@ -270,14 +156,14 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
         setFilters({
             location: "",
             company: "",
-            salary: "", // Clear salary too
+            salaire: "",
         });
     };
 
     // Apply filters and search
     const filteredJobs = jobs.filter((job) => {
         // Only show accepted jobs
-        if (!job.accepted) return false;
+        // if (!job.accepted) return false;
 
         const matchesSearch =
             job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -298,10 +184,8 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
                   .includes(filters.company.toLowerCase()) ?? false
             : true;
 
-        const matchesSalary = filters.salary
-            ? job.salary &&
-              parseFloat(job.salary.replace(/,/g, "")) >=
-                  parseFloat(filters.salary)
+        const matchesSalary = filters.salaire
+            ? job.salaire && job.salaire >= parseFloat(filters.salaire)
             : true;
 
         return (
@@ -419,7 +303,7 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
                                     variant="outlined"
                                     name="salary"
                                     type="number"
-                                    value={filters.salary}
+                                    value={filters.salaire}
                                     onChange={handleFilterChange}
                                     InputProps={{
                                         startAdornment: (
@@ -446,7 +330,7 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
             {(searchTerm ||
                 filters.location ||
                 filters.company ||
-                filters.salary) && (
+                filters.salaire) && (
                 <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2 }}>
                     {searchTerm && (
                         <Chip
@@ -479,11 +363,11 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
                             variant="outlined"
                         />
                     )}
-                    {filters.salary && (
+                    {filters.salaire && (
                         <Chip
-                            label={`Min Salary: $${filters.salary}`}
+                            label={`Min Salary: $${filters.salaire}`}
                             onDelete={() =>
-                                setFilters({ ...filters, salary: "" })
+                                setFilters({ ...filters, salaire: "" })
                             }
                             size="small"
                             color="primary"

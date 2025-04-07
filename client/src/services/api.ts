@@ -181,6 +181,7 @@ export const postApi = {
         title: string;
         description: string;
         final_date: string;
+        salaire: number;
     }) => apiClient.post("/post/new/", postData),
 
     getAllPosts: () => apiClient.get("/post/getAll/"),
@@ -189,7 +190,12 @@ export const postApi = {
 
     updatePost: (
         id: number,
-        postData: { title?: string; description?: string; final_date?: string }
+        postData: {
+            title?: string;
+            description?: string;
+            final_date?: string;
+            salaire?: number;
+        }
     ) => apiClient.put(`/post/update/${id}/`, postData),
 
     deletePost: (id: number) => apiClient.delete(`/post/delete/${id}/`),

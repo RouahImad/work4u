@@ -31,6 +31,7 @@ import ChangePasswordDialog from "../profile/ChangePasswordDialog ";
 import DeleteAccountDialog from "../profile/DeleteAccountDialog ";
 import EditProfileDialog from "../profile/EditProfileDialog ";
 import { format } from "date-fns";
+import { EditOutlined } from "@mui/icons-material";
 
 const statusColors: Record<string, string> = {
     Applied: "#3498db",
@@ -86,24 +87,62 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
                 <Grid item xs={12}>
                     <Paper sx={{ p: 3, display: "flex", alignItems: "center" }}>
                         <Avatar
-                            sx={{ width: 80, height: 80, mr: 3 }}
+                            sx={{
+                                width: 80,
+                                height: 80,
+                                mr: {
+                                    xs: 2,
+                                    sm: 3,
+                                },
+                            }}
                             alt={displayName}
-                            src={`https://ui-avatars.com/api/?name=${user?.first_name}+${user?.last_name}&background=random`}
+                            src={`https://ui-avatars.com/api/?name=${user?.first_name}+${user?.last_name}&background=random&format=svg`}
                         >
                             {user?.first_name?.[0]}
                             {user?.last_name?.[0]}
                         </Avatar>
-                        <Box>
-                            <Typography
-                                variant="h5"
-                                component="h1"
-                                gutterBottom
+                        <Box
+                            sx={{
+                                display: "flex",
+                                alignItems: {
+                                    xs: "flex-start",
+                                    sm: "center",
+                                },
+                                justifyContent: "space-between",
+                                flexDirection: {
+                                    xs: "column",
+                                    sm: "row",
+                                },
+                                flexGrow: 1,
+                                gap: 2,
+                            }}
+                        >
+                            <Box>
+                                <Typography
+                                    variant="h5"
+                                    component="h1"
+                                    gutterBottom
+                                >
+                                    Welcome back, {displayName}
+                                </Typography>
+                                <Typography
+                                    variant="body1"
+                                    color="text.secondary"
+                                >
+                                    {userEmail} | {user?.role || "Employee"}
+                                </Typography>
+                            </Box>
+                            <Button
+                                variant="outlined"
+                                startIcon={<EditOutlined />}
+                                onClick={handleEditProfileOpen}
+                                color="primary"
+                                sx={{
+                                    whiteSpace: "nowrap",
+                                }}
                             >
-                                Welcome back, {displayName}
-                            </Typography>
-                            <Typography variant="body1" color="text.secondary">
-                                {userEmail} | {user?.role || "Employee"}
-                            </Typography>
+                                Edit Profile
+                            </Button>
                         </Box>
                     </Paper>
                 </Grid>
@@ -931,15 +970,30 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
                                                             sx={{
                                                                 display: "flex",
                                                                 mb: 2,
+                                                                flexDirection: {
+                                                                    xs: "column",
+                                                                    sm: "row",
+                                                                },
+                                                                justifyContent:
+                                                                    "center",
+                                                                width: "100%",
+                                                                gap: 2,
                                                             }}
                                                         >
                                                             <Button
                                                                 variant="contained"
                                                                 size="medium"
-                                                                sx={{ mr: 2 }}
                                                                 onClick={
                                                                     handleChangePasswordOpen
                                                                 }
+                                                                sx={{
+                                                                    whiteSpace:
+                                                                        "nowrap",
+                                                                    minWidth: {
+                                                                        xs: "100%",
+                                                                        sm: "auto",
+                                                                    },
+                                                                }}
                                                             >
                                                                 Change Password
                                                             </Button>
@@ -950,6 +1004,14 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
                                                                 onClick={
                                                                     handleDeleteAccountOpen
                                                                 }
+                                                                sx={{
+                                                                    whiteSpace:
+                                                                        "nowrap",
+                                                                    minWidth: {
+                                                                        xs: "100%",
+                                                                        sm: "auto",
+                                                                    },
+                                                                }}
                                                             >
                                                                 Delete Account
                                                             </Button>

@@ -227,18 +227,6 @@ const NavBar = ({
                                     Dashboard
                                 </Typography>
                             </MenuItem>
-
-                            {/* Add logout to mobile menu */}
-                            <MenuItem
-                                onClick={handleLogout}
-                                sx={{
-                                    color: "inherit",
-                                }}
-                            >
-                                <Typography textAlign="center">
-                                    Logout
-                                </Typography>
-                            </MenuItem>
                         </Menu>
                     </Box>
 

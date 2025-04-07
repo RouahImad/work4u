@@ -23,21 +23,7 @@ import { motion } from "framer-motion";
 import { format, isAfter, parseISO } from "date-fns";
 import JobApplication from "./JobApplication";
 import { useState } from "react";
-
-// Update the interface to match your actual job structure
-interface Job {
-    id: number;
-    title: string;
-    description: string;
-    final_date: string;
-    uploaded_at: string;
-    accepted: boolean;
-    user_id: number;
-    company_name: string;
-    company_address: string;
-    company_website: string;
-    salary: string; // Starting salary
-}
+import { Job } from "../../types/Job.types";
 
 interface JobDetailViewProps {
     job: Job;
@@ -243,7 +229,7 @@ const JobDetailView = ({
                                 </Box>
                             )}
 
-                            {job.salary && (
+                            {job.salaire && (
                                 <Box
                                     sx={{
                                         display: "flex",
@@ -268,7 +254,7 @@ const JobDetailView = ({
                                         variant="body1"
                                         color="text.primary"
                                     >
-                                        ${job.salary} (negotiable)
+                                        ${job.salaire} (negotiable)
                                     </Typography>
                                 </Box>
                             )}

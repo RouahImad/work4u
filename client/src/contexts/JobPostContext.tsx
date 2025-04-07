@@ -1,26 +1,17 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 import { postApi } from "../services/api";
 import { useNotification } from "../components/notifications/SlideInNotifications";
-
-// Define the job post interface
-interface JobPost {
-    id: number;
-    title: string;
-    description: string;
-    final_date: string;
-    created_at?: string;
-    employer_id?: number;
-}
+import { Job } from "../types/Job.types";
 
 interface JobPostContextType {
-    jobs: JobPost[];
-    currentJob: JobPost | null;
+    jobs: Job[];
+    currentJob: Job | null;
     loading: boolean;
     error: string | null;
     fetchAllJobs: () => Promise<void>;
     fetchJobById: (id: number) => Promise<void>;
-    createJob: (jobData: Omit<JobPost, "id">) => Promise<void>;
-    updateJob: (id: number, jobData: Partial<JobPost>) => Promise<void>;
+    createJob: (jobData: Omit<Job, "id">) => Promise<void>;
+    updateJob: (id: number, jobData: Partial<Job>) => Promise<void>;
     deleteJob: (id: number) => Promise<void>;
     reportJob: (reportData: {
         post_id: number;
@@ -28,11 +19,17 @@ interface JobPostContextType {
     }) => Promise<void>;
 }
 
+const tmp = {
+    companny_name: "Company Name",
+    company_address: "Company Address",
+    company_website: "https://company-website.com",
+};
+
 const JobPostContext = createContext<JobPostContextType | undefined>(undefined);
 
 export const JobPostProvider = ({ children }: { children: ReactNode }) => {
-    const [jobs, setJobs] = useState<JobPost[]>([]);
-    const [currentJob, setCurrentJob] = useState<JobPost | null>(null);
+    const [jobs, setJobs] = useState<Job[]>([]);
+    const [currentJob, setCurrentJob] = useState<Job | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const { pushNotification } = useNotification();
@@ -42,12 +39,24 @@ export const JobPostProvider = ({ children }: { children: ReactNode }) => {
             setLoading(true);
             setError(null);
             const response = await postApi.getAllPosts();
-            setJobs(response.data);
+
+            response.data.posts?.forEach((job: Job) => {
+                job.company_name = tmp.companny_name;
+                job.company_address = tmp.company_address;
+                job.company_website = tmp.company_website;
+            });
+
+            setJobs(response.data.posts ? response.data.posts.reverse() : []);
         } catch (err: any) {
             const errorMessage =
                 err.response?.data?.detail || "Failed to fetch jobs";
             setError(errorMessage);
-            pushNotification(errorMessage, "error");
+            console.log(errorMessage);
+
+            pushNotification(
+                "Failed to load jobs. Please try again later.",
+                "error"
+            );
         } finally {
             setLoading(false);
         }
@@ -73,13 +82,13 @@ export const JobPostProvider = ({ children }: { children: ReactNode }) => {
         title: string;
         description: string;
         final_date: string;
+        salaire: number;
     }) => {
         try {
             setLoading(true);
             setError(null);
             await postApi.createPost(jobData);
             pushNotification("Job posted successfully!", "success");
-            // Refresh the jobs list
             await fetchAllJobs();
         } catch (err: any) {
             const errorMessage =
@@ -94,14 +103,18 @@ export const JobPostProvider = ({ children }: { children: ReactNode }) => {
 
     const updateJob = async (
         id: number,
-        jobData: { title?: string; description?: string; final_date?: string }
+        jobData: {
+            title?: string;
+            description?: string;
+            final_date?: string;
+            salaire?: number;
+        }
     ) => {
         try {
             setLoading(true);
             setError(null);
             await postApi.updatePost(id, jobData);
             pushNotification("Job updated successfully!", "success");
-            // Refresh current job data
             await fetchJobById(id);
         } catch (err: any) {
             const errorMessage =
