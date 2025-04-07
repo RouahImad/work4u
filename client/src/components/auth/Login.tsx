@@ -26,7 +26,6 @@ const Login = () => {
         userRole,
         isAuthenticated,
         handlesOwnNotifications,
-        logAdmin,
         loading: authLoading,
     } = useAuth();
     const { pushNotification } = useNotification();
@@ -106,19 +105,6 @@ const Login = () => {
 
         setIsLoading(true);
         setLoginError("");
-
-        const adminMail = import.meta.env.VITE_ADMIN || "pfe";
-        const adminPass = import.meta.env.VITE_PASS || "pfe";
-
-        if (formData.email === adminMail && formData.password === adminPass) {
-            logAdmin(adminMail, adminPass);
-            pushNotification(
-                "Successfully logged in as admin! Redirecting...",
-                "success"
-            );
-            redirectBasedOnRole("admin");
-            return;
-        }
 
         try {
             // Call login from auth context

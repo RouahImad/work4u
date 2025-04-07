@@ -170,7 +170,7 @@ const NavBar = ({
                                     component="span"
                                     sx={{
                                         fontFamily: "Pacifico, cursive",
-                                        color: theme.palette.secondary.main,
+                                        color: "rgb(255, 80, 80)",
                                         ml: 0.5,
                                         position: "relative",
                                         display: "inline-block",

@@ -21,11 +21,26 @@ import {
     MenuItem,
     Theme,
     Card,
+    CardContent,
     Avatar,
     CircularProgress,
     Alert,
+    Badge,
+    LinearProgress,
 } from "@mui/material";
-import { MoreVert, Add, EditOutlined } from "@mui/icons-material";
+import {
+    MoreVert,
+    Add,
+    EditOutlined,
+    WorkOutline,
+    BusinessCenter,
+    PersonOutline,
+    CheckCircle,
+    AssignmentInd,
+    Schedule,
+    TrendingUp,
+    Visibility,
+} from "@mui/icons-material";
 import { useNotification } from "../notifications/SlideInNotifications";
 import { useAuth } from "../../contexts/AuthContext";
 import { useDashboard } from "../../contexts/DashboardContext";
@@ -157,6 +172,28 @@ const EmployerDashboard = ({ theme }: { theme: Theme }) => {
 
     const displayName = user ? `${user.first_name} ${user.last_name}` : "User";
 
+    const acceptedApplicationsCount =
+        employerStats?.applications?.filter((a) => a.status === "accepte")
+            ?.length || 0;
+
+    const recentPostsCount =
+        employerStats?.my_posts?.filter(
+            (p) =>
+                new Date(p.uploaded_at) >
+                new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+        )?.length || 0;
+
+    // Calculate average salary once
+    const averageSalary =
+        employerStats?.my_posts && employerStats.my_posts.length > 0
+            ? Math.round(
+                  employerStats.my_posts.reduce(
+                      (sum, post) => sum + Number(post.salaire || 0),
+                      0
+                  ) / employerStats.my_posts.length
+              )
+            : 0;
+
     return (
         <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
             <Grid container spacing={3}>
@@ -176,6 +213,7 @@ const EmployerDashboard = ({ theme }: { theme: Theme }) => {
                                     xs: 2,
                                     sm: 3,
                                 },
+                                bgcolor: "primary.main",
                             }}
                             alt={displayName}
                             src={`https://ui-avatars.com/api/?name=${user?.first_name}+${user?.last_name}&background=random&format=svg`}
@@ -328,332 +366,628 @@ const EmployerDashboard = ({ theme }: { theme: Theme }) => {
 
                 {activeTab === "overview" && (
                     <>
-                        {/* Stats Cards */}
+                        {/* Stats Overview Cards */}
                         <Grid item xs={12} md={8}>
-                            <Grid container spacing={3}>
-                                <Grid item xs={12} sm={6} md={4}>
-                                    <Paper
-                                        sx={{
-                                            p: 2,
-                                            display: "flex",
-                                            flexDirection: "column",
-                                            height: 140,
-                                            transition: "transform 0.3s ease",
-                                            "&:hover": {
-                                                transform: "translateY(-5px)",
-                                            },
-                                        }}
-                                    >
-                                        <Box sx={{ mb: 1 }}>
-                                            <Typography
-                                                color="text.secondary"
-                                                variant="overline"
-                                            >
-                                                Active Job Postings
-                                            </Typography>
-                                        </Box>
-                                        <Typography component="p" variant="h3">
-                                            {loading ? (
-                                                <CircularProgress size={24} />
-                                            ) : (
-                                                employerStats?.total_posts || 0
-                                            )}
-                                        </Typography>
+                            <Paper
+                                sx={{
+                                    p: 3,
+                                    height: "100%",
+                                    borderRadius: 2,
+                                }}
+                            >
+                                <Typography variant="h6" gutterBottom>
+                                    Recruitment Overview
+                                </Typography>
+                                <Grid container spacing={3}>
+                                    <Grid item xs={6} sm={3}>
                                         <Box
                                             sx={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                mt: "auto",
+                                                textAlign: "center",
+                                                p: 1,
                                             }}
                                         >
                                             <Typography
-                                                color="success.main"
-                                                sx={{ mr: 1 }}
-                                                variant="body2"
+                                                variant="h4"
+                                                color="primary.main"
                                             >
-                                                Active
+                                                {employerStats?.total_posts ||
+                                                    0}
                                             </Typography>
                                             <Typography
+                                                variant="body2"
                                                 color="text.secondary"
-                                                variant="caption"
                                             >
-                                                job postings
+                                                Job Posts
                                             </Typography>
                                         </Box>
-                                    </Paper>
-                                </Grid>
+                                    </Grid>
 
-                                <Grid item xs={12} sm={6} md={4}>
-                                    <Paper
-                                        sx={{
-                                            p: 2,
-                                            display: "flex",
-                                            flexDirection: "column",
-                                            height: 140,
-                                            transition: "transform 0.3s ease",
-                                            "&:hover": {
-                                                transform: "translateY(-5px)",
-                                            },
-                                        }}
-                                    >
-                                        <Box sx={{ mb: 1 }}>
+                                    <Grid item xs={6} sm={3}>
+                                        <Box
+                                            sx={{
+                                                textAlign: "center",
+                                                p: 1,
+                                            }}
+                                        >
                                             <Typography
+                                                variant="h4"
+                                                color="primary.main"
+                                            >
+                                                {employerStats?.total_applications ||
+                                                    0}
+                                            </Typography>
+                                            <Typography
+                                                variant="body2"
                                                 color="text.secondary"
-                                                variant="overline"
                                             >
                                                 Total Applicants
                                             </Typography>
                                         </Box>
-                                        <Typography component="p" variant="h3">
-                                            {loading ? (
-                                                <CircularProgress size={24} />
-                                            ) : (
-                                                employerStats?.total_applications ||
-                                                0
-                                            )}
-                                        </Typography>
-                                        <Box
-                                            sx={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                mt: "auto",
-                                            }}
-                                        >
-                                            <Typography
-                                                color="text.secondary"
-                                                variant="caption"
-                                            >
-                                                across all job postings
-                                            </Typography>
-                                        </Box>
-                                    </Paper>
-                                </Grid>
+                                    </Grid>
 
-                                <Grid item xs={12} sm={6} md={4}>
-                                    <Paper
-                                        sx={{
-                                            p: 2,
-                                            display: "flex",
-                                            flexDirection: "column",
-                                            height: 140,
-                                            transition: "transform 0.3s ease",
-                                            "&:hover": {
-                                                transform: "translateY(-5px)",
-                                            },
-                                        }}
-                                    >
-                                        <Box sx={{ mb: 1 }}>
-                                            <Typography
-                                                color="text.secondary"
-                                                variant="overline"
-                                            >
-                                                New Applicants
-                                            </Typography>
-                                        </Box>
-                                        <Typography component="p" variant="h3">
-                                            {loading ? (
-                                                <CircularProgress size={24} />
-                                            ) : (
-                                                employerStats?.pending_applications ||
-                                                0
-                                            )}
-                                        </Typography>
+                                    <Grid item xs={6} sm={3}>
                                         <Box
                                             sx={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                mt: "auto",
+                                                textAlign: "center",
+                                                p: 1,
                                             }}
                                         >
                                             <Typography
-                                                color={
-                                                    employerStats?.pending_applications
-                                                        ? "warning.main"
-                                                        : "text.secondary"
-                                                }
-                                                sx={{ mr: 1 }}
+                                                variant="h4"
+                                                color="warning.main"
+                                            >
+                                                {employerStats?.pending_applications ||
+                                                    0}
+                                            </Typography>
+                                            <Typography
                                                 variant="body2"
+                                                color="text.secondary"
                                             >
                                                 Pending Review
                                             </Typography>
                                         </Box>
-                                    </Paper>
-                                </Grid>
+                                    </Grid>
 
-                                {/* Job Postings List */}
-                                <Grid item xs={12}>
-                                    <Paper
-                                        sx={{
-                                            p: 2,
-                                            display: "flex",
-                                            flexDirection: "column",
-                                        }}
-                                    >
+                                    <Grid item xs={6} sm={3}>
                                         <Box
                                             sx={{
-                                                display: "flex",
-                                                justifyContent: "space-between",
-                                                alignItems: "center",
-                                                mb: 2,
+                                                textAlign: "center",
+                                                p: 1,
                                             }}
                                         >
                                             <Typography
-                                                component="h2"
-                                                variant="h6"
-                                                color="primary"
-                                                gutterBottom
+                                                variant="h4"
+                                                color="success.main"
                                             >
-                                                Your Job Postings
+                                                {acceptedApplicationsCount}
                                             </Typography>
-                                            <Button
-                                                variant="contained"
-                                                size="small"
-                                                startIcon={<Add />}
-                                                onClick={handleCreateJob}
+                                            <Typography
+                                                variant="body2"
+                                                color="text.secondary"
                                             >
-                                                Post New Job
-                                            </Button>
+                                                Accepted
+                                            </Typography>
                                         </Box>
+                                    </Grid>
+                                </Grid>
 
-                                        {loading ? (
-                                            <Box
-                                                sx={{
-                                                    display: "flex",
-                                                    justifyContent: "center",
-                                                    p: 3,
-                                                }}
+                                <Box sx={{ mt: 2 }}>
+                                    <Divider />
+                                    <Grid container spacing={2} sx={{ mt: 2 }}>
+                                        <Grid item xs={4}>
+                                            <Badge
+                                                badgeContent={
+                                                    employerStats?.pending_applications ||
+                                                    0
+                                                }
+                                                color="warning"
+                                                max={999}
                                             >
-                                                <CircularProgress />
-                                            </Box>
-                                        ) : error ? (
-                                            <Alert severity="error">
-                                                {error}
-                                            </Alert>
-                                        ) : employerStats?.my_posts &&
-                                          employerStats.my_posts.length > 0 ? (
-                                            <TableContainer>
-                                                <Table size="medium">
-                                                    <TableHead>
-                                                        <TableRow>
-                                                            <TableCell>
-                                                                Job Title
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                Salary
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                Posted Date
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                Actions
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    </TableHead>
-                                                    <TableBody>
-                                                        {employerStats.my_posts.map(
-                                                            (job) => (
-                                                                <TableRow
-                                                                    key={job.id}
-                                                                >
-                                                                    <TableCell>
-                                                                        {
-                                                                            job.title
-                                                                        }
-                                                                    </TableCell>
-                                                                    <TableCell>
-                                                                        {
-                                                                            job.salaire
-                                                                        }
-                                                                    </TableCell>
-                                                                    <TableCell>
-                                                                        {formatDate(
-                                                                            job.uploaded_at
-                                                                        )}
-                                                                    </TableCell>
-                                                                    <TableCell>
-                                                                        <IconButton
-                                                                            size="small"
-                                                                            onClick={(
-                                                                                event
-                                                                            ) =>
-                                                                                handleMenuClick(
-                                                                                    event,
-                                                                                    job.id
-                                                                                )
-                                                                            }
-                                                                        >
-                                                                            <MoreVert fontSize="small" />
-                                                                        </IconButton>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                            )
-                                                        )}
-                                                    </TableBody>
-                                                </Table>
-                                            </TableContainer>
-                                        ) : (
-                                            <Box
-                                                sx={{
-                                                    textAlign: "center",
-                                                    py: 3,
-                                                }}
+                                                <Chip
+                                                    icon={<AssignmentInd />}
+                                                    label="Pending"
+                                                    variant="outlined"
+                                                />
+                                            </Badge>
+                                        </Grid>
+                                        <Grid item xs={4}>
+                                            <Badge
+                                                badgeContent={
+                                                    acceptedApplicationsCount
+                                                }
+                                                color="success"
+                                                max={999}
                                             >
-                                                <Typography variant="body1">
-                                                    No job postings found
+                                                <Chip
+                                                    icon={<CheckCircle />}
+                                                    label="Accepted"
+                                                    variant="outlined"
+                                                />
+                                            </Badge>
+                                        </Grid>
+                                        <Grid item xs={4}>
+                                            <Badge
+                                                badgeContent={recentPostsCount}
+                                                color="primary"
+                                                max={999}
+                                            >
+                                                <Chip
+                                                    icon={<Schedule />}
+                                                    label="Recent Posts"
+                                                    variant="outlined"
+                                                />
+                                            </Badge>
+                                        </Grid>
+                                    </Grid>
+                                </Box>
+                            </Paper>
+                        </Grid>
+
+                        {/* Activity Stats */}
+                        <Grid item xs={12} md={4}>
+                            <Paper
+                                sx={{
+                                    p: 3,
+                                    height: "100%",
+                                    borderRadius: 2,
+                                }}
+                            >
+                                <Typography variant="h6" gutterBottom>
+                                    Recruitment Progress
+                                </Typography>
+
+                                <Box sx={{ mb: 3, mt: 2 }}>
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            mb: 1,
+                                        }}
+                                    >
+                                        <Typography variant="body2">
+                                            Application Rate
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            {(() => {
+                                                const totalPosts = Math.max(
+                                                    employerStats?.total_posts ||
+                                                        0,
+                                                    1
+                                                );
+                                                const totalApps =
+                                                    employerStats?.total_applications ||
+                                                    0;
+                                                return `${Math.min(
+                                                    100,
+                                                    Math.round(
+                                                        (totalApps /
+                                                            totalPosts) *
+                                                            100
+                                                    )
+                                                )}%`;
+                                            })()}
+                                        </Typography>
+                                    </Box>
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={(() => {
+                                            const totalPosts = Math.max(
+                                                employerStats?.total_posts || 0,
+                                                1
+                                            );
+                                            const totalApps =
+                                                employerStats?.total_applications ||
+                                                0;
+                                            return Math.min(
+                                                100,
+                                                (totalApps / totalPosts) * 100
+                                            );
+                                        })()}
+                                        sx={{
+                                            height: 8,
+                                            borderRadius: 4,
+                                        }}
+                                        color="primary"
+                                    />
+                                </Box>
+
+                                <Box sx={{ mb: 3 }}>
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            mb: 1,
+                                        }}
+                                    >
+                                        <Typography variant="body2">
+                                            Review Progress
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            {(() => {
+                                                const totalApps = Math.max(
+                                                    employerStats?.total_applications ||
+                                                        0,
+                                                    1
+                                                );
+                                                const pendingApps =
+                                                    employerStats?.pending_applications ||
+                                                    0;
+                                                return `${Math.round(
+                                                    100 -
+                                                        (pendingApps /
+                                                            totalApps) *
+                                                            100
+                                                )}%`;
+                                            })()}
+                                        </Typography>
+                                    </Box>
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={(() => {
+                                            const totalApps = Math.max(
+                                                employerStats?.total_applications ||
+                                                    0,
+                                                1
+                                            );
+                                            const pendingApps =
+                                                employerStats?.pending_applications ||
+                                                0;
+                                            return (
+                                                100 -
+                                                (pendingApps / totalApps) * 100
+                                            );
+                                        })()}
+                                        sx={{
+                                            height: 8,
+                                            borderRadius: 4,
+                                        }}
+                                        color="warning"
+                                    />
+                                </Box>
+
+                                <Box sx={{ mb: 3 }}>
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            mb: 1,
+                                        }}
+                                    >
+                                        <Typography variant="body2">
+                                            Acceptance Rate
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            {(() => {
+                                                const totalApps = Math.max(
+                                                    employerStats?.total_applications ||
+                                                        0,
+                                                    1
+                                                );
+                                                return `${Math.round(
+                                                    (acceptedApplicationsCount /
+                                                        totalApps) *
+                                                        100
+                                                )}%`;
+                                            })()}
+                                        </Typography>
+                                    </Box>
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={(() => {
+                                            const totalApps = Math.max(
+                                                employerStats?.total_applications ||
+                                                    0,
+                                                1
+                                            );
+                                            return (
+                                                (acceptedApplicationsCount /
+                                                    totalApps) *
+                                                100
+                                            );
+                                        })()}
+                                        sx={{
+                                            height: 8,
+                                            borderRadius: 4,
+                                        }}
+                                        color="success"
+                                    />
+                                </Box>
+
+                                <Button
+                                    variant="outlined"
+                                    startIcon={<Visibility />}
+                                    onClick={() => setActiveTab("applicants")}
+                                    fullWidth
+                                    sx={{ mt: 1 }}
+                                >
+                                    View All Applicants
+                                </Button>
+                            </Paper>
+                        </Grid>
+
+                        {/* Platform Activity */}
+                        <Grid item xs={12}>
+                            <Paper sx={{ p: 3, borderRadius: 2 }}>
+                                <Typography variant="h6" gutterBottom>
+                                    Recruitment Activity
+                                </Typography>
+                                <Grid container spacing={3} sx={{ mt: 1 }}>
+                                    <Grid item xs={12} sm={6} md={3}>
+                                        <Card
+                                            elevation={0}
+                                            sx={{
+                                                bgcolor: "background.default",
+                                                borderRadius: 2,
+                                            }}
+                                        >
+                                            <CardContent
+                                                sx={{ textAlign: "center" }}
+                                            >
+                                                <WorkOutline
+                                                    color="primary"
+                                                    sx={{ fontSize: 40, mb: 1 }}
+                                                />
+                                                <Typography variant="h6">
+                                                    {employerStats?.total_posts ||
+                                                        0}
                                                 </Typography>
                                                 <Typography
                                                     variant="body2"
                                                     color="text.secondary"
                                                 >
-                                                    Create your first job
-                                                    posting to start receiving
-                                                    applications
+                                                    Active Job Posts
                                                 </Typography>
-                                            </Box>
-                                        )}
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
 
-                                        <Menu
-                                            id="job-actions-menu"
-                                            anchorEl={anchorEl}
-                                            keepMounted
-                                            open={Boolean(anchorEl)}
-                                            onClose={handleMenuClose}
+                                    <Grid item xs={12} sm={6} md={3}>
+                                        <Card
+                                            elevation={0}
+                                            sx={{
+                                                bgcolor: "background.default",
+                                                borderRadius: 2,
+                                            }}
                                         >
-                                            <MenuItem
-                                                onClick={() =>
-                                                    selectedJobId &&
-                                                    handleViewJob(selectedJobId)
-                                                }
+                                            <CardContent
+                                                sx={{ textAlign: "center" }}
                                             >
-                                                View Details
-                                            </MenuItem>
-                                            <MenuItem onClick={handleMenuClose}>
-                                                View Applicants
-                                            </MenuItem>
-                                            <MenuItem
-                                                onClick={() =>
-                                                    selectedJobId &&
-                                                    handleCloseJob(
-                                                        selectedJobId
-                                                    )
-                                                }
+                                                <PersonOutline
+                                                    color="primary"
+                                                    sx={{ fontSize: 40, mb: 1 }}
+                                                />
+                                                <Typography variant="h6">
+                                                    {employerStats?.total_applications ||
+                                                        0}
+                                                </Typography>
+                                                <Typography
+                                                    variant="body2"
+                                                    color="text.secondary"
+                                                >
+                                                    Total Applicants
+                                                </Typography>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+
+                                    <Grid item xs={12} sm={6} md={3}>
+                                        <Card
+                                            elevation={0}
+                                            sx={{
+                                                bgcolor: "background.default",
+                                                borderRadius: 2,
+                                            }}
+                                        >
+                                            <CardContent
+                                                sx={{ textAlign: "center" }}
                                             >
-                                                Close Posting
-                                            </MenuItem>
-                                            <MenuItem
-                                                onClick={() =>
-                                                    selectedJobId &&
-                                                    handleDeleteJob(
-                                                        selectedJobId
-                                                    )
-                                                }
+                                                <BusinessCenter
+                                                    color="primary"
+                                                    sx={{ fontSize: 40, mb: 1 }}
+                                                />
+                                                <Typography variant="h6">
+                                                    {acceptedApplicationsCount}
+                                                </Typography>
+                                                <Typography
+                                                    variant="body2"
+                                                    color="text.secondary"
+                                                >
+                                                    Positions Filled
+                                                </Typography>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+
+                                    <Grid item xs={12} sm={6} md={3}>
+                                        <Card
+                                            elevation={0}
+                                            sx={{
+                                                bgcolor: "background.default",
+                                                borderRadius: 2,
+                                            }}
+                                        >
+                                            <CardContent
+                                                sx={{ textAlign: "center" }}
                                             >
-                                                Delete
-                                            </MenuItem>
-                                        </Menu>
-                                    </Paper>
+                                                <TrendingUp
+                                                    color="primary"
+                                                    sx={{ fontSize: 40, mb: 1 }}
+                                                />
+                                                <Typography variant="h6">
+                                                    ${averageSalary}
+                                                </Typography>
+                                                <Typography
+                                                    variant="body2"
+                                                    color="text.secondary"
+                                                >
+                                                    Average Salary
+                                                </Typography>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
                                 </Grid>
-                            </Grid>
+                            </Paper>
+                        </Grid>
+
+                        {/* Job Postings List */}
+                        <Grid item xs={12}>
+                            <Paper
+                                sx={{
+                                    p: 2,
+                                    display: "flex",
+                                    flexDirection: "column",
+                                }}
+                            >
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                        mb: 2,
+                                    }}
+                                >
+                                    <Typography
+                                        component="h2"
+                                        variant="h6"
+                                        color="primary"
+                                        gutterBottom
+                                    >
+                                        Your Job Postings
+                                    </Typography>
+                                    <Button
+                                        variant="contained"
+                                        size="small"
+                                        startIcon={<Add />}
+                                        onClick={handleCreateJob}
+                                    >
+                                        Post New Job
+                                    </Button>
+                                </Box>
+
+                                {loading ? (
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            justifyContent: "center",
+                                            p: 3,
+                                        }}
+                                    >
+                                        <CircularProgress />
+                                    </Box>
+                                ) : error ? (
+                                    <Alert severity="error">{error}</Alert>
+                                ) : employerStats?.my_posts &&
+                                  employerStats.my_posts.length > 0 ? (
+                                    <TableContainer>
+                                        <Table size="medium">
+                                            <TableHead>
+                                                <TableRow>
+                                                    <TableCell>
+                                                        Job Title
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        Salary
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        Posted Date
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        Actions
+                                                    </TableCell>
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                {employerStats.my_posts.map(
+                                                    (job) => (
+                                                        <TableRow key={job.id}>
+                                                            <TableCell>
+                                                                {job.title}
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                {job.salaire}
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                {formatDate(
+                                                                    job.uploaded_at
+                                                                )}
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <IconButton
+                                                                    size="small"
+                                                                    onClick={(
+                                                                        event
+                                                                    ) =>
+                                                                        handleMenuClick(
+                                                                            event,
+                                                                            job.id
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <MoreVert fontSize="small" />
+                                                                </IconButton>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    )
+                                                )}
+                                            </TableBody>
+                                        </Table>
+                                    </TableContainer>
+                                ) : (
+                                    <Box
+                                        sx={{
+                                            textAlign: "center",
+                                            py: 3,
+                                        }}
+                                    >
+                                        <Typography variant="body1">
+                                            No job postings found
+                                        </Typography>
+                                        <Typography
+                                            variant="body2"
+                                            color="text.secondary"
+                                        >
+                                            Create your first job posting to
+                                            start receiving applications
+                                        </Typography>
+                                    </Box>
+                                )}
+
+                                <Menu
+                                    id="job-actions-menu"
+                                    anchorEl={anchorEl}
+                                    keepMounted
+                                    open={Boolean(anchorEl)}
+                                    onClose={handleMenuClose}
+                                >
+                                    <MenuItem
+                                        onClick={() =>
+                                            selectedJobId &&
+                                            handleViewJob(selectedJobId)
+                                        }
+                                    >
+                                        View Details
+                                    </MenuItem>
+                                    <MenuItem onClick={handleMenuClose}>
+                                        View Applicants
+                                    </MenuItem>
+                                    <MenuItem
+                                        onClick={() =>
+                                            selectedJobId &&
+                                            handleCloseJob(selectedJobId)
+                                        }
+                                    >
+                                        Close Posting
+                                    </MenuItem>
+                                    <MenuItem
+                                        onClick={() =>
+                                            selectedJobId &&
+                                            handleDeleteJob(selectedJobId)
+                                        }
+                                    >
+                                        Delete
+                                    </MenuItem>
+                                </Menu>
+                            </Paper>
                         </Grid>
 
                         {/* Sidebar */}

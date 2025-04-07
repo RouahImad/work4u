@@ -255,10 +255,6 @@ export default function Home({
                                 background: darkMode
                                     ? "linear-gradient(rgba(18, 18, 18, 0) 0%, rgba(157, 78, 221, 0.15) 80.16%, #120025 100%)"
                                     : "linear-gradient(rgba(255, 255, 255, 0) 0%, rgba(225, 190, 255, 0.5) 80.16%, rgb(255, 255, 255) 100%)",
-                                // background: darkMode
-                                //     ? // ? "linear-gradient(rgba(18, 18, 18, 0) 0%, rgba(30, 70, 50, 0.3) 80.16%, rgb(18, 18, 18) 100%)"
-                                //       "linear-gradient(rgba(18, 18, 18, 0) 0%, rgba(30, 70, 50, 0.3) 80.16%, #1A2E35 100%)"
-                                //     : "linear-gradient(rgba(255, 255, 255, 0) 0%, rgb(214, 254, 241) 80.16%, rgb(255, 255, 255) 100%)",
                             }}
                         >
                             <Grid

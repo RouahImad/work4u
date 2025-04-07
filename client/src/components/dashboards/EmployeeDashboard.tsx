@@ -21,13 +21,19 @@ import {
     Tooltip,
     Tabs,
     Tab,
+    Badge,
 } from "@mui/material";
 import {
-    Work,
     Schedule,
-    NotificationsActive,
     TrendingUp,
     QuestionAnswer,
+    AssignmentInd,
+    CheckCircle,
+    BarChart,
+    School,
+    WorkOutline,
+    Person,
+    Visibility,
 } from "@mui/icons-material";
 import { useAuth } from "../../contexts/AuthContext";
 import { useDashboard } from "../../contexts/DashboardContext";
@@ -37,7 +43,6 @@ import EditProfileDialog from "../profile/EditProfileDialog ";
 import InterviewDialog from "../jobs/InterviewDialog";
 import { format } from "date-fns";
 import { EditOutlined } from "@mui/icons-material";
-import { useNotification } from "../notifications/SlideInNotifications";
 
 const statusColors: Record<string, string> = {
     Applied: "#3498db",
@@ -51,13 +56,12 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
     const { user } = useAuth();
     const { employeeStats, loading, error, fetchEmployeeStats } =
         useDashboard();
-    const { pushNotification } = useNotification();
 
     // State for dialogs
     const [editProfileOpen, setEditProfileOpen] = useState(false);
     const [changePasswordOpen, setChangePasswordOpen] = useState(false);
     const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
-    
+
     // Interview dialog state
     const [interviewDialogOpen, setInterviewDialogOpen] = useState(false);
     const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
@@ -106,6 +110,31 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
         setSelectedPostTitle("");
         // Refresh data after interview completion
         fetchEmployeeStats();
+    };
+
+    // Pre-calculate frequently used values for better null safety
+    const applicationCount = employeeStats?.applications?.length || 0;
+    const interviewCount = employeeStats?.interview_history?.length || 0;
+    const averageScore = employeeStats?.average_score || 0;
+    const acceptedCount =
+        employeeStats?.applications?.filter((app) => app.status === "accepte")
+            .length || 0;
+    const pendingCount = applicationCount - acceptedCount;
+
+    // Calculate interview percentage safely
+    const interviewPercentage =
+        applicationCount > 0
+            ? Math.min(100, (interviewCount / applicationCount) * 100)
+            : 0;
+
+    // Helper function for safely accessing applications array
+    const getSafeApplications = () => {
+        return employeeStats?.applications || [];
+    };
+
+    // Helper function for safely accessing interview history
+    const getSafeInterviewHistory = () => {
+        return employeeStats?.interview_history || [];
     };
 
     return (
@@ -176,7 +205,9 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
 
                 {/* Dashboard Navigation */}
                 <Grid item xs={12}>
-                    <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
+                    <Box
+                        sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}
+                    >
                         <Tabs
                             value={activeTab}
                             onChange={(e, newValue) => setActiveTab(newValue)}
@@ -187,25 +218,25 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
                             <Tab
                                 label="Overview"
                                 value="overview"
-                                sx={{ 
-                                    textTransform: 'none',
-                                    minWidth: 100 
+                                sx={{
+                                    textTransform: "none",
+                                    minWidth: 100,
                                 }}
                             />
                             <Tab
                                 label="Applications"
                                 value="applications"
-                                sx={{ 
-                                    textTransform: 'none',
-                                    minWidth: 100 
+                                sx={{
+                                    textTransform: "none",
+                                    minWidth: 100,
                                 }}
                             />
                             <Tab
                                 label="Profile"
                                 value="profile"
-                                sx={{ 
-                                    textTransform: 'none',
-                                    minWidth: 100 
+                                sx={{
+                                    textTransform: "none",
+                                    minWidth: 100,
                                 }}
                             />
                         </Tabs>
@@ -233,237 +264,560 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
                     <>
                         {activeTab === "overview" && (
                             <>
-                                {/* Stats Overview */}
+                                {/* Stats Overview Cards */}
                                 <Grid item xs={12} md={8}>
-                                    <Grid container spacing={3}>
-                                        {/* Application Stats */}
-                                        <Grid item xs={12} sm={6}>
-                                            <Paper
-                                                sx={{
-                                                    p: 3,
-                                                    display: "flex",
-                                                    flexDirection: "column",
-                                                    height: "100%",
-                                                    transition:
-                                                        "transform 0.3s ease",
-                                                    "&:hover": {
-                                                        transform:
-                                                            "translateY(-5px)",
-                                                    },
-                                                }}
-                                            >
-                                                <Box
-                                                    sx={{
-                                                        display: "flex",
-                                                        alignItems: "center",
-                                                        mb: 2,
-                                                    }}
-                                                >
-                                                    <Work
-                                                        color="primary"
-                                                        sx={{ mr: 1 }}
-                                                    />
-                                                    <Typography
-                                                        variant="h6"
-                                                        component="div"
-                                                    >
-                                                        Application Status
-                                                    </Typography>
-                                                </Box>
-                                                <Box sx={{ mb: 2 }}>
-                                                    <Box
-                                                        sx={{
-                                                            display: "flex",
-                                                            justifyContent:
-                                                                "space-between",
-                                                            mb: 1,
-                                                        }}
-                                                    >
-                                                        <Typography variant="body2">
-                                                            Applications
-                                                        </Typography>
-                                                        <Typography variant="body2">
-                                                            {employeeStats
-                                                                ?.applications
-                                                                ?.length || 0}
-                                                        </Typography>
-                                                    </Box>
-                                                    <LinearProgress
-                                                        variant="determinate"
-                                                        value={100}
-                                                        sx={{
-                                                            mb: 1,
-                                                            height: 8,
-                                                            borderRadius: 4,
-                                                        }}
-                                                    />
-                                                </Box>
-                                                <Box sx={{ mb: 2 }}>
-                                                    <Box
-                                                        sx={{
-                                                            display: "flex",
-                                                            justifyContent:
-                                                                "space-between",
-                                                            mb: 1,
-                                                        }}
-                                                    >
-                                                        <Typography variant="body2">
-                                                            Interviews
-                                                        </Typography>
-                                                        <Typography variant="body2">
-                                                            {employeeStats
-                                                                ?.interview_history
-                                                                ?.length || 0}
-                                                        </Typography>
-                                                    </Box>
-                                                    <LinearProgress
-                                                        variant="determinate"
-                                                        value={
-                                                            employeeStats
-                                                                ?.interview_history
-                                                                ?.length
-                                                                ? (employeeStats
-                                                                      .interview_history
-                                                                      .length /
-                                                                      Math.max(
-                                                                          1,
-                                                                          employeeStats
-                                                                              .applications
-                                                                              .length
-                                                                      )) *
-                                                                  100
-                                                                : 0
-                                                        }
-                                                        sx={{
-                                                            mb: 1,
-                                                            height: 8,
-                                                            borderRadius: 4,
-                                                        }}
-                                                        color="secondary"
-                                                    />
-                                                </Box>
-                                                <Box>
-                                                    <Box
-                                                        sx={{
-                                                            display: "flex",
-                                                            justifyContent:
-                                                                "space-between",
-                                                            mb: 1,
-                                                        }}
-                                                    >
-                                                        <Typography variant="body2">
-                                                            Average Score
-                                                        </Typography>
-                                                        <Typography variant="body2">
-                                                            {employeeStats?.average_score?.toFixed(
-                                                                1
-                                                            ) || 0}
-                                                            %
-                                                        </Typography>
-                                                    </Box>
-                                                    <LinearProgress
-                                                        variant="determinate"
-                                                        value={
-                                                            employeeStats?.average_score ||
-                                                            0
-                                                        }
-                                                        sx={{
-                                                            height: 8,
-                                                            borderRadius: 4,
-                                                        }}
-                                                        color="success"
-                                                    />
-                                                </Box>
-                                            </Paper>
-                                        </Grid>
-
-                                        {/* Activity Feed */}
-                                        <Grid item xs={12} sm={6}>
-                                            <Paper
-                                                sx={{
-                                                    p: 3,
-                                                    height: "100%",
-                                                    transition:
-                                                        "transform 0.3s ease",
-                                                    "&:hover": {
-                                                        transform:
-                                                            "translateY(-5px)",
-                                                    },
-                                                }}
-                                            >
-                                                <Box
-                                                    sx={{
-                                                        display: "flex",
-                                                        alignItems: "center",
-                                                        mb: 2,
-                                                    }}
-                                                >
-                                                    <TrendingUp
-                                                        color="primary"
-                                                        sx={{ mr: 1 }}
-                                                    />
-                                                    <Typography
-                                                        variant="h6"
-                                                        component="div"
-                                                    >
-                                                        Recent Activity
-                                                    </Typography>
-                                                </Box>
-                                                <List
-                                                    sx={{
-                                                        width: "100%",
-                                                        mt: 1,
-                                                    }}
-                                                >
-                                                    {employeeStats
-                                                        ?.interview_history
-                                                        ?.length ? (
-                                                        employeeStats.interview_history
-                                                            .slice(0, 3)
-                                                            .map(
-                                                                (interview) => (
-                                                                    <Fragment
-                                                                        key={
-                                                                            interview.id
-                                                                        }
-                                                                    >
-                                                                        <ListItem>
-                                                                            <ListItemText
-                                                                                primary={`Interviewed for ${interview.post_title}`}
-                                                                                secondary={formatDate(
-                                                                                    interview.response_date
-                                                                                )}
-                                                                            />
-                                                                        </ListItem>
-                                                                        <Divider component="li" />
-                                                                    </Fragment>
-                                                                )
-                                                            )
-                                                    ) : (
-                                                        <ListItem>
-                                                            <ListItemText
-                                                                primary="No recent activity"
-                                                                secondary="Your activities will appear here"
-                                                            />
-                                                        </ListItem>
-                                                    )}
-                                                </List>
-                                            </Paper>
-                                        </Grid>
-                                    </Grid>
-                                </Grid>
-
-                                {/* Sidebar */}
-                                <Grid item xs={12} md={4}>
-                                    {/* Upcoming Events */}
                                     <Paper
                                         sx={{
                                             p: 3,
-                                            mb: 3,
-                                            transition: "transform 0.3s ease",
-                                            "&:hover": {
-                                                transform: "translateY(-5px)",
-                                            },
+                                            height: "100%",
+                                            borderRadius: 2,
+                                        }}
+                                    >
+                                        <Typography variant="h6" gutterBottom>
+                                            Career Overview
+                                        </Typography>
+                                        <Grid container spacing={3}>
+                                            <Grid item xs={6} sm={3}>
+                                                <Box
+                                                    sx={{
+                                                        textAlign: "center",
+                                                        p: 1,
+                                                    }}
+                                                >
+                                                    <Typography
+                                                        variant="h4"
+                                                        color="primary.main"
+                                                    >
+                                                        {applicationCount}
+                                                    </Typography>
+                                                    <Typography
+                                                        variant="body2"
+                                                        color="text.secondary"
+                                                    >
+                                                        Applications
+                                                    </Typography>
+                                                </Box>
+                                            </Grid>
+
+                                            <Grid item xs={6} sm={3}>
+                                                <Box
+                                                    sx={{
+                                                        textAlign: "center",
+                                                        p: 1,
+                                                    }}
+                                                >
+                                                    <Typography
+                                                        variant="h4"
+                                                        color="info.main"
+                                                    >
+                                                        {interviewCount}
+                                                    </Typography>
+                                                    <Typography
+                                                        variant="body2"
+                                                        color="text.secondary"
+                                                    >
+                                                        Interviews
+                                                    </Typography>
+                                                </Box>
+                                            </Grid>
+
+                                            <Grid item xs={6} sm={3}>
+                                                <Box
+                                                    sx={{
+                                                        textAlign: "center",
+                                                        p: 1,
+                                                    }}
+                                                >
+                                                    <Typography
+                                                        variant="h4"
+                                                        color="warning.main"
+                                                    >
+                                                        {pendingCount}
+                                                    </Typography>
+                                                    <Typography
+                                                        variant="body2"
+                                                        color="text.secondary"
+                                                    >
+                                                        Pending
+                                                    </Typography>
+                                                </Box>
+                                            </Grid>
+
+                                            <Grid item xs={6} sm={3}>
+                                                <Box
+                                                    sx={{
+                                                        textAlign: "center",
+                                                        p: 1,
+                                                    }}
+                                                >
+                                                    <Typography
+                                                        variant="h4"
+                                                        color="success.main"
+                                                    >
+                                                        {acceptedCount}
+                                                    </Typography>
+                                                    <Typography
+                                                        variant="body2"
+                                                        color="text.secondary"
+                                                    >
+                                                        Accepted
+                                                    </Typography>
+                                                </Box>
+                                            </Grid>
+                                        </Grid>
+
+                                        <Box sx={{ mt: 2 }}>
+                                            <Divider />
+                                            <Grid
+                                                container
+                                                spacing={2}
+                                                sx={{ mt: 2 }}
+                                            >
+                                                <Grid item xs={4}>
+                                                    <Badge
+                                                        badgeContent={
+                                                            pendingCount
+                                                        }
+                                                        color="primary"
+                                                        max={999}
+                                                    >
+                                                        <Chip
+                                                            icon={
+                                                                <AssignmentInd />
+                                                            }
+                                                            label="Pending"
+                                                            variant="outlined"
+                                                        />
+                                                    </Badge>
+                                                </Grid>
+                                                <Grid item xs={4}>
+                                                    <Badge
+                                                        badgeContent={
+                                                            acceptedCount
+                                                        }
+                                                        color="success"
+                                                        max={999}
+                                                    >
+                                                        <Chip
+                                                            icon={
+                                                                <CheckCircle />
+                                                            }
+                                                            label="Accepted"
+                                                            variant="outlined"
+                                                        />
+                                                    </Badge>
+                                                </Grid>
+                                                <Grid item xs={4}>
+                                                    <Badge
+                                                        badgeContent={
+                                                            interviewCount
+                                                        }
+                                                        color="info"
+                                                        max={999}
+                                                    >
+                                                        <Chip
+                                                            icon={
+                                                                <QuestionAnswer />
+                                                            }
+                                                            label="Interviews"
+                                                            variant="outlined"
+                                                        />
+                                                    </Badge>
+                                                </Grid>
+                                            </Grid>
+                                        </Box>
+                                    </Paper>
+                                </Grid>
+
+                                {/* Progress Stats */}
+                                <Grid item xs={12} md={4}>
+                                    <Paper
+                                        sx={{
+                                            p: 3,
+                                            height: "100%",
+                                            borderRadius: 2,
+                                        }}
+                                    >
+                                        <Typography variant="h6" gutterBottom>
+                                            Application Progress
+                                        </Typography>
+
+                                        <Box sx={{ mb: 3, mt: 2 }}>
+                                            <Box
+                                                sx={{
+                                                    display: "flex",
+                                                    justifyContent:
+                                                        "space-between",
+                                                    mb: 1,
+                                                }}
+                                            >
+                                                <Typography variant="body2">
+                                                    Application Status
+                                                </Typography>
+                                                <Typography variant="body2">
+                                                    {applicationCount} Total
+                                                </Typography>
+                                            </Box>
+                                            <LinearProgress
+                                                variant="determinate"
+                                                value={100}
+                                                sx={{
+                                                    height: 8,
+                                                    borderRadius: 4,
+                                                }}
+                                                color="primary"
+                                            />
+                                        </Box>
+
+                                        <Box sx={{ mb: 3 }}>
+                                            <Box
+                                                sx={{
+                                                    display: "flex",
+                                                    justifyContent:
+                                                        "space-between",
+                                                    mb: 1,
+                                                }}
+                                            >
+                                                <Typography variant="body2">
+                                                    Interview Completion
+                                                </Typography>
+                                                <Typography variant="body2">
+                                                    {interviewPercentage.toFixed(
+                                                        0
+                                                    )}
+                                                    %
+                                                </Typography>
+                                            </Box>
+                                            <LinearProgress
+                                                variant="determinate"
+                                                value={interviewPercentage}
+                                                sx={{
+                                                    height: 8,
+                                                    borderRadius: 4,
+                                                }}
+                                                color="secondary"
+                                            />
+                                        </Box>
+
+                                        <Box sx={{ mb: 3 }}>
+                                            <Box
+                                                sx={{
+                                                    display: "flex",
+                                                    justifyContent:
+                                                        "space-between",
+                                                    mb: 1,
+                                                }}
+                                            >
+                                                <Typography variant="body2">
+                                                    Success Rate
+                                                </Typography>
+                                                <Typography variant="body2">
+                                                    {applicationCount > 0
+                                                        ? (
+                                                              (acceptedCount /
+                                                                  applicationCount) *
+                                                              100
+                                                          ).toFixed(0)
+                                                        : "0"}
+                                                    %
+                                                </Typography>
+                                            </Box>
+                                            <LinearProgress
+                                                variant="determinate"
+                                                value={
+                                                    applicationCount > 0
+                                                        ? (acceptedCount /
+                                                              applicationCount) *
+                                                          100
+                                                        : 0
+                                                }
+                                                sx={{
+                                                    height: 8,
+                                                    borderRadius: 4,
+                                                }}
+                                                color="success"
+                                            />
+                                        </Box>
+
+                                        <Box sx={{ mb: 3 }}>
+                                            <Box
+                                                sx={{
+                                                    display: "flex",
+                                                    justifyContent:
+                                                        "space-between",
+                                                    mb: 1,
+                                                }}
+                                            >
+                                                <Typography variant="body2">
+                                                    Average Score
+                                                </Typography>
+                                                <Typography variant="body2">
+                                                    {averageScore.toFixed(1)}%
+                                                </Typography>
+                                            </Box>
+                                            <LinearProgress
+                                                variant="determinate"
+                                                value={averageScore}
+                                                sx={{
+                                                    height: 8,
+                                                    borderRadius: 4,
+                                                }}
+                                                color="warning"
+                                            />
+                                        </Box>
+
+                                        <Button
+                                            variant="outlined"
+                                            startIcon={<Visibility />}
+                                            onClick={() =>
+                                                setActiveTab("applications")
+                                            }
+                                            fullWidth
+                                            sx={{ mt: 1 }}
+                                        >
+                                            View All Applications
+                                        </Button>
+                                    </Paper>
+                                </Grid>
+
+                                {/* Activity Cards */}
+                                <Grid item xs={12}>
+                                    <Paper sx={{ p: 3, borderRadius: 2 }}>
+                                        <Typography variant="h6" gutterBottom>
+                                            Application Activity
+                                        </Typography>
+                                        <Grid
+                                            container
+                                            spacing={3}
+                                            sx={{ mt: 1 }}
+                                        >
+                                            <Grid item xs={12} sm={6} md={3}>
+                                                <Card
+                                                    elevation={0}
+                                                    sx={{
+                                                        bgcolor:
+                                                            "background.default",
+                                                        borderRadius: 2,
+                                                    }}
+                                                >
+                                                    <CardContent
+                                                        sx={{
+                                                            textAlign: "center",
+                                                        }}
+                                                    >
+                                                        <WorkOutline
+                                                            color="primary"
+                                                            sx={{
+                                                                fontSize: 40,
+                                                                mb: 1,
+                                                            }}
+                                                        />
+                                                        <Typography variant="h6">
+                                                            {applicationCount}
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="body2"
+                                                            color="text.secondary"
+                                                        >
+                                                            Total Applications
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+
+                                            <Grid item xs={12} sm={6} md={3}>
+                                                <Card
+                                                    elevation={0}
+                                                    sx={{
+                                                        bgcolor:
+                                                            "background.default",
+                                                        borderRadius: 2,
+                                                    }}
+                                                >
+                                                    <CardContent
+                                                        sx={{
+                                                            textAlign: "center",
+                                                        }}
+                                                    >
+                                                        <Person
+                                                            color="primary"
+                                                            sx={{
+                                                                fontSize: 40,
+                                                                mb: 1,
+                                                            }}
+                                                        />
+                                                        <Typography variant="h6">
+                                                            {acceptedCount}
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="body2"
+                                                            color="text.secondary"
+                                                        >
+                                                            Accepted Offers
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+
+                                            <Grid item xs={12} sm={6} md={3}>
+                                                <Card
+                                                    elevation={0}
+                                                    sx={{
+                                                        bgcolor:
+                                                            "background.default",
+                                                        borderRadius: 2,
+                                                    }}
+                                                >
+                                                    <CardContent
+                                                        sx={{
+                                                            textAlign: "center",
+                                                        }}
+                                                    >
+                                                        <School
+                                                            color="primary"
+                                                            sx={{
+                                                                fontSize: 40,
+                                                                mb: 1,
+                                                            }}
+                                                        />
+                                                        <Typography variant="h6">
+                                                            {interviewCount}
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="body2"
+                                                            color="text.secondary"
+                                                        >
+                                                            Completed Interviews
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+
+                                            <Grid item xs={12} sm={6} md={3}>
+                                                <Card
+                                                    elevation={0}
+                                                    sx={{
+                                                        bgcolor:
+                                                            "background.default",
+                                                        borderRadius: 2,
+                                                    }}
+                                                >
+                                                    <CardContent
+                                                        sx={{
+                                                            textAlign: "center",
+                                                        }}
+                                                    >
+                                                        <BarChart
+                                                            color="primary"
+                                                            sx={{
+                                                                fontSize: 40,
+                                                                mb: 1,
+                                                            }}
+                                                        />
+                                                        <Typography variant="h6">
+                                                            {averageScore.toFixed(
+                                                                1
+                                                            )}
+                                                            %
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="body2"
+                                                            color="text.secondary"
+                                                        >
+                                                            Average Score
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+                                        </Grid>
+                                    </Paper>
+                                </Grid>
+
+                                {/* Recent Activity and Upcoming Events Row */}
+                                <Grid item xs={12} md={8}>
+                                    <Paper
+                                        sx={{
+                                            p: 3,
+                                            mb: { xs: 3, md: 0 },
+                                            borderRadius: 2,
+                                        }}
+                                    >
+                                        <Box
+                                            sx={{
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                alignItems: "center",
+                                                mb: 2,
+                                            }}
+                                        >
+                                            <Box
+                                                sx={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                }}
+                                            >
+                                                <TrendingUp
+                                                    color="primary"
+                                                    sx={{ mr: 1 }}
+                                                />
+                                                <Typography
+                                                    variant="h6"
+                                                    component="div"
+                                                >
+                                                    Recent Activity
+                                                </Typography>
+                                            </Box>
+                                            <Button
+                                                size="small"
+                                                onClick={() =>
+                                                    setActiveTab("applications")
+                                                }
+                                                variant="text"
+                                            >
+                                                View All
+                                            </Button>
+                                        </Box>
+
+                                        <List sx={{ width: "100%" }}>
+                                            {getSafeInterviewHistory().length >
+                                            0 ? (
+                                                getSafeInterviewHistory()
+                                                    .slice(0, 5)
+                                                    .map((interview) => (
+                                                        <Fragment
+                                                            key={interview.id}
+                                                        >
+                                                            <ListItem>
+                                                                <ListItemText
+                                                                    primary={`Interviewed for ${interview.post_title}`}
+                                                                    secondary={`On ${formatDate(
+                                                                        interview.response_date
+                                                                    )} - Score: ${interview.score.toFixed(
+                                                                        1
+                                                                    )}%`}
+                                                                />
+                                                            </ListItem>
+                                                            <Divider component="li" />
+                                                        </Fragment>
+                                                    ))
+                                            ) : (
+                                                <ListItem>
+                                                    <ListItemText
+                                                        primary="No recent activity"
+                                                        secondary="Your activities will appear here"
+                                                    />
+                                                </ListItem>
+                                            )}
+                                        </List>
+                                    </Paper>
+                                </Grid>
+
+                                <Grid item xs={12} md={4}>
+                                    <Paper
+                                        sx={{
+                                            p: 3,
+                                            height: "100%",
+                                            borderRadius: 2,
                                         }}
                                     >
                                         <Box
@@ -484,13 +838,13 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
                                                 Upcoming Events
                                             </Typography>
                                         </Box>
-                                        <List dense sx={{ width: "100%" }}>
-                                            {employeeStats?.applications
-                                                ?.filter(
+                                        <List dense>
+                                            {getSafeApplications()
+                                                .filter(
                                                     (app) =>
                                                         app.status !== "accepte"
                                                 )
-                                                ?.slice(0, 3)
+                                                .slice(0, 3)
                                                 .map((app, index) => (
                                                     <Fragment key={index}>
                                                         <ListItem>
@@ -500,6 +854,23 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
                                                                     app.application_date
                                                                 )}`}
                                                             />
+                                                            {app.interview_id ===
+                                                                0 && (
+                                                                <Button
+                                                                    size="small"
+                                                                    variant="outlined"
+                                                                    color="secondary"
+                                                                    onClick={() =>
+                                                                        handleInterviewStart(
+                                                                            app.cv_id,
+                                                                            app.post_title
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    Take
+                                                                    Interview
+                                                                </Button>
+                                                            )}
                                                         </ListItem>
                                                         <Divider component="li" />
                                                     </Fragment>
@@ -508,78 +879,6 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
                                                     <ListItemText
                                                         primary="No upcoming events"
                                                         secondary="Events will appear here when scheduled"
-                                                    />
-                                                </ListItem>
-                                            )}
-                                        </List>
-                                    </Paper>
-
-                                    {/* Recent Scores */}
-                                    <Paper
-                                        sx={{
-                                            p: 3,
-                                            transition: "transform 0.3s ease",
-                                            "&:hover": {
-                                                transform: "translateY(-5px)",
-                                            },
-                                        }}
-                                    >
-                                        <Box
-                                            sx={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "space-between",
-                                                mb: 2,
-                                            }}
-                                        >
-                                            <Box
-                                                sx={{
-                                                    display: "flex",
-                                                    alignItems: "center",
-                                                }}
-                                            >
-                                                <NotificationsActive
-                                                    color="primary"
-                                                    sx={{ mr: 1 }}
-                                                />
-                                                <Typography
-                                                    variant="h6"
-                                                    component="div"
-                                                >
-                                                    Interview Scores
-                                                </Typography>
-                                            </Box>
-                                        </Box>
-                                        <List dense sx={{ width: "100%" }}>
-                                            {employeeStats?.interview_history
-                                                ?.length ? (
-                                                employeeStats.interview_history.map(
-                                                    (interview) => (
-                                                        <Fragment
-                                                            key={interview.id}
-                                                        >
-                                                            <ListItem>
-                                                                <ListItemText
-                                                                    primary={`${
-                                                                        interview.post_title
-                                                                    }: ${interview.score.toFixed(
-                                                                        1
-                                                                    )}%`}
-                                                                    secondary={`Question: ${interview.question.substring(
-                                                                        0,
-                                                                        30
-                                                                    )}...`}
-                                                                />
-                                                            </ListItem>
-                                                            <Divider component="li" />
-                                                        </Fragment>
-                                                    )
-                                                )
-                                            ) : (
-                                                <ListItem>
-                                                    <ListItemText
-                                                        primary="No interview scores yet"
-                                                        secondary="Complete interviews to see your scores"
                                                     />
                                                 </ListItem>
                                             )}
@@ -675,7 +974,7 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
                                                                             justifyContent:
                                                                                 "flex-end",
                                                                             mt: 2,
-                                                                            gap: 1
+                                                                            gap: 1,
                                                                         }}
                                                                     >
                                                                         <Button
@@ -685,28 +984,33 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
                                                                             View
                                                                             Details
                                                                         </Button>
-                                                                        
+
                                                                         {/* Interview button */}
-                                                                        {application.interview_id === 0 && 
-                                                                          application.status !== "accepte" && (
-                                                                            <Tooltip title="Take an automated interview for this position">
-                                                                              <Button
-                                                                                size="small"
-                                                                                variant="outlined"
-                                                                                color="secondary"
-                                                                                startIcon={<QuestionAnswer />}
-                                                                                onClick={() => 
-                                                                                    handleInterviewStart(
-                                                                                        application.cv_id, 
-                                                                                        application.post_title
-                                                                                    )
-                                                                                }
-                                                                              >
-                                                                                Take Interview
-                                                                              </Button>
-                                                                            </Tooltip>
-                                                                        )}
-                                                                        
+                                                                        {application.interview_id ===
+                                                                            0 &&
+                                                                            application.status !==
+                                                                                "accepte" && (
+                                                                                <Tooltip title="Take an automated interview for this position">
+                                                                                    <Button
+                                                                                        size="small"
+                                                                                        variant="outlined"
+                                                                                        color="secondary"
+                                                                                        startIcon={
+                                                                                            <QuestionAnswer />
+                                                                                        }
+                                                                                        onClick={() =>
+                                                                                            handleInterviewStart(
+                                                                                                application.cv_id,
+                                                                                                application.post_title
+                                                                                            )
+                                                                                        }
+                                                                                    >
+                                                                                        Take
+                                                                                        Interview
+                                                                                    </Button>
+                                                                                </Tooltip>
+                                                                            )}
+
                                                                         <Button
                                                                             size="small"
                                                                             variant="contained"
@@ -1122,7 +1426,7 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
                 open={deleteAccountOpen}
                 onClose={handleDeleteAccountClose}
             />
-            
+
             {/* Interview Dialog */}
             {selectedPostId && (
                 <InterviewDialog

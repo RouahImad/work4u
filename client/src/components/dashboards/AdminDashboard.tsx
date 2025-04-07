@@ -139,7 +139,7 @@ const AdminDashboard = () => {
                                             >
                                                 <Typography
                                                     variant="h4"
-                                                    color="info.main"
+                                                    color="text.secondary"
                                                 >
                                                     {adminStats?.cvs?.total ||
                                                         0}
@@ -329,7 +329,7 @@ const AdminDashboard = () => {
                                             >
                                                 <Typography
                                                     variant="h4"
-                                                    color="info.main"
+                                                    color="success.main"
                                                 >
                                                     {adminStats
                                                         ?.interview_responses
@@ -356,7 +356,7 @@ const AdminDashboard = () => {
                                             >
                                                 <Typography
                                                     variant="h4"
-                                                    color="secondary.main"
+                                                    color="success.main"
                                                 >
                                                     {((adminStats?.applications
                                                         ?.accepted || 0) /

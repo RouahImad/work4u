@@ -119,6 +119,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
             setError(null);
 
             const response = await dashboardApi.getRoleBasedStats();
+
             setEmployeeStats(response.data);
         } catch (err: any) {
             const errorMessage =
@@ -156,6 +157,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
 
             const response = await dashboardApi.getRoleBasedStats();
             setAdminStats(response.data);
+            console.log(response.data);
         } catch (err: any) {
             const errorMessage =
                 err.response?.data?.detail ||
