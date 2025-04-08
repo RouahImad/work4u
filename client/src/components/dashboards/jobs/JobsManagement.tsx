@@ -71,14 +71,23 @@ const JobsManagement = () => {
                 job.company_address
                     .toLowerCase()
                     .includes(searchTerm.toLowerCase()) ||
-                job.description.toLowerCase().includes(searchTerm.toLowerCase())
+                job.salaire.toString().includes(searchTerm) ||
+                (job.uploaded_at
+                    ? job.uploaded_at
+                          .toLowerCase()
+                          .includes(searchTerm.toLowerCase())
+                    : false) ||
+                (searchTerm.toLowerCase() == "active" &&
+                    !isApplicationClosed(job)) ||
+                (searchTerm.toLowerCase() == "closed" &&
+                    isApplicationClosed(job))
         );
 
         setFilteredJobs(filtered);
         setPage(0); // Reset to first page when filtering
     }, [searchTerm, jobs]);
 
-    const handleChangePage = (event: unknown, newPage: number) => {
+    const handleChangePage = (_event: unknown, newPage: number) => {
         setPage(newPage);
     };
 

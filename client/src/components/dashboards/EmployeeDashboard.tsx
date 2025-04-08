@@ -34,6 +34,10 @@ import {
     WorkOutline,
     Person,
     Visibility,
+    Dashboard,
+    AccountCircle,
+    EditOutlined,
+    List as ListIcon,
 } from "@mui/icons-material";
 import { useAuth } from "../../contexts/AuthContext";
 import { useDashboard } from "../../contexts/DashboardContext";
@@ -42,7 +46,6 @@ import DeleteAccountDialog from "../profile/DeleteAccountDialog ";
 import EditProfileDialog from "../profile/EditProfileDialog ";
 import InterviewDialog from "../jobs/InterviewDialog";
 import { format } from "date-fns";
-import { EditOutlined } from "@mui/icons-material";
 
 const statusColors: Record<string, string> = {
     Applied: "#3498db",
@@ -210,7 +213,7 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
                     >
                         <Tabs
                             value={activeTab}
-                            onChange={(e, newValue) => setActiveTab(newValue)}
+                            onChange={(_e, newValue) => setActiveTab(newValue)}
                             aria-label="employee dashboard tabs"
                             variant="scrollable"
                             scrollButtons="auto"
@@ -218,6 +221,8 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
                             <Tab
                                 label="Overview"
                                 value="overview"
+                                icon={<Dashboard />}
+                                iconPosition="start"
                                 sx={{
                                     textTransform: "none",
                                     minWidth: 100,
@@ -226,6 +231,8 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
                             <Tab
                                 label="Applications"
                                 value="applications"
+                                icon={<ListIcon />}
+                                iconPosition="start"
                                 sx={{
                                     textTransform: "none",
                                     minWidth: 100,
@@ -234,6 +241,8 @@ const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
                             <Tab
                                 label="Profile"
                                 value="profile"
+                                icon={<AccountCircle />}
+                                iconPosition="start"
                                 sx={{
                                     textTransform: "none",
                                     minWidth: 100,

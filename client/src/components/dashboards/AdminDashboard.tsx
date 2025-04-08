@@ -21,18 +21,19 @@ import {
     Person,
     Flag,
     WorkOutline,
-    Settings,
     AttachMoney,
     Description,
     QuestionAnswer,
     AssignmentInd,
     CheckCircle,
     Visibility,
+    AccountCircle,
 } from "@mui/icons-material";
 import { useDashboard } from "../../contexts/DashboardContext";
-import { format } from "date-fns";
 import ReportsTable from "./reports/ReportsTable";
 import JobsManagement from "./jobs/JobsManagement";
+import UsersManagement from "./users/UsersManagement";
+import AdminProfile from "./profile/AdminProfile";
 
 const AdminDashboard = () => {
     const [tabValue, setTabValue] = useState(0);
@@ -53,14 +54,14 @@ const AdminDashboard = () => {
                     Admin Dashboard
                 </Typography>
                 <Typography variant="subtitle1" color="text.secondary">
-                    Manage users, jobs, and platform settings
+                    Manage users, jobs, and platform
                 </Typography>
             </Box>
 
             <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
                 <Tabs
                     value={tabValue}
-                    onChange={(e, newValue) => handleTabChange(newValue)}
+                    onChange={(_e, newValue) => handleTabChange(newValue)}
                     aria-label="admin dashboard tabs"
                     variant="scrollable"
                     scrollButtons="auto"
@@ -78,9 +79,9 @@ const AdminDashboard = () => {
                     />
                     <Tab icon={<Flag />} iconPosition="start" label="Reports" />
                     <Tab
-                        icon={<Settings />}
+                        icon={<AccountCircle />}
                         iconPosition="start"
-                        label="Settings"
+                        label="Profile"
                     />
                 </Tabs>
             </Box>
@@ -596,17 +597,19 @@ const AdminDashboard = () => {
                     {/* Users Management Tab */}
                     {tabValue === 1 && (
                         <Paper sx={{ p: 3, borderRadius: 2 }}>
-                            <Typography variant="h6">
-                                Users Management Tab Content
-                            </Typography>
-                            <Typography
-                                variant="body2"
-                                color="text.secondary"
-                                sx={{ mt: 2 }}
-                            >
-                                User management functionality will be
-                                implemented here.
-                            </Typography>
+                            {adminStats?.users?.list && (
+                                <UsersManagement
+                                    users={adminStats.users.list.map(
+                                        (user) => ({
+                                            ...user,
+                                            first_name: user.first_name || "",
+                                            last_name: user.last_name || "",
+                                            email: user.email || "",
+                                            role: user.role || "",
+                                        })
+                                    )}
+                                />
+                            )}
                         </Paper>
                     )}
 
@@ -658,22 +661,8 @@ const AdminDashboard = () => {
                         </Paper>
                     )}
 
-                    {/* Settings Tab */}
-                    {tabValue === 4 && (
-                        <Paper sx={{ p: 3, borderRadius: 2 }}>
-                            <Typography variant="h6">
-                                Settings Tab Content
-                            </Typography>
-                            <Typography
-                                variant="body2"
-                                color="text.secondary"
-                                sx={{ mt: 2 }}
-                            >
-                                Platform settings and configuration options will
-                                be implemented here.
-                            </Typography>
-                        </Paper>
-                    )}
+                    {/* Profile Tab */}
+                    {tabValue === 4 && <AdminProfile />}
                 </>
             )}
         </Container>

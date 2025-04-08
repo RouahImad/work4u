@@ -28,6 +28,7 @@ const EmployerRegister = () => {
         firstName: "",
         lastName: "",
         email: "",
+        username: "",
         password: "",
         confirmPassword: "",
         companyName: "",
@@ -43,6 +44,7 @@ const EmployerRegister = () => {
         firstName?: string;
         lastName?: string;
         email?: string;
+        username?: string;
         password?: string;
         confirmPassword?: string;
         companyName?: string;
@@ -85,6 +87,7 @@ const EmployerRegister = () => {
             firstName?: string;
             lastName?: string;
             email?: string;
+            username?: string;
             password?: string;
             confirmPassword?: string;
             companyName?: string;
@@ -104,6 +107,10 @@ const EmployerRegister = () => {
             newErrors.email = "Email is required";
         } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
             newErrors.email = "Email is invalid";
+        }
+
+        if (!formData.username.trim()) {
+            newErrors.username = "Username is required";
         }
 
         if (!formData.password) {
@@ -151,6 +158,7 @@ const EmployerRegister = () => {
                 first_name: formData.firstName,
                 last_name: formData.lastName,
                 email: formData.email,
+                username: formData.username,
                 password: formData.password,
                 role: "employer",
                 company_name: formData.companyName,
@@ -231,6 +239,21 @@ const EmployerRegister = () => {
                     sx={{ mt: 3, width: "100%" }}
                 >
                     <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <TextField
+                                required
+                                fullWidth
+                                id="username"
+                                label="Username"
+                                name="username"
+                                autoComplete="username"
+                                value={formData.username}
+                                onChange={handleChange}
+                                error={!!errors.username}
+                                helperText={errors.username}
+                                disabled={isLoading}
+                            />
+                        </Grid>
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 autoComplete="given-name"
@@ -277,6 +300,7 @@ const EmployerRegister = () => {
                                 disabled={isLoading}
                             />
                         </Grid>
+
                         <Grid item xs={12}>
                             <TextField
                                 required

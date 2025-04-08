@@ -40,6 +40,10 @@ import {
     Schedule,
     TrendingUp,
     Visibility,
+    Dashboard,
+    Group,
+    BarChart,
+    AccountCircle,
 } from "@mui/icons-material";
 import { useNotification } from "../notifications/SlideInNotifications";
 import { useAuth } from "../../contexts/AuthContext";
@@ -151,7 +155,6 @@ const EmployerDashboard = ({ theme }: { theme: Theme }) => {
     const handleViewJob = (jobId: number) => {
         setSelectedJobId(jobId);
         setJobViewOpen(true);
-        console.log("herrre ", jobId);
 
         handleMenuClose();
     };
@@ -304,6 +307,7 @@ const EmployerDashboard = ({ theme }: { theme: Theme }) => {
                                 borderRadius: 0,
                                 pb: 1,
                             }}
+                            startIcon={<Dashboard />}
                         >
                             Overview
                         </Button>
@@ -322,6 +326,7 @@ const EmployerDashboard = ({ theme }: { theme: Theme }) => {
                                 borderRadius: 0,
                                 pb: 1,
                             }}
+                            startIcon={<Group />}
                         >
                             Applicants
                         </Button>
@@ -340,6 +345,7 @@ const EmployerDashboard = ({ theme }: { theme: Theme }) => {
                                 borderRadius: 0,
                                 pb: 1,
                             }}
+                            startIcon={<BarChart />}
                         >
                             Analytics
                         </Button>
@@ -358,6 +364,7 @@ const EmployerDashboard = ({ theme }: { theme: Theme }) => {
                                 borderRadius: 0,
                                 pb: 1,
                             }}
+                            startIcon={<AccountCircle />}
                         >
                             Profile
                         </Button>

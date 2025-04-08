@@ -7,38 +7,12 @@ import {
 } from "react";
 import { authApi, secureStorage } from "../services/api";
 import { useNotification } from "../components/notifications/SlideInNotifications";
-
-interface User {
-    id: number;
-    username: string;
-    email: string;
-    role: string;
-    first_name: string;
-    last_name: string;
-    company_name?: string;
-    company_address?: string;
-    company_website?: string;
-}
-
-// Define interfaces for registration
-interface BaseRegistrationData {
-    first_name: string;
-    last_name: string;
-    email: string;
-    password: string;
-    role: string;
-}
-
-interface EmployeeRegistrationData extends BaseRegistrationData {
-    role: "employee";
-}
-
-interface EmployerRegistrationData extends BaseRegistrationData {
-    role: "employer";
-    company_name: string;
-    company_address: string;
-    company_website: string;
-}
+import {
+    User,
+    EmployeeRegistrationData,
+    EmployerRegistrationData,
+    CreateUserData,
+} from "../types/User.types";
 
 interface AuthContextType {
     user: User | null;
@@ -58,6 +32,8 @@ interface AuthContextType {
     updatePassword: (newPassword: string) => Promise<void>;
     deleteAccount: () => Promise<void>;
     handlesOwnNotifications: boolean;
+    createUser: (userData: CreateUserData) => Promise<boolean>;
+    deleteUser: (userId: number) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -290,6 +266,56 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    const createUser = async (userData: CreateUserData) => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            userData.role === "employer"
+                ? await authApi.registerEmployer({
+                      ...userData,
+                      company_name: userData.company_name || "uknown",
+                      company_address: userData.company_address || "uknown",
+                      company_website: userData.company_website || "uknown",
+                  })
+                : await authApi.registerEmployeeAdmin(userData);
+
+            pushNotification(
+                `User ${userData.username} created successfully.`,
+                "success"
+            );
+
+            setLoading(false);
+            return true;
+        } catch (err: any) {
+            const errorMessage =
+                err.response?.data?.detail || "Failed to create user";
+            setError(`${errorMessage} from here`);
+            pushNotification(errorMessage, "error");
+            setLoading(false);
+            return false;
+        }
+    };
+
+    const deleteUser = async (userId: number): Promise<void> => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            await authApi.deleteUserAsAdmin(userId);
+
+            pushNotification(`User deleted successfully.`, "success");
+        } catch (err: any) {
+            const errorMessage =
+                err.response?.data?.detail || "Failed to delete user";
+            setError(errorMessage);
+            pushNotification(errorMessage, "error");
+            throw new Error(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <AuthContext.Provider
             value={{
@@ -306,6 +332,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 updatePassword,
                 deleteAccount,
                 handlesOwnNotifications,
+                createUser,
+                deleteUser,
             }}
         >
             {children}

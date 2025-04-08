@@ -60,9 +60,21 @@ interface ReportDetail {
     reported_at: string;
 }
 
+interface User {
+    id: number;
+    username: string;
+    email: string;
+    role: string;
+    first_name?: string;
+    last_name?: string;
+    created_at?: string;
+    updated_at?: string;
+}
+
 interface AdminDashboardStats {
     users: {
         total: number;
+        list: User[];
     };
     posts: {
         total: number;
@@ -157,8 +169,9 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
 
             const response = await dashboardApi.getRoleBasedStats();
             setAdminStats(response.data);
-            console.log(response.data);
         } catch (err: any) {
+            console.log(err);
+
             const errorMessage =
                 err.response?.data?.detail ||
                 "Failed to fetch admin dashboard statistics";

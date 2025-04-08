@@ -5,7 +5,7 @@ import { Job, JobPost } from "../types/Job.types";
 
 interface JobPostContextType {
     jobs: Job[];
-    currentJob: TMP | null;
+    currentJob: Job | null;
     loading: boolean;
     error: string | null;
     fetchAllJobs: () => Promise<void>;
@@ -19,23 +19,11 @@ interface JobPostContextType {
     }) => Promise<void>;
 }
 
-interface TMP extends JobPost {
-    company_name: string;
-    company_address: string;
-    company_website: string;
-}
-
-const tmp = {
-    companny_name: "Company Con",
-    company_address: "Nyc, ao",
-    company_website: "https://company-website.com",
-};
-
 const JobPostContext = createContext<JobPostContextType | undefined>(undefined);
 
 export const JobPostProvider = ({ children }: { children: ReactNode }) => {
     const [jobs, setJobs] = useState<Job[]>([]);
-    const [currentJob, setCurrentJob] = useState<TMP | null>(null);
+    const [currentJob, setCurrentJob] = useState<Job | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const { pushNotification } = useNotification();
@@ -46,13 +34,26 @@ export const JobPostProvider = ({ children }: { children: ReactNode }) => {
             setError(null);
             const response = await postApi.getAllPosts();
 
-            response.data.posts?.forEach((job: Job) => {
-                job.company_name = tmp.companny_name;
-                job.company_address = tmp.company_address;
-                job.company_website = tmp.company_website;
-            });
+            // Map posts to include company information from the user object
+            const formattedJobs = response.data.posts
+                ? response.data.posts.map((post: any) => ({
+                      id: post.id,
+                      title: post.title,
+                      description: post.description,
+                      final_date: post.final_date,
+                      salaire: post.salaire,
+                      uploaded_at: post.uploaded_at,
+                      accepted: post.accepted,
+                      user_id: post.user?.id,
+                      company_name:
+                          post.user?.company_name || "Unknown Company",
+                      company_address:
+                          post.user?.company_address || "Unknown Location",
+                      company_website: post.user?.company_website || "",
+                  }))
+                : [];
 
-            setJobs(response.data.posts ? response.data.posts.reverse() : []);
+            setJobs(formattedJobs.reverse());
         } catch (err: any) {
             const errorMessage =
                 err.response?.data?.detail || "Failed to fetch jobs";
@@ -78,7 +79,26 @@ export const JobPostProvider = ({ children }: { children: ReactNode }) => {
                 throw new Error("Job not found");
             }
 
-            setCurrentJob({ ...response.data.post, ...tmp });
+            const post = response.data.post;
+
+            // Create a job with company information from the user object
+            const formattedJob: Job = {
+                id: post.id,
+                title: post.title,
+                description: post.description,
+                final_date: post.final_date,
+                salaire: post.salaire,
+                uploaded_at: post.uploaded_at,
+                accepted: post.accepted,
+                user_id: post.user?.id,
+                // Extract company details from the user object
+                company_name: post.user?.company_name || "Unknown Company",
+                company_address:
+                    post.user?.company_address || "Unknown Location",
+                company_website: post.user?.company_website || "",
+            };
+
+            setCurrentJob(formattedJob);
         } catch (err: any) {
             const errorMessage =
                 err.response?.data?.detail || "Failed to fetch job details";

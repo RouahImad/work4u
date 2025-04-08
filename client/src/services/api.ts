@@ -168,11 +168,35 @@ export const authApi = {
 
     deleteAccount: () => apiClient.delete("/api/users/delete/"),
 
-    // For admins to delete other users
     deleteUserAsAdmin: (userId: number) =>
         apiClient.delete("/api/users/delete/", {
             data: { user_id: userId },
         }),
+
+    registerEmployeeAdmin: (data: {
+        email: string;
+        password: string;
+        username: string;
+        first_name: string;
+        last_name: string;
+        role: string;
+    }) => {
+        return apiClient.post("/api/register/", data);
+    },
+
+    registerEmployer: (data: {
+        email: string;
+        password: string;
+        username: string;
+        first_name: string;
+        last_name: string;
+        role: string;
+        company_name: string;
+        company_address: string;
+        company_website: string;
+    }) => {
+        return apiClient.post("/api/register/", data);
+    },
 };
 
 // Post management services
@@ -241,6 +265,31 @@ export const cvInterviewApi = {
             post_id: postId,
             candidate_answers: candidateAnswers,
         }),
+
+    // Get user CVs
+    getUserCVs: () => {
+        return apiClient.get("/cv");
+    },
+
+    // Get specific CV
+    getCV: (id: number) => {
+        return apiClient.get(`/cv/${id}`);
+    },
+
+    // Delete a CV
+    deleteCV: (id: number) => {
+        return apiClient.delete(`/cv/${id}`);
+    },
+
+    // Get interview questions for a job
+    getInterviewQuestions: (jobId: number) => {
+        return apiClient.get(`/interview/job/${jobId}/questions`);
+    },
+
+    // Submit interview answers
+    submitInterviewAnswers: (jobId: number, answers: any) => {
+        return apiClient.post(`/interview/job/${jobId}/submit`, { answers });
+    },
 };
 
 // Dashboard statistics services

@@ -267,12 +267,7 @@ const Login = () => {
                                 "Sign In"
                             )}
                         </Button>
-                        <Grid container justifyContent="space-between">
-                            <Grid item>
-                                <MuiLink component="button" variant="body2">
-                                    Forgot password?
-                                </MuiLink>
-                            </Grid>
+                        <Grid container>
                             <Grid item>
                                 <MuiLink
                                     component={Link}

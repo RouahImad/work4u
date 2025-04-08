@@ -53,7 +53,6 @@ const JobView: React.FC<JobViewProps> = ({
 
     useEffect(() => {
         fetchJobById(jobId);
-        console.log(currentJob);
     }, []);
 
     useEffect(() => {
