@@ -15,7 +15,6 @@ import {
     Avatar,
     Chip,
     LinearProgress,
-    Theme,
     CircularProgress,
     Alert,
     Tooltip,
@@ -54,7 +53,7 @@ const statusColors: Record<string, string> = {
     accepte: "#2ecc71",
 };
 
-const EmployeeDashboard = ({ theme }: { theme: Theme }) => {
+const EmployeeDashboard = () => {
     const [activeTab, setActiveTab] = useState("overview");
     const { user } = useAuth();
     const { employeeStats, loading, error, fetchEmployeeStats } =

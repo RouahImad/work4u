@@ -208,11 +208,18 @@ const EmployerRegister = () => {
     };
 
     return (
-        <Container component="main" maxWidth="sm">
+        <Container
+            component="main"
+            maxWidth="sm"
+            sx={{
+                my: 4,
+                minHeight: "100vh",
+                placeContent: "center",
+            }}
+        >
             <Paper
                 elevation={3}
                 sx={{
-                    mt: 8,
                     p: 4,
                     display: "flex",
                     flexDirection: "column",
@@ -439,7 +446,12 @@ const EmployerRegister = () => {
                             "Create Employer Account"
                         )}
                     </Button>
-                    <Grid container>
+                    <Grid
+                        container
+                        sx={{
+                            flexDirection: { xs: "column-reverse", sm: "row" },
+                        }}
+                    >
                         <Grid item xs>
                             <MuiLink
                                 component={Link}

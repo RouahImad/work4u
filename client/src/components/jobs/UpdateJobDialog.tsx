@@ -12,7 +12,6 @@ import {
     Box,
 } from "@mui/material";
 import { useJobPost } from "../../contexts/JobPostContext";
-import { useNotification } from "../notifications/SlideInNotifications";
 import { JobPost } from "../../types/Job.types";
 import { useDashboard } from "../../contexts/DashboardContext";
 
@@ -21,6 +20,7 @@ interface UpdateJobDialogProps {
     onClose: () => void;
     jobId: number | null;
     job: JobPost | null;
+    viewInAdmin?: boolean | false;
 }
 
 const UpdateJobDialog: React.FC<UpdateJobDialogProps> = ({
@@ -28,9 +28,9 @@ const UpdateJobDialog: React.FC<UpdateJobDialogProps> = ({
     onClose,
     jobId,
     job,
+    viewInAdmin = false,
 }) => {
-    const { updateJob, loading, error } = useJobPost();
-    const { pushNotification } = useNotification();
+    const { updateJob, loading, error, fetchAllJobs } = useJobPost();
     const { fetchEmployerStats } = useDashboard();
 
     const [formData, setFormData] = useState({
@@ -139,7 +139,8 @@ const UpdateJobDialog: React.FC<UpdateJobDialogProps> = ({
                 salaire: Number(formData.salaire),
             });
 
-            fetchEmployerStats();
+            if (viewInAdmin) fetchAllJobs();
+            else fetchEmployerStats();
             onClose();
         } catch (error) {
             console.error("Failed to update job:", error);

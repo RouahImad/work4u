@@ -108,7 +108,7 @@ const AppRoutes = ({
                             darkMode={darkMode}
                             setDarkMode={setDarkMode}
                         >
-                            <EmployeeDashboard theme={theme} />
+                            <EmployeeDashboard />
                         </ProtectedRoute>
                     }
                 />

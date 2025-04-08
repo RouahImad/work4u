@@ -37,10 +37,14 @@ import {
     Business,
     AttachMoney,
     CalendarToday,
+    Visibility,
+    Edit,
 } from "@mui/icons-material";
 import { format, isAfter, parseISO } from "date-fns";
 import { useJobPost } from "../../../contexts/JobPostContext";
 import { Job } from "../../../types/Job.types";
+import JobView from "../../../components/jobs/JobView";
+import UpdateJobDialog from "../../../components/jobs/UpdateJobDialog";
 
 const JobsManagement = () => {
     const theme = useTheme();
@@ -52,6 +56,9 @@ const JobsManagement = () => {
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
+    const [jobViewOpen, setJobViewOpen] = useState(false);
+    const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+    const [updateJobDialogOpen, setUpdateJobDialogOpen] = useState(false);
 
     // Load jobs when component mounts
     useEffect(() => {
@@ -128,6 +135,36 @@ const JobsManagement = () => {
             setDeleteConfirmOpen(false);
             setSelectedJobId(null);
         }
+    };
+
+    // Function to handle viewing a job
+    const handleViewJob = (job: Job) => {
+        setSelectedJob(job);
+        setJobViewOpen(true);
+    };
+
+    // Handle closing the job view dialog
+    const handleJobViewClose = () => {
+        setJobViewOpen(false);
+    };
+
+    // Handle job editing - now properly implemented
+    const handleEditJob = (jobId: number) => {
+        const jobToEdit = jobs.find((job) => job.id === jobId);
+        if (jobToEdit) {
+            setSelectedJob(jobToEdit);
+            setSelectedJobId(jobId);
+            setUpdateJobDialogOpen(true);
+        }
+
+        if (jobViewOpen) {
+            setJobViewOpen(false);
+        }
+    };
+
+    // Handle closing the update job dialog
+    const handleUpdateJobDialogClose = () => {
+        setUpdateJobDialogOpen(false);
     };
 
     // Format date function
@@ -438,8 +475,35 @@ const JobsManagement = () => {
                                                             display: "flex",
                                                             justifyContent:
                                                                 "flex-end",
+                                                            gap: 1,
                                                         }}
                                                     >
+                                                        <Tooltip title="View job details">
+                                                            <IconButton
+                                                                size="small"
+                                                                color="primary"
+                                                                onClick={() =>
+                                                                    handleViewJob(
+                                                                        job
+                                                                    )
+                                                                }
+                                                            >
+                                                                <Visibility fontSize="small" />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                        <Tooltip title="Edit job">
+                                                            <IconButton
+                                                                size="small"
+                                                                color="secondary"
+                                                                onClick={() =>
+                                                                    handleEditJob(
+                                                                        job.id
+                                                                    )
+                                                                }
+                                                            >
+                                                                <Edit fontSize="small" />
+                                                            </IconButton>
+                                                        </Tooltip>
                                                         <Tooltip title="Delete job">
                                                             <IconButton
                                                                 size="small"
@@ -512,6 +576,28 @@ const JobsManagement = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            {/* Job View Dialog */}
+            {selectedJob && (
+                <JobView
+                    open={jobViewOpen}
+                    onClose={handleJobViewClose}
+                    jobId={selectedJob.id}
+                    job={selectedJob}
+                    onEdit={handleEditJob}
+                />
+            )}
+
+            {/* Update Job Dialog */}
+            {selectedJobId && selectedJob && (
+                <UpdateJobDialog
+                    open={updateJobDialogOpen}
+                    onClose={handleUpdateJobDialogClose}
+                    jobId={selectedJobId}
+                    job={selectedJob}
+                    viewInAdmin={true}
+                />
+            )}
         </Box>
     );
 };

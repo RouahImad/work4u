@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Dialog,
     DialogTitle,
@@ -30,14 +30,15 @@ import {
 import { format, isAfter, parseISO } from "date-fns";
 import { useJobPost } from "../../contexts/JobPostContext";
 import { useTheme } from "@mui/material/styles";
-import { JobPost } from "../../types/Job.types";
+import { JobPost, Job } from "../../types/Job.types";
 
 interface JobViewProps {
     open: boolean;
     onClose: () => void;
     jobId: number;
-    setViewedJob: (job: JobPost | null) => void;
+    setViewedJob?: (job: JobPost | null) => void;
     onEdit: (jobId: number) => void;
+    job?: Job | null; // Optional job object
 }
 
 const JobView: React.FC<JobViewProps> = ({
@@ -46,27 +47,44 @@ const JobView: React.FC<JobViewProps> = ({
     jobId,
     setViewedJob,
     onEdit,
+    job = null,
 }) => {
     const { currentJob, fetchJobById, loading, error } = useJobPost();
     const theme = useTheme();
-    // const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+    const [localJob, setLocalJob] = useState<Job | null>(null);
+    const [localLoading, setLocalLoading] = useState<boolean>(false);
 
+    // Determine if we need to fetch the job or use the provided one
     useEffect(() => {
-        fetchJobById(jobId);
-    }, []);
-
-    useEffect(() => {
-        if (currentJob) {
-            setViewedJob(currentJob);
+        if (job) {
+            // If a job is provided via props, use it
+            setLocalJob(job);
+            if (setViewedJob) setViewedJob(job);
+            setLocalLoading(false);
+        } else {
+            // Otherwise fetch the job
+            setLocalLoading(true);
+            fetchJobById(jobId);
         }
+    }, [job, jobId]);
 
-        // Clean up when component unmounts
+    // Handle the fetched job if we had to fetch it
+    useEffect(() => {
+        if (!job && currentJob) {
+            setLocalJob(currentJob);
+            if (setViewedJob) setViewedJob(currentJob);
+            setLocalLoading(false);
+        }
+    }, [currentJob, setViewedJob, job]);
+
+    // Clean up when component unmounts or dialog closes
+    useEffect(() => {
         return () => {
-            if (!open) {
+            if (!open && setViewedJob) {
                 setViewedJob(null);
             }
         };
-    }, [currentJob, setViewedJob, open]);
+    }, [open, setViewedJob]);
 
     const formatDate = (dateString: string) => {
         try {
@@ -93,6 +111,11 @@ const JobView: React.FC<JobViewProps> = ({
         }
     };
 
+    // Determine loading and error states
+    const isLoading = job ? false : localLoading || loading;
+    const displayError = !job && error;
+    const displayJob = localJob || job;
+
     return (
         <Dialog
             open={open}
@@ -107,15 +130,15 @@ const JobView: React.FC<JobViewProps> = ({
                 },
             }}
         >
-            {loading ? (
+            {isLoading ? (
                 <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                     <CircularProgress />
                 </Box>
-            ) : error ? (
+            ) : displayError ? (
                 <Box sx={{ p: 3 }}>
                     <Alert severity="error">{error}</Alert>
                 </Box>
-            ) : currentJob ? (
+            ) : displayJob ? (
                 <>
                     <DialogTitle
                         sx={{
@@ -159,17 +182,17 @@ const JobView: React.FC<JobViewProps> = ({
                                         component="h2"
                                         sx={{ fontWeight: 600 }}
                                     >
-                                        {currentJob.title}
+                                        {displayJob.title}
                                     </Typography>
                                     <Chip
                                         label={
-                                            isApplicationClosed(currentJob)
+                                            isApplicationClosed(displayJob)
                                                 ? "Closed"
                                                 : "Active"
                                         }
                                         size="small"
                                         color={
-                                            isApplicationClosed(currentJob)
+                                            isApplicationClosed(displayJob)
                                                 ? "error"
                                                 : "success"
                                         }
@@ -184,7 +207,7 @@ const JobView: React.FC<JobViewProps> = ({
                                     variant="subtitle1"
                                     color="text.secondary"
                                 >
-                                    {currentJob.company_name || "Company Name"}
+                                    {displayJob.company_name || "Company Name"}
                                 </Typography>
                             </Box>
                         </Box>
@@ -257,7 +280,7 @@ const JobView: React.FC<JobViewProps> = ({
                                                     fontWeight="medium"
                                                 >
                                                     $
-                                                    {currentJob.salaire ||
+                                                    {displayJob.salaire ||
                                                         "Negotiable"}
                                                 </Typography>
                                             </Box>
@@ -296,7 +319,7 @@ const JobView: React.FC<JobViewProps> = ({
                                                     variant="body1"
                                                     fontWeight="medium"
                                                 >
-                                                    {currentJob.company_address ||
+                                                    {displayJob.company_address ||
                                                         "Remote"}
                                                 </Typography>
                                             </Box>
@@ -335,7 +358,7 @@ const JobView: React.FC<JobViewProps> = ({
                                                     variant="body1"
                                                     fontWeight="medium"
                                                 >
-                                                    {currentJob.company_name ||
+                                                    {displayJob.company_name ||
                                                         "Company Name"}
                                                 </Typography>
                                             </Box>
@@ -369,7 +392,7 @@ const JobView: React.FC<JobViewProps> = ({
                                                     color="text.secondary"
                                                 >
                                                     {isApplicationClosed(
-                                                        currentJob
+                                                        displayJob
                                                     )
                                                         ? "Closed on"
                                                         : "Deadline"}
@@ -379,7 +402,7 @@ const JobView: React.FC<JobViewProps> = ({
                                                     fontWeight="medium"
                                                 >
                                                     {formatDate(
-                                                        currentJob.final_date
+                                                        displayJob.final_date
                                                     )}
                                                 </Typography>
                                             </Box>
@@ -415,7 +438,7 @@ const JobView: React.FC<JobViewProps> = ({
                                         textAlign: "justify",
                                     }}
                                 >
-                                    {currentJob.description}
+                                    {displayJob.description}
                                 </Typography>
                             </Box>
 
@@ -439,7 +462,7 @@ const JobView: React.FC<JobViewProps> = ({
                                 >
                                     Posted:{" "}
                                     {formatDate(
-                                        currentJob.uploaded_at ||
+                                        displayJob.uploaded_at ||
                                             new Date().toISOString()
                                     )}
                                 </Typography>

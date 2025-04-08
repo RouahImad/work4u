@@ -13,7 +13,6 @@ import { useAuth } from "../../../contexts/AuthContext";
 import EditProfileDialog from "../../profile/EditProfileDialog ";
 import ChangePasswordDialog from "../../profile/ChangePasswordDialog ";
 import DeleteAccountDialog from "../../profile/DeleteAccountDialog ";
-import { format } from "date-fns";
 
 const AdminProfile = () => {
     const { user } = useAuth();
@@ -32,19 +31,10 @@ const AdminProfile = () => {
     const handleDeleteAccountClose = () => setDeleteAccountOpen(false);
 
     // Format date function
-    const formatDate = (dateString?: string) => {
-        if (!dateString) return "N/A";
-        try {
-            return format(new Date(dateString), "MMM dd, yyyy");
-        } catch (error) {
-            return "Invalid date";
-        }
-    };
 
     // Create a display name from user data
     const displayName = user ? `${user.first_name} ${user.last_name}` : "Admin";
     const userEmail = user?.email || "No email available";
-    const joinDate = formatDate(user?.created_at);
 
     return (
         <Grid item xs={12}>
@@ -177,7 +167,7 @@ const AdminProfile = () => {
                                         {user?.username || "Not available"}
                                     </Typography>
                                 </Box>
-{/* 
+                                {/* 
                                 <Box sx={{ mb: 3 }}>
                                     <Typography
                                         variant="subtitle2"

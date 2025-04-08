@@ -171,11 +171,17 @@ const Login = () => {
     // Only render the login form if not authenticated
     if (!isAuthenticated) {
         return (
-            <Container component="main" maxWidth="xs">
+            <Container
+                component="main"
+                maxWidth="xs"
+                sx={{
+                    minHeight: "100vh",
+                    placeContent: "center",
+                }}
+            >
                 <Paper
                     elevation={3}
                     sx={{
-                        mt: 8,
                         p: 4,
                         display: "flex",
                         flexDirection: "column",

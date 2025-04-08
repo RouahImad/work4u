@@ -37,7 +37,6 @@ interface JobDetailViewProps {
     open: boolean;
     onClose: () => void;
     onReport: (jobId: number) => void;
-    darkmode: boolean;
 }
 
 const JobDetailView = ({
@@ -45,7 +44,6 @@ const JobDetailView = ({
     open,
     onClose,
     onReport,
-    darkmode,
 }: JobDetailViewProps) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
