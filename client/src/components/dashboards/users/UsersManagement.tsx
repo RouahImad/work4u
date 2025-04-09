@@ -414,29 +414,31 @@ const UsersManagement = ({ users }: UsersManagementProps) => {
                                                 }}
                                             >
                                                 <Tooltip title="Verify User">
-                                                    <IconButton
-                                                        size="small"
-                                                        color="primary"
-                                                        onClick={() =>
-                                                            handleVerifyUser(
-                                                                user.id
-                                                            )
-                                                        }
-                                                        disabled={
-                                                            user.verified ||
-                                                            verifyingUserId ===
-                                                                user.id
-                                                        }
-                                                    >
-                                                        {verifyingUserId ===
-                                                        user.id ? (
-                                                            <CircularProgress
-                                                                size={20}
-                                                            />
-                                                        ) : (
-                                                            <VerifiedUser fontSize="small" />
-                                                        )}
-                                                    </IconButton>
+                                                    <span>
+                                                        <IconButton
+                                                            size="small"
+                                                            color="primary"
+                                                            onClick={() =>
+                                                                handleVerifyUser(
+                                                                    user.id
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                user.verified ||
+                                                                verifyingUserId ===
+                                                                    user.id
+                                                            }
+                                                        >
+                                                            {verifyingUserId ===
+                                                            user.id ? (
+                                                                <CircularProgress
+                                                                    size={20}
+                                                                />
+                                                            ) : (
+                                                                <VerifiedUser fontSize="small" />
+                                                            )}
+                                                        </IconButton>
+                                                    </span>
                                                 </Tooltip>
 
                                                 <Tooltip title="Delete User">

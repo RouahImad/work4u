@@ -2,6 +2,7 @@ import { createContext, useContext, useState, ReactNode } from "react";
 import { postApi } from "../services/api";
 import { useNotification } from "../components/notifications/SlideInNotifications";
 import { Job, JobPost } from "../types/Job.types";
+import { logError } from "../services/errorUtils";
 
 interface JobPostContextType {
     jobs: Job[];
@@ -58,12 +59,11 @@ export const JobPostProvider = ({ children }: { children: ReactNode }) => {
             const errorMessage =
                 err.response?.data?.detail || "Failed to fetch jobs";
             setError(errorMessage);
-            console.log(errorMessage);
-
             pushNotification(
                 "Failed to load jobs. Please try again later.",
                 "error"
             );
+            logError(err, "fetchAllJobs");
         } finally {
             setLoading(false);
         }
@@ -104,6 +104,7 @@ export const JobPostProvider = ({ children }: { children: ReactNode }) => {
                 err.response?.data?.detail || "Failed to fetch job details";
             setError(errorMessage);
             pushNotification(errorMessage, "error");
+            logError(err, "fetchJobById");
         } finally {
             setLoading(false);
         }
@@ -128,6 +129,7 @@ export const JobPostProvider = ({ children }: { children: ReactNode }) => {
                 "Failed to create job";
             setError(errorMessage);
             pushNotification(errorMessage, "error");
+            logError(err, "createJob");
             throw err;
         } finally {
             setLoading(false);
@@ -154,6 +156,7 @@ export const JobPostProvider = ({ children }: { children: ReactNode }) => {
                 err.response?.data?.detail || "Failed to update job";
             setError(errorMessage);
             pushNotification(errorMessage, "error");
+            logError(err, "updateJob");
             throw err;
         } finally {
             setLoading(false);
@@ -173,6 +176,7 @@ export const JobPostProvider = ({ children }: { children: ReactNode }) => {
                 err.response?.data?.detail || "Failed to delete job";
             setError(errorMessage);
             pushNotification(errorMessage, "error");
+            logError(err, "deleteJob");
             throw err;
         } finally {
             setLoading(false);
@@ -198,6 +202,7 @@ export const JobPostProvider = ({ children }: { children: ReactNode }) => {
                 err.response?.data?.detail || "Failed to report job";
             setError(errorMessage);
             pushNotification(errorMessage, "error");
+            logError(err, "reportJob");
             throw err;
         } finally {
             setLoading(false);

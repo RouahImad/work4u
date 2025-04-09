@@ -19,6 +19,7 @@ import NotificationProvider from "./components/notifications/SlideInNotification
 import { JobPostProvider } from "./contexts/JobPostContext";
 import { CVInterviewProvider } from "./contexts/CVInterviewContext";
 import { DashboardProvider } from "./contexts/DashboardContext";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 const isDarkMode = localStorage.getItem("darkMode") === "true" ? true : false;
 
@@ -112,22 +113,23 @@ const App = () => {
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
-
-            <NotificationProvider>
-                <AuthProvider>
-                    <DashboardProvider>
-                        <JobPostProvider>
-                            <CVInterviewProvider>
-                                <AppRoutes
-                                    theme={theme}
-                                    darkMode={darkMode}
-                                    setDarkMode={setDarkMode}
-                                />
-                            </CVInterviewProvider>
-                        </JobPostProvider>
-                    </DashboardProvider>
-                </AuthProvider>
-            </NotificationProvider>
+            <ErrorBoundary>
+                <NotificationProvider>
+                    <AuthProvider>
+                        <DashboardProvider>
+                            <JobPostProvider>
+                                <CVInterviewProvider>
+                                    <AppRoutes
+                                        theme={theme}
+                                        darkMode={darkMode}
+                                        setDarkMode={setDarkMode}
+                                    />
+                                </CVInterviewProvider>
+                            </JobPostProvider>
+                        </DashboardProvider>
+                    </AuthProvider>
+                </NotificationProvider>
+            </ErrorBoundary>
         </ThemeProvider>
     );
 };

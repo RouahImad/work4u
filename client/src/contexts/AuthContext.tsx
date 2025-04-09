@@ -141,6 +141,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 "Failed to register employee"
             );
             setError(errorMessage);
+            logError(err, "registerEmployee");
 
             // Show error notification
             pushNotification(errorMessage, "error");
@@ -175,6 +176,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 "Failed to register employer"
             );
             setError(errorMessage);
+            logError(err, "registerEmployer");
 
             // Show error notification
             pushNotification(errorMessage, "error");
@@ -217,6 +219,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 "Failed to update user profile"
             );
             setError(errorMessage);
+            logError(err, "updateUserProfile");
             throw err;
         } finally {
             setLoading(false);
@@ -241,6 +244,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setError(errorMessage);
 
             pushNotification(errorMessage, "error");
+            logError(err, "updatePassword");
             throw err;
         } finally {
             setLoading(false);
@@ -271,6 +275,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 "Failed to delete account"
             );
             setError(errorMessage);
+            logError(err, "deleteAccount");
 
             if (!handlesOwnNotifications) {
                 pushNotification(errorMessage, "error");
@@ -309,6 +314,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setError(`${errorMessage} from here`);
             pushNotification(errorMessage, "error");
             setLoading(false);
+            logError(err, "createUser");
             return false;
         }
     };
@@ -328,6 +334,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             );
             setError(errorMessage);
             pushNotification(errorMessage, "error");
+            logError(err, "deleteUser");
             throw new Error(errorMessage);
         } finally {
             setLoading(false);
@@ -359,6 +366,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             );
             setError(errorMessage);
             pushNotification(errorMessage, "error");
+            logError(err, "verifyUser");
             throw new Error(errorMessage);
         } finally {
             setLoading(false);

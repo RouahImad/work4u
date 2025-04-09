@@ -523,37 +523,41 @@ const JobDetailView = ({
                                 placement="top"
                                 arrow
                             >
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    fullWidth={isMobile}
-                                    disabled={
-                                        applicationClosed ||
-                                        userRole === "admin"
-                                    }
-                                    startIcon={
-                                        applicationClosed ? (
-                                            <ErrorOutline />
-                                        ) : undefined
-                                    }
-                                    onClick={
-                                        !applicationClosed
-                                            ? handleApplyClick
-                                            : undefined
-                                    }
-                                    sx={{
-                                        px: 3.8,
-                                        py: 1.2,
-                                        opacity: applicationClosed ? 0.7 : 1,
-                                        borderRadius: 2,
-                                        boxShadow: 2,
-                                        fontWeight: "medium",
-                                    }}
-                                >
-                                    {applicationClosed
-                                        ? "Applications Closed"
-                                        : "Apply Now"}
-                                </Button>
+                                <span>
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        fullWidth={isMobile}
+                                        disabled={
+                                            applicationClosed ||
+                                            userRole === "admin"
+                                        }
+                                        startIcon={
+                                            applicationClosed ? (
+                                                <ErrorOutline />
+                                            ) : undefined
+                                        }
+                                        onClick={
+                                            !applicationClosed
+                                                ? handleApplyClick
+                                                : undefined
+                                        }
+                                        sx={{
+                                            px: 3.8,
+                                            py: 1.2,
+                                            opacity: applicationClosed
+                                                ? 0.7
+                                                : 1,
+                                            borderRadius: 2,
+                                            boxShadow: 2,
+                                            fontWeight: "medium",
+                                        }}
+                                    >
+                                        {applicationClosed
+                                            ? "Applications Closed"
+                                            : "Apply Now"}
+                                    </Button>
+                                </span>
                             </Tooltip>
                         </motion.div>
                     </Box>

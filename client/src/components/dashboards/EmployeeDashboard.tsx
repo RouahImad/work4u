@@ -66,7 +66,7 @@ const EmployeeDashboard = () => {
 
     // Interview dialog state
     const [interviewDialogOpen, setInterviewDialogOpen] = useState(false);
-    const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
+    const [selectedId, setSelectedId] = useState<number | null>(null);
     const [selectedPostTitle, setSelectedPostTitle] = useState<string>("");
 
     // Create a properly formatted display name
@@ -81,8 +81,11 @@ const EmployeeDashboard = () => {
     }, []);
 
     // Format date function
-    const formatDate = (dateString: string) => {
+    const formatDate = (dateString: string, withHour = false) => {
         try {
+            if (withHour) {
+                return format(new Date(dateString), "MMM dd, yyyy HH:mm");
+            }
             return format(new Date(dateString), "MMM dd, yyyy");
         } catch (error) {
             return "Invalid date";
@@ -100,15 +103,15 @@ const EmployeeDashboard = () => {
     const handleDeleteAccountClose = () => setDeleteAccountOpen(false);
 
     // Interview dialog handlers
-    const handleInterviewStart = (postId: number, postTitle: string) => {
-        setSelectedPostId(postId);
+    const handleInterviewStart = (applicationId: number, postTitle: string) => {
+        setSelectedId(applicationId);
         setSelectedPostTitle(postTitle);
         setInterviewDialogOpen(true);
     };
 
     const handleInterviewClose = () => {
         setInterviewDialogOpen(false);
-        setSelectedPostId(null);
+        setSelectedId(null);
         setSelectedPostTitle("");
         // Refresh data after interview completion
         fetchEmployeeStats();
@@ -847,42 +850,46 @@ const EmployeeDashboard = () => {
                                             </Typography>
                                         </Box>
                                         <List dense>
-                                            {getSafeApplications()
-                                                .filter(
-                                                    (app) =>
-                                                        app.status !== "accepte"
-                                                )
-                                                .slice(0, 3)
-                                                .map((app, index) => (
-                                                    <Fragment key={index}>
-                                                        <ListItem>
-                                                            <ListItemText
-                                                                primary={`Interview for ${app.post_title}`}
-                                                                secondary={`Application: ${formatDate(
-                                                                    app.application_date
-                                                                )}`}
-                                                            />
-                                                            {app.interview_id ===
-                                                                0 && (
-                                                                <Button
-                                                                    size="small"
-                                                                    variant="outlined"
-                                                                    color="secondary"
-                                                                    onClick={() =>
-                                                                        handleInterviewStart(
-                                                                            app.cv_id,
-                                                                            app.post_title
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    Take
-                                                                    Interview
-                                                                </Button>
-                                                            )}
-                                                        </ListItem>
-                                                        <Divider component="li" />
-                                                    </Fragment>
-                                                )) || (
+                                            {getSafeApplications().length >
+                                            0 ? (
+                                                getSafeApplications()
+                                                    .filter(
+                                                        (app) =>
+                                                            app.status !==
+                                                            "accepte"
+                                                    )
+                                                    .slice(0, 3)
+                                                    .map((app, index) => (
+                                                        <Fragment key={index}>
+                                                            <ListItem>
+                                                                <ListItemText
+                                                                    primary={`Applied for ${app.post_title}`}
+                                                                    secondary={`Application: ${formatDate(
+                                                                        app.application_date
+                                                                    )}`}
+                                                                />
+                                                                {app.interview_id ===
+                                                                    0 && (
+                                                                    <Button
+                                                                        size="small"
+                                                                        variant="outlined"
+                                                                        color="secondary"
+                                                                        onClick={() =>
+                                                                            handleInterviewStart(
+                                                                                app.application_id,
+                                                                                app.post_title
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        Take
+                                                                        Interview
+                                                                    </Button>
+                                                                )}
+                                                            </ListItem>
+                                                            <Divider component="li" />
+                                                        </Fragment>
+                                                    ))
+                                            ) : (
                                                 <ListItem>
                                                     <ListItemText
                                                         primary="No upcoming events"
@@ -891,6 +898,106 @@ const EmployeeDashboard = () => {
                                                 </ListItem>
                                             )}
                                         </List>
+                                    </Paper>
+                                </Grid>
+
+                                {/* Add a section to display interview history */}
+                                <Grid item xs={12} md={6}>
+                                    <Paper sx={{ p: 3, borderRadius: 2 }}>
+                                        <Typography variant="h6" gutterBottom>
+                                            Interview History
+                                        </Typography>
+                                        {getSafeInterviewHistory().length >
+                                        0 ? (
+                                            <List>
+                                                {getSafeInterviewHistory().map(
+                                                    (interview) => (
+                                                        <Fragment
+                                                            key={interview.id}
+                                                        >
+                                                            <ListItem>
+                                                                <ListItemText
+                                                                    primary={`Interview for ${interview.post_title}`}
+                                                                    secondary={`Question: ${
+                                                                        interview.question
+                                                                    }\nAnswer: ${
+                                                                        interview.answer
+                                                                    }\nScore: ${interview.score.toFixed(
+                                                                        1
+                                                                    )}%\nDate: ${formatDate(
+                                                                        interview.response_date
+                                                                    )}`}
+                                                                />
+                                                            </ListItem>
+                                                            <Divider component="li" />
+                                                        </Fragment>
+                                                    )
+                                                )}
+                                            </List>
+                                        ) : (
+                                            <Typography
+                                                variant="body2"
+                                                color="text.secondary"
+                                            >
+                                                No interviews completed yet.
+                                            </Typography>
+                                        )}
+                                    </Paper>
+                                </Grid>
+
+                                <Grid item xs={12}>
+                                    <Paper sx={{ p: 3, borderRadius: 2 }}>
+                                        <Typography variant="h6" gutterBottom>
+                                            Pending Applications
+                                        </Typography>
+                                        {getSafeApplications().filter(
+                                            (app) => app.status === "en_attente"
+                                        ).length > 0 ? (
+                                            <List>
+                                                {getSafeApplications()
+                                                    .filter(
+                                                        (app) =>
+                                                            app.status ===
+                                                            "en_attente"
+                                                    )
+                                                    .map((app, index) => (
+                                                        <Fragment key={index}>
+                                                            <ListItem>
+                                                                <ListItemText
+                                                                    primary={`Application for ${app.post_title}`}
+                                                                    secondary={`Date: ${formatDate(
+                                                                        app.application_date,
+                                                                        true
+                                                                    )}`}
+                                                                />
+                                                                <Button
+                                                                    size="small"
+                                                                    variant="outlined"
+                                                                    color="secondary"
+                                                                    onClick={() =>
+                                                                        handleInterviewStart(
+                                                                            app.application_id,
+                                                                            app.post_title
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    Start
+                                                                    Interview
+                                                                </Button>
+                                                            </ListItem>
+                                                            <Divider component="li" />
+                                                        </Fragment>
+                                                    ))}
+                                            </List>
+                                        ) : (
+                                            <Typography
+                                                variant="body2"
+                                                color="text.secondary"
+                                            >
+                                                No pending applications
+                                                requiring interviews.
+                                            </Typography>
+                                        )}
                                     </Paper>
                                 </Grid>
                             </>
@@ -1008,7 +1115,7 @@ const EmployeeDashboard = () => {
                                                                                         }
                                                                                         onClick={() =>
                                                                                             handleInterviewStart(
-                                                                                                application.cv_id,
+                                                                                                application.application_id,
                                                                                                 application.post_title
                                                                                             )
                                                                                         }
@@ -1384,11 +1491,11 @@ const EmployeeDashboard = () => {
             />
 
             {/* Interview Dialog */}
-            {selectedPostId && (
+            {selectedId && (
                 <InterviewDialog
                     open={interviewDialogOpen}
                     onClose={handleInterviewClose}
-                    postId={selectedPostId}
+                    applicationId={selectedId}
                     postTitle={selectedPostTitle}
                     interviewTime={30} // 30-minute interview
                 />

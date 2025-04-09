@@ -2,6 +2,7 @@ import { createContext, useContext, useState, ReactNode } from "react";
 import { dashboardApi } from "../services/api";
 import { useNotification } from "../components/notifications/SlideInNotifications";
 import { UserBase } from "../types/User.types";
+import { logError } from "../services/errorUtils";
 
 // Define interfaces for the API response
 interface InterviewHistory {
@@ -14,6 +15,7 @@ interface InterviewHistory {
 }
 
 interface Application {
+    application_id: number;
     post_title: string;
     cv_id: number;
     interview_id: number;
@@ -121,6 +123,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
             setError(null);
 
             const response = await dashboardApi.getRoleBasedStats();
+            console.clear();
 
             setEmployeeStats(response.data);
         } catch (err: any) {
@@ -129,6 +132,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
                 "Failed to fetch dashboard statistics";
             setError(errorMessage);
             pushNotification(errorMessage, "error");
+            logError(err, "fetchEmployeeStats");
         } finally {
             setLoading(false);
         }
@@ -147,6 +151,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
                 "Failed to fetch dashboard statistics";
             setError(errorMessage);
             pushNotification(errorMessage, "error");
+            logError(err, "fetchEmployerStats");
         } finally {
             setLoading(false);
         }
@@ -160,13 +165,12 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
             const response = await dashboardApi.getRoleBasedStats();
             setAdminStats(response.data);
         } catch (err: any) {
-            console.log(err);
-
             const errorMessage =
                 err.response?.data?.detail ||
                 "Failed to fetch admin dashboard statistics";
             setError(errorMessage);
             pushNotification(errorMessage, "error");
+            logError(err, "fetchAdminStats");
         } finally {
             setLoading(false);
         }

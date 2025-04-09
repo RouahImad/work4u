@@ -251,48 +251,26 @@ export const cvInterviewApi = {
             post_id: postId,
         }),
 
-    generateInterviewQuestions: (postId: number) =>
-        apiClient.post("/post/interview/", { post_id: postId }),
+    saveInterview: (applicationId: number) =>
+        apiClient.post("/post/save-interview/", {
+            application_id: applicationId,
+        }),
 
-    submitInterviewResponses: (
-        postId: number,
-        responses: Array<{ question: string; answer: string }>
-    ) =>
+    generateInterviewQuestions: (applicationId: number) =>
+        apiClient.post("/post/interview/", {
+            application_id: applicationId,
+        }),
+
+    submitInterviewResponses: (applicationId: number, responses: string[]) =>
         apiClient.post("/post/submit-interview/", {
-            post_id: postId,
+            application_id: applicationId,
             responses,
         }),
 
-    evaluateResponses: (postId: number, candidateAnswers: string[]) =>
+    evaluateResponses: (applicationId: number) =>
         apiClient.post("/post/evaluate-responses/", {
-            post_id: postId,
-            candidate_answers: candidateAnswers,
+            application_id: applicationId,
         }),
-
-    // Get user CVs
-    getUserCVs: () => {
-        return apiClient.get("/cv");
-    },
-
-    // Get specific CV
-    getCV: (id: number) => {
-        return apiClient.get(`/cv/${id}`);
-    },
-
-    // Delete a CV
-    deleteCV: (id: number) => {
-        return apiClient.delete(`/cv/${id}`);
-    },
-
-    // Get interview questions for a job
-    getInterviewQuestions: (jobId: number) => {
-        return apiClient.get(`/interview/job/${jobId}/questions`);
-    },
-
-    // Submit interview answers
-    submitInterviewAnswers: (jobId: number, answers: any) => {
-        return apiClient.post(`/interview/job/${jobId}/submit`, { answers });
-    },
 };
 
 // Dashboard statistics services

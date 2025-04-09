@@ -15,6 +15,8 @@ import {
     Paper,
     Chip,
     Grid,
+    Dialog as ConfirmationDialog,
+    DialogContentText,
 } from "@mui/material";
 import {
     Close,
@@ -29,34 +31,45 @@ import { useNotification } from "../notifications/SlideInNotifications";
 interface InterviewDialogProps {
     open: boolean;
     onClose: () => void;
-    postId: number;
     postTitle: string;
+    applicationId: number;
     interviewTime?: number; // Time in minutes for the interview
 }
 
 const InterviewDialog: React.FC<InterviewDialogProps> = ({
     open,
     onClose,
-    postId,
     postTitle,
+    applicationId,
     interviewTime = 30, // Default interview time: 30 minutes
 }) => {
-    const { questions, loading, error, generateQuestions, submitResponses } =
-        useCVInterview();
+    const {
+        questions,
+        loading,
+        error,
+        generateQuestions,
+        submitResponses,
+        evaluateInterview,
+    } = useCVInterview();
     const { pushNotification } = useNotification();
 
     // Interview state
-    const [answers, setAnswers] = useState<{ [key: string]: string }>({});
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [interviewStarted, setInterviewStarted] = useState(false);
     const [interviewCompleted, setInterviewCompleted] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [interviewSuccess, setInterviewSuccess] = useState(false);
+    const [terminateDialogOpen, setTerminateDialogOpen] = useState(false); // State for termination confirmation dialog
 
     // Timer state
     const [timeRemaining, setTimeRemaining] = useState(interviewTime * 60); // Convert minutes to seconds
     const [timerActive, setTimerActive] = useState(false);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+    // State to hold transformed questions with answers
+    const [transformedQuestions, setTransformedQuestions] = useState<
+        { question: string; answer: string }[]
+    >([]);
 
     // Load questions when dialog opens
     useEffect(() => {
@@ -65,14 +78,14 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
         }
     }, [open]);
 
-    // Initialize answers object when questions change
+    // Transform questions into objects when they change
     useEffect(() => {
         if (questions.length > 0) {
-            const initialAnswers: { [key: string]: string } = {};
-            questions.forEach((question) => {
-                initialAnswers[question.question] = "";
-            });
-            setAnswers(initialAnswers);
+            const formattedQuestions = questions.map((q) => ({
+                question: q,
+                answer: "",
+            }));
+            setTransformedQuestions(formattedQuestions);
         }
     }, [questions]);
 
@@ -113,7 +126,7 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
     // Load questions from API
     const loadQuestions = async () => {
         try {
-            await generateQuestions(postId);
+            await generateQuestions(applicationId);
         } catch (error) {
             console.error("Failed to load interview questions:", error);
         }
@@ -126,11 +139,12 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
     };
 
     // Handle answer changes
-    const handleAnswerChange = (question: string, value: string) => {
-        setAnswers((prevAnswers) => ({
-            ...prevAnswers,
-            [question]: value,
-        }));
+    const handleAnswerChange = (index: number, value: string) => {
+        setTransformedQuestions((prev) =>
+            prev.map((item, i) =>
+                i === index ? { ...item, answer: value } : item
+            )
+        );
     };
 
     // Navigate between questions
@@ -148,24 +162,28 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
 
     // Check if all questions have been answered
     const areAllQuestionsAnswered = () => {
-        return questions.every(
-            (question) => answers[question.question]?.trim().length > 0
+        return transformedQuestions.every(
+            (item) => item.answer.trim().length > 0
         );
     };
 
-    // Submit the interview
+    // Modify the handleSubmitInterview function to only send responses
     const handleSubmitInterview = async () => {
         setSubmitting(true);
         setTimerActive(false);
 
         try {
-            // Format responses for API
-            const responses = questions.map((question) => ({
-                question: question.question,
-                answer: answers[question.question] || "No answer provided",
-            }));
+            // Format responses as an array of strings
+            const responses = transformedQuestions.map(
+                (item) => item.answer || "No answer provided"
+            );
 
-            await submitResponses(postId, responses);
+            // Submit interview responses
+            await submitResponses(applicationId, responses);
+
+            // Evaluate the responses
+            await evaluateInterview(applicationId);
+
             setInterviewCompleted(true);
             setInterviewSuccess(true);
             pushNotification("Interview completed successfully!", "success");
@@ -173,6 +191,37 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
             console.error("Failed to submit interview:", error);
             pushNotification(
                 "There was an error submitting your interview. Please try again.",
+                "error"
+            );
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    // Handle termination confirmation
+    const handleTerminateInterview = async () => {
+        setTerminateDialogOpen(false);
+        setSubmitting(true);
+        setTimerActive(false);
+
+        try {
+            const responses = transformedQuestions.map(
+                (item) => item.answer || "No answer provided"
+            );
+
+            await submitResponses(applicationId, responses);
+
+            // Mark interview as completed
+            setInterviewCompleted(true);
+            setInterviewSuccess(false);
+            pushNotification(
+                "Interview terminated. Your responses have been submitted.",
+                "warning"
+            );
+        } catch (error) {
+            console.error("Failed to terminate interview:", error);
+            pushNotification(
+                "There was an error terminating your interview. Please try again.",
                 "error"
             );
         } finally {
@@ -197,10 +246,12 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
     return (
         <Dialog
             open={open}
-            onClose={handleClose}
+            onClose={!loading && !submitting ? handleClose : undefined} // Prevent closing during loading or submitting
             fullWidth
             maxWidth="md"
-            disableEscapeKeyDown={interviewStarted && !interviewCompleted}
+            disableEscapeKeyDown={
+                loading || (interviewStarted && !interviewCompleted)
+            } // Prevent escape key during loading or active interview
             PaperProps={{
                 sx: {
                     borderRadius: 2,
@@ -327,9 +378,22 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
                     >
                         <CircularProgress size={48} sx={{ mb: 2 }} />
                         <Typography variant="body1" align="center">
-                            {interviewStarted
-                                ? "Processing your interview..."
-                                : "Preparing your interview questions..."}
+                            {interviewStarted ? (
+                                "Processing your interview..."
+                            ) : (
+                                <>
+                                    Preparing your interview questions...
+                                    <br />
+                                    <span
+                                        style={{
+                                            fontSize: "0.8em",
+                                            color: "#888",
+                                        }}
+                                    >
+                                        Please wait.
+                                    </span>
+                                </>
+                            )}
                         </Typography>
                     </Box>
                 ) : error ? (
@@ -386,25 +450,36 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
                                 <li>
                                     <Typography variant="body2">
                                         You cannot pause the timer once you
-                                        start
+                                        start.
                                     </Typography>
                                 </li>
                                 <li>
                                     <Typography variant="body2">
                                         You can navigate between questions using
-                                        the Previous and Next buttons
+                                        the Previous and Next buttons.
                                     </Typography>
                                 </li>
                                 <li>
                                     <Typography variant="body2">
                                         All questions must be answered before
-                                        submitting
+                                        submitting.
                                     </Typography>
                                 </li>
                                 <li>
                                     <Typography variant="body2">
                                         Your responses will be evaluated after
-                                        submission
+                                        submission.
+                                    </Typography>
+                                </li>
+                                <li>
+                                    <Typography variant="body2">
+                                        Answers must be written in English.
+                                    </Typography>
+                                </li>
+                                <li>
+                                    <Typography variant="body2">
+                                        Copy, paste, and cut actions are
+                                        disabled in the answer input field.
                                     </Typography>
                                 </li>
                             </ul>
@@ -418,7 +493,7 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
                 ) : (
                     // Interview questions
                     <Box sx={{ height: "100%" }}>
-                        {questions.map((question, index) => (
+                        {transformedQuestions.map((item, index) => (
                             <Box
                                 key={index}
                                 sx={{
@@ -457,7 +532,7 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
                                             component="div"
                                             sx={{ lineHeight: 1.4 }}
                                         >
-                                            {question.question}
+                                            {item.question}
                                         </Typography>
                                     </Box>
                                 </Paper>
@@ -465,18 +540,23 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
                                 <TextField
                                     fullWidth
                                     multiline
-                                    rows={8}
-                                    placeholder="Type your answer here..."
+                                    rows={5}
+                                    placeholder="Type your answer here in English..."
                                     variant="outlined"
-                                    value={answers[question.question] || ""}
+                                    value={item.answer}
                                     onChange={(e) =>
                                         handleAnswerChange(
-                                            question.question,
+                                            index,
                                             e.target.value
                                         )
                                     }
-                                    disabled={submitting}
+                                    disabled={submitting || interviewCompleted} // Disable if submitting or completed
                                     sx={{ mb: 3 }}
+                                    inputProps={{
+                                        onCopy: (e) => e.preventDefault(), // Disable copy
+                                        onPaste: (e) => e.preventDefault(), // Disable paste
+                                        onCut: (e) => e.preventDefault(), // Disable cut
+                                    }}
                                 />
 
                                 <Grid
@@ -505,20 +585,21 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
                                             color="text.secondary"
                                         >
                                             {currentQuestionIndex + 1} of{" "}
-                                            {questions.length}
+                                            {transformedQuestions.length}
                                         </Typography>
                                     </Grid>
                                     <Grid item>
                                         {currentQuestionIndex ===
-                                        questions.length - 1 ? (
+                                        transformedQuestions.length - 1 ? (
                                             <Button
                                                 variant="contained"
                                                 color="primary"
                                                 onClick={handleSubmitInterview}
                                                 disabled={
+                                                    interviewCompleted ||
                                                     !areAllQuestionsAnswered() ||
                                                     submitting
-                                                }
+                                                } // Enable only if all questions are answered
                                             >
                                                 Submit Interview
                                             </Button>
@@ -567,6 +648,49 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
                     </Button>
                 </DialogActions>
             )}
+
+            {interviewStarted && !interviewCompleted && (
+                <DialogActions sx={{ p: 3, pt: 0 }}>
+                    <Button
+                        variant="outlined"
+                        color="error"
+                        onClick={() => setTerminateDialogOpen(true)} // Open termination confirmation dialog
+                        disabled={submitting}
+                    >
+                        Terminate Interview
+                    </Button>
+                </DialogActions>
+            )}
+
+            {/* Termination confirmation dialog */}
+            <ConfirmationDialog
+                open={terminateDialogOpen}
+                onClose={() => setTerminateDialogOpen(false)}
+            >
+                <DialogTitle>Terminate Interview</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Are you sure you want to terminate the interview? All
+                        your current answers will be submitted.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        onClick={() => setTerminateDialogOpen(false)}
+                        color="primary"
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleTerminateInterview}
+                        color="error"
+                        variant="contained"
+                        disabled={submitting}
+                    >
+                        Terminate
+                    </Button>
+                </DialogActions>
+            </ConfirmationDialog>
         </Dialog>
     );
 };

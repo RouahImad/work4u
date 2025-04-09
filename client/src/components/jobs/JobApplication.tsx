@@ -12,7 +12,7 @@ import {
     Alert,
     IconButton,
 } from "@mui/material";
-import { Close, UploadFile, CheckCircleOutline } from "@mui/icons-material";
+import { Close, CheckCircleOutline } from "@mui/icons-material";
 import { useCVInterview } from "../../contexts/CVInterviewContext";
 import { useNotification } from "../notifications/SlideInNotifications";
 
@@ -38,7 +38,7 @@ const JobApplication = ({
     const fileInputRef = useRef<HTMLInputElement>(null);
     const dropZoneRef = useRef<HTMLDivElement>(null);
 
-    const { uploadCV, compareWithJob } = useCVInterview();
+    const { uploadCV, compareWithJob, saveInterview } = useCVInterview();
     const { pushNotification } = useNotification();
 
     const validateFile = useCallback((selectedFile: File): boolean => {
@@ -60,7 +60,6 @@ const JobApplication = ({
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files[0]) {
             const selectedFile = event.target.files[0];
-
             if (validateFile(selectedFile)) {
                 setFile(selectedFile);
                 setError(null);
@@ -92,13 +91,19 @@ const JobApplication = ({
             const cvId = await uploadCV(cvTitle, file);
 
             // Then compare it with the job
-            await compareWithJob(cvId, jobId);
+            const applicationId = await compareWithJob(cvId, jobId);
 
-            setSuccess(true);
-            pushNotification(
-                "Your application has been submitted successfully!",
-                "success"
-            );
+            // If comparison successful and we got an application ID
+            if (applicationId) {
+                // Save the interview
+                await saveInterview(applicationId);
+
+                setSuccess(true);
+                pushNotification(
+                    "Application submitted successfully! You can now take the interview.",
+                    "success"
+                );
+            }
 
             // Close dialog after showing success for a moment
             setTimeout(() => {
@@ -140,10 +145,7 @@ const JobApplication = ({
         e.stopPropagation();
 
         // Only set isDragging to false if we're leaving the drop zone and not entering a child element
-        if (
-            dropZoneRef.current &&
-            !dropZoneRef.current.contains(e.relatedTarget as Node)
-        ) {
+        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
             setIsDragging(false);
         }
     };
@@ -155,7 +157,6 @@ const JobApplication = ({
 
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             const droppedFile = e.dataTransfer.files[0];
-
             if (validateFile(droppedFile)) {
                 setFile(droppedFile);
                 setError(null);
@@ -171,10 +172,21 @@ const JobApplication = ({
     return (
         <Dialog
             open={open}
-            onClose={loading ? undefined : onClose}
+            onClose={!loading ? onClose : undefined}
             fullWidth
             maxWidth="sm"
+            PaperProps={{
+                sx: { borderRadius: 2 },
+            }}
         >
+            <input
+                type="file"
+                accept=".pdf"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                style={{ display: "none" }}
+            />
+
             <DialogTitle
                 sx={{
                     display: "flex",
@@ -199,7 +211,7 @@ const JobApplication = ({
                         />
                         <Typography>
                             Your application has been submitted successfully.
-                            We'll review your resume and get back to you soon.
+                            You'll now need to complete an interview assessment.
                         </Typography>
                     </Box>
                 ) : (
@@ -242,71 +254,26 @@ const JobApplication = ({
                                         ? file
                                             ? "rgba(0, 230, 118, 0.1)"
                                             : "transparent"
-                                        : isDragging
-                                        ? "rgba(33, 150, 243, 0.1)"
-                                        : file
-                                        ? "rgba(0, 230, 118, 0.1)"
-                                        : "rgba(0, 0, 0, 0.05)",
+                                        : "rgba(0, 0, 0, 0.04)",
                                 },
-                                transition: "all 0.2s ease",
-                                position: "relative",
-                                overflow: "hidden",
                             }}
                             onClick={loading ? undefined : triggerFileInput}
-                            onDragEnter={handleDragEnter}
-                            onDragOver={handleDragOver}
-                            onDragLeave={handleDragLeave}
-                            onDrop={handleDrop}
+                            onDragEnter={loading ? undefined : handleDragEnter}
+                            onDragOver={loading ? undefined : handleDragOver}
+                            onDragLeave={loading ? undefined : handleDragLeave}
+                            onDrop={loading ? undefined : handleDrop}
                         >
-                            <input
-                                type="file"
-                                accept="application/pdf"
-                                onChange={handleFileChange}
-                                style={{ display: "none" }}
-                                ref={fileInputRef}
-                                disabled={loading}
-                            />
-
-                            {isDragging ? (
-                                <Box>
-                                    <UploadFile
-                                        sx={{
-                                            fontSize: 50,
-                                            color: "primary.main",
-                                            mb: 1,
-                                            animation: "pulse 1.5s infinite",
-                                            "@keyframes pulse": {
-                                                "0%": { opacity: 0.6 },
-                                                "50%": { opacity: 1 },
-                                                "100%": { opacity: 0.6 },
-                                            },
-                                        }}
-                                    />
-                                    <Typography
-                                        variant="h6"
-                                        color="primary.main"
-                                    >
-                                        Drop your file here
-                                    </Typography>
-                                </Box>
+                            {loading ? (
+                                <CircularProgress size={40} />
                             ) : (
                                 <>
-                                    <UploadFile
-                                        sx={{
-                                            fontSize: 40,
-                                            color: file
-                                                ? "success.main"
-                                                : "action.active",
-                                            mb: 1,
-                                        }}
-                                    />
-
                                     {file ? (
                                         <>
-                                            <Typography
-                                                variant="body1"
-                                                fontWeight="bold"
-                                            >
+                                            <CheckCircleOutline
+                                                color="success"
+                                                sx={{ fontSize: 40, mb: 1 }}
+                                            />
+                                            <Typography variant="body1">
                                                 {file.name}
                                             </Typography>
                                             <Typography
