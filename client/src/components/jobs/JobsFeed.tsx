@@ -21,9 +21,6 @@ import {
     FormControl,
     Select,
     SelectChangeEvent,
-    useMediaQuery,
-    useTheme,
-    Tooltip,
 } from "@mui/material";
 import {
     Search,
@@ -45,7 +42,6 @@ import { Job } from "../../types/Job.types";
 import JobItemSkeleton from "./JobItemSkeleton";
 import ScrollToTop from "../ScrollToTop";
 
-// Define type for sort options
 type SortOption = {
     value: string;
     label: string;
@@ -53,9 +49,6 @@ type SortOption = {
 };
 
 const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
-    const materialTheme = useTheme();
-    const isMobile = useMediaQuery(materialTheme.breakpoints.down("sm"));
-
     const [searchTerm, setSearchTerm] = useState("");
     const [loading, setLoading] = useState(false);
     const [filters, setFilters] = useState({
@@ -63,6 +56,10 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
         company: "",
         salaire: "",
     });
+
+    // Add sorting state
+    const [sortOption, setSortOption] = useState("newest");
+
     const { fetchAllJobs, jobs } = useJobPost();
 
     // Selected job state
@@ -183,38 +180,100 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
         });
     };
 
-    // Apply filters and search
-    const filteredJobs = jobs.filter((job) => {
-        // Only show accepted jobs
-        // if (!job.accepted) return false;
+    // Define sort options
+    const sortOptions: SortOption[] = [
+        {
+            value: "newest",
+            label: "Newest First",
+            sortFn: (a, b) =>
+                new Date(b.uploaded_at || "").getTime() -
+                new Date(a.uploaded_at || "").getTime(),
+        },
+        {
+            value: "oldest",
+            label: "Oldest First",
+            sortFn: (a, b) =>
+                new Date(a.uploaded_at || "").getTime() -
+                new Date(b.uploaded_at || "").getTime(),
+        },
+        {
+            value: "deadline",
+            label: "Deadline (Soonest)",
+            sortFn: (a, b) =>
+                new Date(a.final_date).getTime() -
+                new Date(b.final_date).getTime(),
+        },
+        {
+            value: "salary-high",
+            label: "Salary (Highest)",
+            sortFn: (a, b) => (b.salaire || 0) - (a.salaire || 0),
+        },
+        {
+            value: "salary-low",
+            label: "Salary (Lowest)",
+            sortFn: (a, b) => (a.salaire || 0) - (b.salaire || 0),
+        },
+        {
+            value: "title-az",
+            label: "Title (A-Z)",
+            sortFn: (a, b) => a.title.localeCompare(b.title),
+        },
+        {
+            value: "title-za",
+            label: "Title (Z-A)",
+            sortFn: (a, b) => b.title.localeCompare(a.title),
+        },
+    ];
 
-        const matchesSearch =
-            job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            job.company_name
-                ?.toLowerCase()
-                .includes(searchTerm.toLowerCase()) ||
-            job.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const handleSortChange = (event: SelectChangeEvent) => {
+        setSortOption(event.target.value);
+    };
 
-        const matchesLocation = filters.location
-            ? job.company_address
-                  ?.toLowerCase()
-                  .includes(filters.location.toLowerCase()) ?? false
-            : true;
+    // Apply filters, search, and sorting
+    const filteredJobs = jobs
+        .filter((job) => {
+            // Only show accepted jobs
+            // if (!job.accepted) return false;
 
-        const matchesCompany = filters.company
-            ? job.company_name
-                  ?.toLowerCase()
-                  .includes(filters.company.toLowerCase()) ?? false
-            : true;
+            const matchesSearch =
+                job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                job.company_name
+                    ?.toLowerCase()
+                    .includes(searchTerm.toLowerCase()) ||
+                job.description
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase());
 
-        const matchesSalary = filters.salaire
-            ? job.salaire && job.salaire >= parseFloat(filters.salaire)
-            : true;
+            const matchesLocation = filters.location
+                ? job.company_address
+                      ?.toLowerCase()
+                      .includes(filters.location.toLowerCase()) ?? false
+                : true;
 
-        return (
-            matchesSearch && matchesLocation && matchesCompany && matchesSalary
-        );
-    });
+            const matchesCompany = filters.company
+                ? job.company_name
+                      ?.toLowerCase()
+                      .includes(filters.company.toLowerCase()) ?? false
+                : true;
+
+            const matchesSalary = filters.salaire
+                ? job.salaire && job.salaire >= parseFloat(filters.salaire)
+                : true;
+
+            return (
+                matchesSearch &&
+                matchesLocation &&
+                matchesCompany &&
+                matchesSalary
+            );
+        })
+        .sort((a, b) => {
+            // Find the selected sort option and apply its sort function
+            const selectedSort = sortOptions.find(
+                (option) => option.value === sortOption
+            );
+            return selectedSort ? selectedSort.sortFn(a, b) : 0;
+        });
 
     return (
         <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
@@ -324,7 +383,7 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
                                     fullWidth
                                     placeholder="Minimum salary"
                                     variant="outlined"
-                                    name="salary"
+                                    name="salaire"
                                     type="number"
                                     value={filters.salaire}
                                     onChange={handleFilterChange}
@@ -352,55 +411,109 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
             </Collapse>
 
             {/* Active filters display */}
-            {(searchTerm ||
-                filters.location ||
-                filters.company ||
-                filters.salaire) && (
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2 }}>
-                    {searchTerm && (
-                        <Chip
-                            label={`Search: ${searchTerm}`}
-                            onDelete={() => setSearchTerm("")}
-                            size="small"
-                            color="primary"
-                            variant="outlined"
-                        />
-                    )}
-                    {filters.location && (
-                        <Chip
-                            label={`Location: ${filters.location}`}
-                            onDelete={() =>
-                                setFilters({ ...filters, location: "" })
-                            }
-                            size="small"
-                            color="primary"
-                            variant="outlined"
-                        />
-                    )}
-                    {filters.company && (
-                        <Chip
-                            label={`Company: ${filters.company}`}
-                            onDelete={() =>
-                                setFilters({ ...filters, company: "" })
-                            }
-                            size="small"
-                            color="primary"
-                            variant="outlined"
-                        />
-                    )}
-                    {filters.salaire && (
-                        <Chip
-                            label={`Min Salary: $${filters.salaire}`}
-                            onDelete={() =>
-                                setFilters({ ...filters, salaire: "" })
-                            }
-                            size="small"
-                            color="primary"
-                            variant="outlined"
-                        />
+            <Box
+                sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    mb: 2,
+                }}
+            >
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                    {(searchTerm ||
+                        filters.location ||
+                        filters.company ||
+                        filters.salaire) && (
+                        <>
+                            {searchTerm && (
+                                <Chip
+                                    label={`Search: ${searchTerm}`}
+                                    onDelete={() => setSearchTerm("")}
+                                    size="small"
+                                    color="primary"
+                                    variant="outlined"
+                                />
+                            )}
+                            {filters.location && (
+                                <Chip
+                                    label={`Location: ${filters.location}`}
+                                    onDelete={() =>
+                                        setFilters({ ...filters, location: "" })
+                                    }
+                                    size="small"
+                                    color="primary"
+                                    variant="outlined"
+                                />
+                            )}
+                            {filters.company && (
+                                <Chip
+                                    label={`Company: ${filters.company}`}
+                                    onDelete={() =>
+                                        setFilters({ ...filters, company: "" })
+                                    }
+                                    size="small"
+                                    color="primary"
+                                    variant="outlined"
+                                />
+                            )}
+                            {filters.salaire && (
+                                <Chip
+                                    label={`Min Salary: $${filters.salaire}`}
+                                    onDelete={() =>
+                                        setFilters({ ...filters, salaire: "" })
+                                    }
+                                    size="small"
+                                    color="primary"
+                                    variant="outlined"
+                                />
+                            )}
+                        </>
                     )}
                 </Box>
-            )}
+
+                {/* Sort dropdown */}
+                {filteredJobs.length > 1 && (
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <FormControl size="small" sx={{ minWidth: 160 }}>
+                            <Select
+                                value={sortOption}
+                                onChange={handleSortChange}
+                                displayEmpty
+                                variant="outlined"
+                                inputProps={{
+                                    "aria-label": "Sort by",
+                                }}
+                                startAdornment={
+                                    <InputAdornment position="start">
+                                        <SortIcon
+                                            fontSize="small"
+                                            color="action"
+                                        />
+                                    </InputAdornment>
+                                }
+                                renderValue={(selected) => {
+                                    if (selected === "") {
+                                        return <em>Sort by</em>;
+                                    }
+                                    return (
+                                        selected.charAt(0).toUpperCase() +
+                                        selected.slice(1)
+                                    );
+                                }}
+                            >
+                                {sortOptions.map((option) => (
+                                    <MenuItem
+                                        key={option.value}
+                                        value={option.value}
+                                    >
+                                        {option.label}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </Box>
+                )}
+            </Box>
 
             {/* Job listings with skeleton loading */}
             <Grid container spacing={3}>
