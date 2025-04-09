@@ -599,15 +599,7 @@ const AdminDashboard = () => {
                         <Paper sx={{ p: 3, borderRadius: 2 }}>
                             {adminStats?.users?.list && (
                                 <UsersManagement
-                                    users={adminStats.users.list.map(
-                                        (user) => ({
-                                            ...user,
-                                            first_name: user.first_name || "",
-                                            last_name: user.last_name || "",
-                                            email: user.email || "",
-                                            role: user.role || "",
-                                        })
-                                    )}
+                                    users={adminStats.users.list}
                                 />
                             )}
                         </Paper>

@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 import { dashboardApi } from "../services/api";
 import { useNotification } from "../components/notifications/SlideInNotifications";
+import { UserBase } from "../types/User.types";
 
 // Define interfaces for the API response
 interface InterviewHistory {
@@ -60,21 +61,10 @@ interface ReportDetail {
     reported_at: string;
 }
 
-interface User {
-    id: number;
-    username: string;
-    email: string;
-    role: string;
-    first_name?: string;
-    last_name?: string;
-    created_at?: string;
-    updated_at?: string;
-}
-
 interface AdminDashboardStats {
     users: {
         total: number;
-        list: User[];
+        list: UserBase[];
     };
     posts: {
         total: number;

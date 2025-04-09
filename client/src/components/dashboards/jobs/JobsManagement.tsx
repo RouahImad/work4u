@@ -28,6 +28,10 @@ import {
     CardContent,
     Alert,
     CircularProgress,
+    FormControl,
+    Select,
+    MenuItem,
+    SelectChangeEvent,
 } from "@mui/material";
 import {
     Search,
@@ -39,6 +43,7 @@ import {
     CalendarToday,
     Visibility,
     Edit,
+    Sort,
 } from "@mui/icons-material";
 import { format, isAfter, parseISO } from "date-fns";
 import { useJobPost } from "../../../contexts/JobPostContext";
@@ -53,6 +58,7 @@ const JobsManagement = () => {
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [searchTerm, setSearchTerm] = useState("");
     const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
+    const [sortBy, setSortBy] = useState<string>("");
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -65,11 +71,11 @@ const JobsManagement = () => {
         fetchAllJobs();
     }, [refreshTrigger]);
 
-    // Apply search filter
+    // Filter and sort users when search term or sortBy changes
     useEffect(() => {
         if (!jobs) return;
 
-        const filtered = jobs.filter(
+        let filtered = jobs.filter(
             (job) =>
                 job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 job.company_name
@@ -83,16 +89,40 @@ const JobsManagement = () => {
                     ? job.uploaded_at
                           .toLowerCase()
                           .includes(searchTerm.toLowerCase())
-                    : false) ||
-                (searchTerm.toLowerCase() == "active" &&
-                    !isApplicationClosed(job)) ||
-                (searchTerm.toLowerCase() == "closed" &&
-                    isApplicationClosed(job))
+                    : false)
         );
 
+        if (sortBy) {
+            filtered = filtered.sort((a, b) => {
+                switch (sortBy) {
+                    case "title":
+                        return a.title.localeCompare(b.title);
+                    case "company":
+                        return a.company_name.localeCompare(b.company_name);
+                    case "location":
+                        return a.company_address.localeCompare(
+                            b.company_address
+                        );
+                    case "salary":
+                        return a.salaire - b.salaire;
+                    case "date":
+                        return (
+                            new Date(a.uploaded_at || "").getTime() -
+                            new Date(b.uploaded_at || "").getTime()
+                        );
+                    case "status":
+                        const aStatus = isApplicationClosed(a);
+                        const bStatus = isApplicationClosed(b);
+                        return aStatus === bStatus ? 0 : aStatus ? 1 : -1;
+                    default:
+                        return 0;
+                }
+            });
+        }
+
         setFilteredJobs(filtered);
-        setPage(0); // Reset to first page when filtering
-    }, [searchTerm, jobs]);
+        setPage(0); // Reset to first page when filtering or sorting
+    }, [searchTerm, sortBy, jobs]);
 
     const handleChangePage = (_event: unknown, newPage: number) => {
         setPage(newPage);
@@ -111,6 +141,11 @@ const JobsManagement = () => {
 
     const clearSearch = () => {
         setSearchTerm("");
+    };
+
+    // Handle sort change
+    const handleSortChange = (event: SelectChangeEvent<string>) => {
+        setSortBy(event.target.value);
     };
 
     const openDeleteConfirm = (jobId: number) => {
@@ -293,7 +328,7 @@ const JobsManagement = () => {
             </Grid>
 
             {/* Search Bar */}
-            <Box sx={{ mb: 3 }}>
+            <Box sx={{ mb: 3, display: "flex", gap: 2 }}>
                 <TextField
                     fullWidth
                     placeholder="Search jobs by title, company, description or location..."
@@ -321,6 +356,37 @@ const JobsManagement = () => {
                         ),
                     }}
                 />
+                <FormControl size="small" sx={{ minWidth: 150 }}>
+                    <Select
+                        value={sortBy}
+                        onChange={handleSortChange}
+                        startAdornment={
+                            <InputAdornment position="start">
+                                <Sort />
+                            </InputAdornment>
+                        }
+                        displayEmpty
+                        renderValue={(selected) => {
+                            if (selected === "") {
+                                return <em>Sort by</em>;
+                            }
+                            return (
+                                selected.charAt(0).toUpperCase() +
+                                selected.slice(1)
+                            );
+                        }}
+                    >
+                        <MenuItem value="">
+                            <em>None</em>
+                        </MenuItem>
+                        <MenuItem value="title">Title</MenuItem>
+                        <MenuItem value="company">Company</MenuItem>
+                        <MenuItem value="location">Location</MenuItem>
+                        <MenuItem value="salary">Salary</MenuItem>
+                        <MenuItem value="date">Date</MenuItem>
+                        <MenuItem value="status">Status</MenuItem>
+                    </Select>
+                </FormControl>
             </Box>
 
             {/* Jobs Table */}

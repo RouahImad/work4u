@@ -1,9 +1,13 @@
 // User entity
-export interface User {
+export interface UserBase {
     id: number;
     username: string;
     email: string;
     role: string;
+    verified: boolean;
+}
+
+export interface User extends UserBase {
     first_name: string;
     last_name: string;
     company_name?: string;
@@ -15,7 +19,7 @@ export interface User {
 
 // User management props
 export interface UsersManagementProps {
-    users: User[];
+    users: UserBase[];
 }
 
 // Dialog props

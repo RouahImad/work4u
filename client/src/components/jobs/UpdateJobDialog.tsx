@@ -144,7 +144,6 @@ const UpdateJobDialog: React.FC<UpdateJobDialogProps> = ({
             onClose();
         } catch (error) {
             console.error("Failed to update job:", error);
-            // Error handling is done in the context
         }
     };
 

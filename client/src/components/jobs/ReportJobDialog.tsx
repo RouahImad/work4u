@@ -67,7 +67,6 @@ const ReportJobDialog = ({
                 handleClose();
             }, 1200);
         } catch (error) {
-            console.error("Failed to submit report:", error);
             pushNotification(
                 "Failed to submit report. Please try again.",
                 "error"

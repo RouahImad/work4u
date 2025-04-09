@@ -173,7 +173,6 @@ const EmployerProfileDialog = ({
             pushNotification("Company profile updated successfully", "success");
             onClose();
         } catch (error: any) {
-            console.error("Failed to update profile:", error);
             setErrorMessage(
                 error.response?.data?.detail || "Failed to update profile"
             );

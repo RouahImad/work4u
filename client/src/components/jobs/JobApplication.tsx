@@ -108,8 +108,6 @@ const JobApplication = ({
                 setCvTitle("");
             }, 2000);
         } catch (err: any) {
-            console.log(err);
-
             setError(err.message || "Failed to submit application");
         } finally {
             setLoading(false);

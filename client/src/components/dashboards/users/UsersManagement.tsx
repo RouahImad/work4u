@@ -23,55 +23,78 @@ import {
     Alert,
     Tooltip,
     Avatar,
+    CircularProgress,
+    FormControl,
+    Select,
+    MenuItem,
+    SelectChangeEvent,
 } from "@mui/material";
-import { Search, Clear, Delete, PersonAdd } from "@mui/icons-material";
+import {
+    Search,
+    Clear,
+    Delete,
+    PersonAdd,
+    VerifiedUser,
+    Sort,
+} from "@mui/icons-material";
 import { useDashboard } from "../../../contexts/DashboardContext";
+import { useNotification } from "../../../components/notifications/SlideInNotifications";
 import CreateUserDialog from "./CreateUserDialog";
 import { useAuth } from "../../../contexts/AuthContext";
-import { User, UsersManagementProps } from "../../../types/User.types";
+import { UserBase, UsersManagementProps } from "../../../types/User.types";
 
 const UsersManagement = ({ users }: UsersManagementProps) => {
     // State variables
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [searchTerm, setSearchTerm] = useState("");
-    const [filteredUsers, setFilteredUsers] = useState<User[]>(users || []);
+    const [filteredUsers, setFilteredUsers] = useState<UserBase[]>(users || []);
+    const [sortBy, setSortBy] = useState<string>("");
 
     // State for create user dialog
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
     // State for delete confirmation dialog
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    const [userToDelete, setUserToDelete] = useState<User | null>(null);
+    const [userToDelete, setUserToDelete] = useState<UserBase | null>(null);
+
+    // State for verification
+    const [verifyingUserId, setVerifyingUserId] = useState<number | null>(null);
 
     // Access dashboard context
-    const { error, deleteUser } = useAuth();
+    const { error, deleteUser, verifyUser } = useAuth();
     const { fetchAdminStats } = useDashboard();
+    const { pushNotification } = useNotification();
 
-    // Filter users when search term changes
+    // Filter and sort users when search term or sortBy changes
     useEffect(() => {
         if (!users) return;
 
-        const filtered = users.filter(
+        let filtered = users.filter(
             (user) =>
                 user.username
                     .toLowerCase()
                     .includes(searchTerm.toLowerCase()) ||
                 user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                user.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                (user.first_name &&
-                    user.first_name
-                        .toLowerCase()
-                        .includes(searchTerm.toLowerCase())) ||
-                (user.last_name &&
-                    user.last_name
-                        .toLowerCase()
-                        .includes(searchTerm.toLowerCase()))
+                user.role.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
+        filtered = filtered.sort((a, b) => {
+            if (sortBy === "username") {
+                return a.username.localeCompare(b.username);
+            } else if (sortBy === "email") {
+                return a.email.localeCompare(b.email);
+            } else if (sortBy === "role") {
+                return a.role.localeCompare(b.role);
+            } else if (sortBy === "verified") {
+                return a.verified === b.verified ? 0 : a.verified ? -1 : 1;
+            }
+            return 0;
+        });
+
         setFilteredUsers(filtered);
-        setPage(0); // Reset to first page when filtering
-    }, [searchTerm, users]);
+        setPage(0); // Reset to first page when filtering or sorting
+    }, [searchTerm, sortBy, users]);
 
     // Handle search input change
     const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,6 +104,11 @@ const UsersManagement = ({ users }: UsersManagementProps) => {
     // Clear search term
     const clearSearch = () => {
         setSearchTerm("");
+    };
+
+    // Handle sort change
+    const handleSortChange = (event: SelectChangeEvent<string>) => {
+        setSortBy(event.target.value);
     };
 
     // Handle pagination
@@ -105,7 +133,7 @@ const UsersManagement = ({ users }: UsersManagementProps) => {
     };
 
     // Delete user handlers
-    const handleDeleteDialogOpen = (user: User) => {
+    const handleDeleteDialogOpen = (user: UserBase) => {
         setUserToDelete(user);
         setDeleteDialogOpen(true);
     };
@@ -124,14 +152,38 @@ const UsersManagement = ({ users }: UsersManagementProps) => {
                 await fetchAdminStats();
                 handleDeleteDialogClose();
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error deleting user:", error);
         }
     };
 
-    // Get initials for the avatar
-    const getInitials = (first_name?: string, last_name?: string) => {
-        return `${first_name?.[0] || ""}${last_name?.[0] || ""}`.toUpperCase();
+    // Verify user handler
+    const handleVerifyUser = async (userId: number) => {
+        setVerifyingUserId(userId);
+        try {
+            await verifyUser(userId);
+
+            // Optimistically update the local state for immediate UI feedback
+            setFilteredUsers((prevUsers) =>
+                prevUsers.map((user) =>
+                    user.id === userId ? { ...user, verified: true } : user
+                )
+            );
+
+            // Then fetch the updated data from server
+            if (!error) {
+                await fetchAdminStats();
+            }
+        } catch (error) {
+            console.error("Error verifying user:", error);
+            // Display the error to the user
+            pushNotification?.(
+                "Failed to verify user. Please try again.",
+                "error"
+            );
+        } finally {
+            setVerifyingUserId(null);
+        }
     };
 
     // Render role chip with appropriate styling
@@ -164,7 +216,10 @@ const UsersManagement = ({ users }: UsersManagementProps) => {
                 label={role}
                 color={color}
                 size="small"
-                sx={{ color: color !== "default" ? "white" : undefined }}
+                sx={{
+                    color: color !== "default" ? "white" : undefined,
+                    backgroundColor: role === "admin" ? "#f44336 " : undefined,
+                }}
             />
         );
     };
@@ -205,8 +260,8 @@ const UsersManagement = ({ users }: UsersManagementProps) => {
                     Create User
                 </Button>
             </Box>
-            {/* Search Bar */}
-            <Box sx={{ mb: 3 }}>
+            {/* Search Bar and Sort By */}
+            <Box sx={{ mb: 3, display: "flex", gap: 2 }}>
                 <TextField
                     fullWidth
                     placeholder="Search users by name, email, role..."
@@ -234,6 +289,35 @@ const UsersManagement = ({ users }: UsersManagementProps) => {
                         ),
                     }}
                 />
+                <FormControl size="small" sx={{ minWidth: 150 }}>
+                    <Select
+                        value={sortBy}
+                        onChange={handleSortChange}
+                        startAdornment={
+                            <InputAdornment position="start">
+                                <Sort />
+                            </InputAdornment>
+                        }
+                        displayEmpty
+                        renderValue={(selected) => {
+                            if (selected === "") {
+                                return <em>Sort by</em>;
+                            }
+                            return (
+                                selected.charAt(0).toUpperCase() +
+                                selected.slice(1)
+                            );
+                        }}
+                    >
+                        <MenuItem value="">
+                            <em>None</em>
+                        </MenuItem>
+                        <MenuItem value="username">Username</MenuItem>
+                        <MenuItem value="email">Email</MenuItem>
+                        <MenuItem value="role">Role</MenuItem>
+                        <MenuItem value="verified">Verified</MenuItem>
+                    </Select>
+                </FormControl>
             </Box>
             {/* Users Table */}
             <Paper sx={{ width: "100%", overflow: "hidden", borderRadius: 2 }}>
@@ -244,6 +328,7 @@ const UsersManagement = ({ users }: UsersManagementProps) => {
                                 <TableCell>User</TableCell>
                                 <TableCell>Email</TableCell>
                                 <TableCell>Role</TableCell>
+                                <TableCell>Verified</TableCell>
                                 <TableCell align="right">Actions</TableCell>
                             </TableRow>
                         </TableHead>
@@ -282,10 +367,7 @@ const UsersManagement = ({ users }: UsersManagementProps) => {
                                                                 : "#4caf50",
                                                     }}
                                                 >
-                                                    {getInitials(
-                                                        user.first_name,
-                                                        user.last_name
-                                                    )}
+                                                    {user.username[0].toUpperCase()}
                                                 </Avatar>
                                                 <Box>
                                                     <Typography
@@ -294,19 +376,35 @@ const UsersManagement = ({ users }: UsersManagementProps) => {
                                                     >
                                                         {user.username}
                                                     </Typography>
-                                                    <Typography
-                                                        variant="caption"
-                                                        color="text.secondary"
-                                                    >
-                                                        {user.first_name}{" "}
-                                                        {user.last_name}
-                                                    </Typography>
                                                 </Box>
                                             </Box>
                                         </TableCell>
                                         <TableCell>{user.email}</TableCell>
                                         <TableCell>
                                             {renderRoleChip(user.role)}
+                                        </TableCell>
+                                        <TableCell>
+                                            {user.verified ? (
+                                                <Chip
+                                                    label="Verified"
+                                                    size="small"
+                                                    sx={{
+                                                        backgroundColor:
+                                                            "rgba(76, 175, 80, 0.2)",
+                                                        color: "#4CAF50",
+                                                    }}
+                                                />
+                                            ) : (
+                                                <Chip
+                                                    label="Not Verified"
+                                                    size="small"
+                                                    sx={{
+                                                        backgroundColor:
+                                                            "rgba(255, 193, 7, 0.3)",
+                                                        color: "#EF6C00",
+                                                    }}
+                                                />
+                                            )}
                                         </TableCell>
                                         <TableCell align="right">
                                             <Box
@@ -315,6 +413,32 @@ const UsersManagement = ({ users }: UsersManagementProps) => {
                                                     justifyContent: "flex-end",
                                                 }}
                                             >
+                                                <Tooltip title="Verify User">
+                                                    <IconButton
+                                                        size="small"
+                                                        color="primary"
+                                                        onClick={() =>
+                                                            handleVerifyUser(
+                                                                user.id
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            user.verified ||
+                                                            verifyingUserId ===
+                                                                user.id
+                                                        }
+                                                    >
+                                                        {verifyingUserId ===
+                                                        user.id ? (
+                                                            <CircularProgress
+                                                                size={20}
+                                                            />
+                                                        ) : (
+                                                            <VerifiedUser fontSize="small" />
+                                                        )}
+                                                    </IconButton>
+                                                </Tooltip>
+
                                                 <Tooltip title="Delete User">
                                                     <IconButton
                                                         size="small"

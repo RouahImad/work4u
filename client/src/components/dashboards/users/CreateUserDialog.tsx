@@ -20,7 +20,7 @@ import { useDashboard } from "../../../contexts/DashboardContext";
 import { CreateUserDialogProps } from "../../../types/User.types";
 
 const CreateUserDialog = ({ open, onClose }: CreateUserDialogProps) => {
-    const { error, createUser } = useAuth();
+    const { createUser } = useAuth();
     const { fetchAdminStats } = useDashboard();
     const [isLoading, setIsLoading] = useState(false);
 
@@ -154,12 +154,11 @@ const CreateUserDialog = ({ open, onClose }: CreateUserDialogProps) => {
 
             const response = await createUser(userData);
 
-            if (response && !error) {
+            if (response) {
                 await fetchAdminStats();
                 handleClose();
             }
         } catch (error) {
-            console.error("Error creating user:", error);
         } finally {
             setIsLoading(false);
         }

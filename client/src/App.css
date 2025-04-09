@@ -23,6 +23,11 @@
     scrollbar-color: #9d4edd transparent;
 }
 
+::selection {
+    background: #9d4edd;
+    color: white;
+}
+
 /* scrollbar for WebKit browsers (Chrome, Edge, Safari) */
 ::-webkit-scrollbar {
     width: 8px;

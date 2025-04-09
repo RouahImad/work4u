@@ -177,8 +177,6 @@ const EmployeeRegister = () => {
             if (!handlesOwnNotifications) {
                 pushNotification(errorMessage, "error");
             }
-
-            console.error(error);
         } finally {
             setIsLoading(false);
         }

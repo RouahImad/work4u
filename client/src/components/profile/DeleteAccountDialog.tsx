@@ -37,7 +37,6 @@ const DeleteAccountDialog = ({ open, onClose }: DeleteAccountDialogProps) => {
         try {
             await deleteAccount();
         } catch (error: any) {
-            console.error("Failed to delete account:", error);
             pushNotification(
                 error.response?.data?.detail || "Failed to delete account",
                 "error"

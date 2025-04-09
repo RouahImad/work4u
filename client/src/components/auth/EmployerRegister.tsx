@@ -129,7 +129,7 @@ const EmployerRegister = () => {
             newErrors.companyName = "Company name is required";
         }
 
-        // Website format validation (optional field)
+        // Website format validation
         if (
             formData.companyWebsite &&
             !formData.companyWebsite.startsWith("http")
@@ -201,7 +201,6 @@ const EmployerRegister = () => {
                 pushNotification(errorMessage, "error");
             }
 
-            console.error(error);
         } finally {
             setIsLoading(false);
         }

@@ -49,8 +49,8 @@ import { useNotification } from "../notifications/SlideInNotifications";
 import { useAuth } from "../../contexts/AuthContext";
 import { useDashboard } from "../../contexts/DashboardContext";
 import EmployerProfileDialog from "../profile/EmployerProfileDialog";
-import ChangePasswordDialog from "../profile/ChangePasswordDialog ";
-import DeleteAccountDialog from "../profile/DeleteAccountDialog ";
+import ChangePasswordDialog from "../profile/ChangePasswordDialog";
+import DeleteAccountDialog from "../profile/DeleteAccountDialog";
 import { format } from "date-fns";
 import CreateJobDialog from "../jobs/CreateJobDialog";
 import UpdateJobDialog from "../jobs/UpdateJobDialog";
@@ -128,9 +128,7 @@ const EmployerDashboard = ({ theme }: { theme: Theme }) => {
             pushNotification("Job offer has been closed", "success");
 
             fetchEmployerStats();
-        } catch (error) {
-            console.error("Failed to close job:", error);
-        }
+        } catch (error) {}
         handleMenuClose();
     };
 
@@ -138,9 +136,7 @@ const EmployerDashboard = ({ theme }: { theme: Theme }) => {
         try {
             await deleteJob(jobId);
             fetchEmployerStats();
-        } catch (error) {
-            console.error("Failed to delete job:", error);
-        }
+        } catch (error) {}
         handleMenuClose();
     };
 

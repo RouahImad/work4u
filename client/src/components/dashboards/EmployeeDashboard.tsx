@@ -40,9 +40,9 @@ import {
 } from "@mui/icons-material";
 import { useAuth } from "../../contexts/AuthContext";
 import { useDashboard } from "../../contexts/DashboardContext";
-import ChangePasswordDialog from "../profile/ChangePasswordDialog ";
-import DeleteAccountDialog from "../profile/DeleteAccountDialog ";
-import EditProfileDialog from "../profile/EditProfileDialog ";
+import ChangePasswordDialog from "../profile/ChangePasswordDialog";
+import DeleteAccountDialog from "../profile/DeleteAccountDialog";
+import EditProfileDialog from "../profile/EditProfileDialog";
 import InterviewDialog from "../jobs/InterviewDialog";
 import { format } from "date-fns";
 
@@ -1357,59 +1357,7 @@ const EmployeeDashboard = () => {
                                                         </Typography>
                                                     </Box>
 
-                                                    {/* <Box
-                                                        sx={{
-                                                            p: 3,
-                                                            borderRadius: 2,
-                                                            bgcolor:
-                                                                theme.palette
-                                                                    .mode ===
-                                                                "dark"
-                                                                    ? "rgba(255,255,255,0.05)"
-                                                                    : "rgba(0,0,0,0.02)",
-                                                            border: 1,
-                                                            borderColor:
-                                                                "divider",
-                                                        }}
-                                                    >
-                                                        <Typography
-                                                            variant="subtitle2"
-                                                            gutterBottom
-                                                        >
-                                                            Account Status
-                                                        </Typography>
-                                                        {/* <Box
-                                                            sx={{
-                                                                display: "flex",
-                                                                alignItems:
-                                                                    "center",
-                                                                justifyContent:
-                                                                    "space-between",
-                                                            }}
-                                                        >
-                                                            <Typography
-                                                                variant="body2"
-                                                                color="text.secondary"
-                                                            >
-                                                                Active since:{" "}
-                                                                {user?.created_at
-                                                                    ? formatDate(
-                                                                          user.created_at
-                                                                      )
-                                                                    : "Not available"}
-                                                            </Typography>
-                                                            <Chip
-                                                                size="small"
-                                                                label="Active"
-                                                                color="success"
-                                                                sx={{
-                                                                    fontWeight:
-                                                                        "medium",
-                                                                }}
-                                                            />
-                                                        </Box> */}
-                                                    {/* </Box> */}
-                                                    {/* */}
+                                                    {/* Account settings card actual content stays */}
                                                 </Card>
                                             </Grid>
                                         </Grid>

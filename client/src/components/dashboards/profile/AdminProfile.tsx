@@ -10,9 +10,9 @@ import {
 } from "@mui/material";
 import { SupervisorAccount, Settings } from "@mui/icons-material";
 import { useAuth } from "../../../contexts/AuthContext";
-import EditProfileDialog from "../../profile/EditProfileDialog ";
-import ChangePasswordDialog from "../../profile/ChangePasswordDialog ";
-import DeleteAccountDialog from "../../profile/DeleteAccountDialog ";
+import EditProfileDialog from "../../profile/EditProfileDialog";
+import ChangePasswordDialog from "../../profile/ChangePasswordDialog";
+import DeleteAccountDialog from "../../profile/DeleteAccountDialog";
 
 const AdminProfile = () => {
     const { user } = useAuth();

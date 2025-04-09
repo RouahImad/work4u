@@ -354,8 +354,6 @@ export default function Home({
                                                     fontWeight: 600,
                                                     boxShadow:
                                                         "0 2px 8px rgba(0,0,0,0.1)",
-                                                    // backgroundColor:
-                                                    //     theme.palette.primary.main,
                                                 }}
                                             >
                                                 Sign Up as Job Seeker
@@ -546,7 +544,6 @@ export default function Home({
                                             </Typography>
                                             <Typography
                                                 variant="body2"
-                                                // color="text.secondary"
                                                 sx={{
                                                     color: darkMode
                                                         ? "#fff"

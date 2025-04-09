@@ -133,10 +133,12 @@ const Login = () => {
                     error.response?.data?.detail || "Invalid email or password";
                 pushNotification(errorMessage, "error");
             }
-            setLoginError(
-                error.response?.data?.detail || "Invalid email or password"
-            );
-            console.error("Login error", error);
+            if (error.response?.status >= 500) {
+                setLoginError("Server error. Please try again later.");
+            } else
+                setLoginError(
+                    error.response?.data?.detail || "Invalid email or password"
+                );
         } finally {
             setIsLoading(false);
         }

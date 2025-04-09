@@ -315,7 +315,9 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
                                                 <span
                                                     style={{
                                                         fontSize: "1.25rem",
-                                                        color: "rgba(0, 0, 0, 0.54)",
+                                                        color: darkmode
+                                                            ? "#fff"
+                                                            : "rgba(0, 0, 0, 0.54)",
                                                     }}
                                                 >
                                                     $

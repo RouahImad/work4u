@@ -7,6 +7,7 @@ import {
 } from "react";
 import { authApi, secureStorage } from "../services/api";
 import { useNotification } from "../components/notifications/SlideInNotifications";
+import { sanitizeErrorMessage, logError } from "../services/errorUtils";
 import {
     User,
     EmployeeRegistrationData,
@@ -34,6 +35,7 @@ interface AuthContextType {
     handlesOwnNotifications: boolean;
     createUser: (userData: CreateUserData) => Promise<boolean>;
     deleteUser: (userId: number) => Promise<void>;
+    verifyUser: (userId: number) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -102,12 +104,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             // Show success notification
             pushNotification("Successfully logged in!", "success");
         } catch (err: any) {
-            const errorMessage =
-                err.response?.data?.detail || "Failed to login";
+            const errorMessage = sanitizeErrorMessage(err, "Failed to login");
             setError(errorMessage);
 
             // Show error notification
             pushNotification(errorMessage, "error");
+            logError(err, "login");
             throw err;
         } finally {
             setLoading(false);
@@ -134,8 +136,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             localStorage.setItem("userRole", "employee");
             setUserRole("employee");
         } catch (err: any) {
-            const errorMessage =
-                err.response?.data?.detail || "Failed to register";
+            const errorMessage = sanitizeErrorMessage(
+                err,
+                "Failed to register employee"
+            );
             setError(errorMessage);
 
             // Show error notification
@@ -166,8 +170,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             localStorage.setItem("userRole", "employer");
             setUserRole("employer");
         } catch (err: any) {
-            const errorMessage =
-                err.response?.data?.detail || "Failed to register";
+            const errorMessage = sanitizeErrorMessage(
+                err,
+                "Failed to register employer"
+            );
             setError(errorMessage);
 
             // Show error notification
@@ -206,7 +212,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             const response = await authApi.updateUser(data);
             setUser(response.data);
         } catch (err: any) {
-            setError(err.response?.data?.detail || "Failed to update profile");
+            const errorMessage = sanitizeErrorMessage(
+                err,
+                "Failed to update user profile"
+            );
+            setError(errorMessage);
             throw err;
         } finally {
             setLoading(false);
@@ -224,8 +234,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
             pushNotification("Password updated successfully", "success");
         } catch (err: any) {
-            const errorMessage =
-                err.response?.data?.detail || "Failed to update password";
+            const errorMessage = sanitizeErrorMessage(
+                err,
+                "Failed to update password"
+            );
             setError(errorMessage);
 
             pushNotification(errorMessage, "error");
@@ -254,8 +266,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 );
             }
         } catch (err: any) {
-            const errorMessage =
-                err.response?.data?.detail || "Failed to delete account";
+            const errorMessage = sanitizeErrorMessage(
+                err,
+                "Failed to delete account"
+            );
             setError(errorMessage);
 
             if (!handlesOwnNotifications) {
@@ -288,8 +302,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setLoading(false);
             return true;
         } catch (err: any) {
-            const errorMessage =
-                err.response?.data?.detail || "Failed to create user";
+            const errorMessage = sanitizeErrorMessage(
+                err,
+                "Failed to create user"
+            );
             setError(`${errorMessage} from here`);
             pushNotification(errorMessage, "error");
             setLoading(false);
@@ -306,8 +322,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
             pushNotification(`User deleted successfully.`, "success");
         } catch (err: any) {
-            const errorMessage =
-                err.response?.data?.detail || "Failed to delete user";
+            const errorMessage = sanitizeErrorMessage(
+                err,
+                "Failed to delete user"
+            );
+            setError(errorMessage);
+            pushNotification(errorMessage, "error");
+            throw new Error(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const verifyUser = async (userId: number): Promise<void> => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const response = await authApi.verifyUser(userId);
+
+            // Update the local users array if the verified user is the current user
+            if (user && user.id === userId) {
+                setUser({
+                    ...user,
+                    verified: true,
+                });
+            }
+
+            pushNotification(`User verified successfully.`, "success");
+
+            return response.data.user;
+        } catch (err: any) {
+            const errorMessage = sanitizeErrorMessage(
+                err,
+                "Failed to verify user"
+            );
             setError(errorMessage);
             pushNotification(errorMessage, "error");
             throw new Error(errorMessage);
@@ -334,6 +383,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 handlesOwnNotifications,
                 createUser,
                 deleteUser,
+                verifyUser,
             }}
         >
             {children}

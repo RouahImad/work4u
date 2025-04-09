@@ -344,7 +344,7 @@ const NavBar = ({
                             <span
                                 style={{
                                     fontFamily: "Pacifico, cursive",
-                                    color: theme.palette.secondary.main,
+                                    color: "rgb(255, 80, 80)",
                                 }}
                             >
                                 4U

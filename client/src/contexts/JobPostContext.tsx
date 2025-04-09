@@ -123,7 +123,9 @@ export const JobPostProvider = ({ children }: { children: ReactNode }) => {
             await fetchAllJobs();
         } catch (err: any) {
             const errorMessage =
-                err.response?.data?.detail || "Failed to create job";
+                err.response?.data?.detail ||
+                err.response?.data?.error ||
+                "Failed to create job";
             setError(errorMessage);
             pushNotification(errorMessage, "error");
             throw err;

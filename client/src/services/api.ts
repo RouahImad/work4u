@@ -197,6 +197,9 @@ export const authApi = {
     }) => {
         return apiClient.post("/api/register/", data);
     },
+
+    verifyUser: (userId: number) =>
+        apiClient.post(`/api/verify-user/${userId}/`),
 };
 
 // Post management services

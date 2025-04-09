@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
-// import { AnimatePresence } from "framer-motion";
 declare module "@mui/material/styles" {
     interface BreakpointOverrides {
         xs: true;
@@ -97,14 +96,12 @@ const App = () => {
                         "&:hover": {
                             background:
                                 "linear-gradient(45deg, #9D4EDD 30%, #C77DFF 90%)",
-                            // "linear-gradient(45deg, #7B2CBF 30%, #9D4EDD 90%)",
                         },
                     },
                     containedSecondary: {
                         "&:hover": {
                             background:
                                 "linear-gradient(45deg, #FF3C7F 30%, #FF7AA2 90%)",
-                            // "linear-gradient(45deg, #CF1259 30%, #FF3C7F 90%)",
                         },
                     },
                 },
