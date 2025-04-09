@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Box,
     Container,
@@ -25,7 +25,13 @@ import { useNotification } from "../../components/notifications/SlideInNotificat
 
 const EmployeeRegister = () => {
     const navigate = useNavigate();
-    const { registerEmployee, handlesOwnNotifications } = useAuth();
+    const {
+        isAuthenticated,
+        userRole,
+        registerEmployee,
+        handlesOwnNotifications,
+        loading: authLoading,
+    } = useAuth();
     const { pushNotification } = useNotification();
 
     const [formData, setFormData] = useState({
@@ -51,6 +57,27 @@ const EmployeeRegister = () => {
 
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    useEffect(() => {
+        if (isAuthenticated && userRole) {
+            redirectBasedOnRole(userRole);
+        }
+    }, [isAuthenticated, userRole]);
+
+    const redirectBasedOnRole = (role: string) => {
+        switch (role) {
+            case "admin":
+                navigate("/admin/dashboard");
+                break;
+            case "employer":
+                navigate("/employer/dashboard");
+                break;
+            case "employee":
+            default:
+                navigate("/employee/dashboard");
+                break;
+        }
+    };
 
     const handleTogglePasswordVisibility = () => {
         setShowPassword((prevShowPassword) => !prevShowPassword);
@@ -182,220 +209,274 @@ const EmployeeRegister = () => {
         }
     };
 
-    return (
-        <Container
-            component="main"
-            maxWidth="sm"
-            sx={{
-                my: 4,
-                minHeight: "100vh",
-                placeContent: "center",
-            }}
-        >
-            <Paper
-                elevation={3}
+    if (!isLoading && authLoading) {
+        return (
+            <Container
                 sx={{
-                    p: 4,
                     display: "flex",
-                    flexDirection: "column",
                     alignItems: "center",
-                    borderRadius: 2,
+                    justifyContent: "center",
+                    height: "100vh",
                 }}
             >
-                <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
-                    <PersonAddOutlined />
-                </Avatar>
-                <Typography component="h1" variant="h5" mb={3}>
-                    Create Job Seeker Account
-                </Typography>
-
-                {registerError && (
-                    <Alert severity="error" sx={{ width: "100%", mb: 2 }}>
-                        {registerError}
-                    </Alert>
-                )}
-
-                <Box
-                    component="form"
-                    onSubmit={handleSubmit}
-                    sx={{ mt: 3, width: "100%" }}
-                >
-                    <Grid container spacing={2}>
-                        <Grid item xs={12}>
-                            <TextField
-                                required
-                                fullWidth
-                                id="username"
-                                label="Username"
-                                name="username"
-                                autoComplete="username"
-                                value={formData.username}
-                                onChange={handleChange}
-                                error={!!errors.username}
-                                helperText={errors.username}
-                                disabled={isLoading}
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                autoComplete="given-name"
-                                name="firstName"
-                                required
-                                fullWidth
-                                id="firstName"
-                                label="First Name"
-                                autoFocus
-                                value={formData.firstName}
-                                onChange={handleChange}
-                                error={!!errors.firstName}
-                                helperText={errors.firstName}
-                                disabled={isLoading}
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                required
-                                fullWidth
-                                id="lastName"
-                                label="Last Name"
-                                name="lastName"
-                                autoComplete="family-name"
-                                value={formData.lastName}
-                                onChange={handleChange}
-                                error={!!errors.lastName}
-                                helperText={errors.lastName}
-                                disabled={isLoading}
-                            />
-                        </Grid>
-
-                        <Grid item xs={12}>
-                            <TextField
-                                required
-                                fullWidth
-                                id="email"
-                                label="Email Address"
-                                name="email"
-                                autoComplete="email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                error={!!errors.email}
-                                helperText={errors.email}
-                                disabled={isLoading}
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <TextField
-                                required
-                                fullWidth
-                                name="password"
-                                label="Password"
-                                type={showPassword ? "text" : "password"}
-                                id="password"
-                                autoComplete="new-password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                error={!!errors.password}
-                                helperText={errors.password}
-                                disabled={isLoading}
-                                InputProps={{
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <IconButton
-                                                aria-label="toggle password visibility"
-                                                onClick={
-                                                    handleTogglePasswordVisibility
-                                                }
-                                                edge="end"
-                                                disabled={isLoading}
-                                                size="large"
-                                                sx={{ color: "text.secondary" }}
-                                            >
-                                                {showPassword ? (
-                                                    <VisibilityOff />
-                                                ) : (
-                                                    <Visibility />
-                                                )}
-                                            </IconButton>
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <TextField
-                                required
-                                fullWidth
-                                name="confirmPassword"
-                                label="Confirm Password"
-                                type={showConfirmPassword ? "text" : "password"}
-                                id="confirmPassword"
-                                value={formData.confirmPassword}
-                                onChange={handleChange}
-                                error={!!errors.confirmPassword}
-                                helperText={errors.confirmPassword}
-                                disabled={isLoading}
-                                InputProps={{
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <IconButton
-                                                aria-label="toggle confirm password visibility"
-                                                onClick={
-                                                    handleToggleConfirmPasswordVisibility
-                                                }
-                                                edge="end"
-                                                disabled={isLoading}
-                                                size="large"
-                                                sx={{ color: "text.secondary" }}
-                                            >
-                                                {showConfirmPassword ? (
-                                                    <VisibilityOff />
-                                                ) : (
-                                                    <Visibility />
-                                                )}
-                                            </IconButton>
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
-                        </Grid>
-                    </Grid>
-                    <Button
-                        type="submit"
-                        fullWidth
-                        variant="contained"
-                        color="primary"
-                        sx={{ mt: 3, mb: 2 }}
-                        disabled={isLoading}
-                    >
-                        {isLoading ? <CircularProgress size={24} /> : "Sign Up"}
-                    </Button>
-                    <Grid
-                        container
-                        sx={{
-                            flexDirection: { xs: "column-reverse", sm: "row" },
-                        }}
-                    >
-                        <Grid item xs>
-                            <MuiLink
-                                component={Link}
-                                to="/register/employer"
-                                variant="body2"
-                            >
-                                Register as an Employer
-                            </MuiLink>
-                        </Grid>
-                        <Grid item>
-                            <MuiLink
-                                component={Link}
-                                to="/login"
-                                variant="body2"
-                            >
-                                Already have an account? Sign in
-                            </MuiLink>
-                        </Grid>
-                    </Grid>
+                <Box sx={{ textAlign: "center" }}>
+                    <CircularProgress size={60} />
+                    <Typography variant="h6" sx={{ mt: 2 }}>
+                        Checking authentication status...
+                    </Typography>
                 </Box>
-            </Paper>
+            </Container>
+        );
+    }
+
+    if (!isAuthenticated)
+        return (
+            <Container
+                component="main"
+                maxWidth="sm"
+                sx={{
+                    my: 4,
+                    minHeight: "100vh",
+                    placeContent: "center",
+                }}
+            >
+                <Paper
+                    elevation={3}
+                    sx={{
+                        p: 4,
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        borderRadius: 2,
+                    }}
+                >
+                    <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
+                        <PersonAddOutlined />
+                    </Avatar>
+                    <Typography component="h1" variant="h5" mb={3}>
+                        Create Job Seeker Account
+                    </Typography>
+
+                    {registerError && (
+                        <Alert severity="error" sx={{ width: "100%", mb: 2 }}>
+                            {registerError}
+                        </Alert>
+                    )}
+
+                    <Box
+                        component="form"
+                        onSubmit={handleSubmit}
+                        sx={{ mt: 3, width: "100%" }}
+                    >
+                        <Grid container spacing={2}>
+                            <Grid item xs={12}>
+                                <TextField
+                                    required
+                                    fullWidth
+                                    id="username"
+                                    label="Username"
+                                    name="username"
+                                    autoComplete="username"
+                                    value={formData.username}
+                                    onChange={handleChange}
+                                    error={!!errors.username}
+                                    helperText={errors.username}
+                                    disabled={isLoading}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    autoComplete="given-name"
+                                    name="firstName"
+                                    required
+                                    fullWidth
+                                    id="firstName"
+                                    label="First Name"
+                                    autoFocus
+                                    value={formData.firstName}
+                                    onChange={handleChange}
+                                    error={!!errors.firstName}
+                                    helperText={errors.firstName}
+                                    disabled={isLoading}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    required
+                                    fullWidth
+                                    id="lastName"
+                                    label="Last Name"
+                                    name="lastName"
+                                    autoComplete="family-name"
+                                    value={formData.lastName}
+                                    onChange={handleChange}
+                                    error={!!errors.lastName}
+                                    helperText={errors.lastName}
+                                    disabled={isLoading}
+                                />
+                            </Grid>
+
+                            <Grid item xs={12}>
+                                <TextField
+                                    required
+                                    fullWidth
+                                    id="email"
+                                    label="Email Address"
+                                    name="email"
+                                    autoComplete="email"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    error={!!errors.email}
+                                    helperText={errors.email}
+                                    disabled={isLoading}
+                                />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <TextField
+                                    required
+                                    fullWidth
+                                    name="password"
+                                    label="Password"
+                                    type={showPassword ? "text" : "password"}
+                                    id="password"
+                                    autoComplete="new-password"
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    error={!!errors.password}
+                                    helperText={errors.password}
+                                    disabled={isLoading}
+                                    InputProps={{
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                <IconButton
+                                                    aria-label="toggle password visibility"
+                                                    onClick={
+                                                        handleTogglePasswordVisibility
+                                                    }
+                                                    edge="end"
+                                                    disabled={isLoading}
+                                                    size="large"
+                                                    sx={{
+                                                        color: "text.secondary",
+                                                    }}
+                                                >
+                                                    {showPassword ? (
+                                                        <VisibilityOff />
+                                                    ) : (
+                                                        <Visibility />
+                                                    )}
+                                                </IconButton>
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <TextField
+                                    required
+                                    fullWidth
+                                    name="confirmPassword"
+                                    label="Confirm Password"
+                                    type={
+                                        showConfirmPassword
+                                            ? "text"
+                                            : "password"
+                                    }
+                                    id="confirmPassword"
+                                    value={formData.confirmPassword}
+                                    onChange={handleChange}
+                                    error={!!errors.confirmPassword}
+                                    helperText={errors.confirmPassword}
+                                    disabled={isLoading}
+                                    InputProps={{
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                <IconButton
+                                                    aria-label="toggle confirm password visibility"
+                                                    onClick={
+                                                        handleToggleConfirmPasswordVisibility
+                                                    }
+                                                    edge="end"
+                                                    disabled={isLoading}
+                                                    size="large"
+                                                    sx={{
+                                                        color: "text.secondary",
+                                                    }}
+                                                >
+                                                    {showConfirmPassword ? (
+                                                        <VisibilityOff />
+                                                    ) : (
+                                                        <Visibility />
+                                                    )}
+                                                </IconButton>
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                />
+                            </Grid>
+                        </Grid>
+                        <Button
+                            type="submit"
+                            fullWidth
+                            variant="contained"
+                            color="primary"
+                            sx={{ mt: 3, mb: 2 }}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? (
+                                <CircularProgress size={24} />
+                            ) : (
+                                "Sign Up"
+                            )}
+                        </Button>
+                        <Grid
+                            container
+                            sx={{
+                                flexDirection: {
+                                    xs: "column-reverse",
+                                    sm: "row",
+                                },
+                            }}
+                        >
+                            <Grid item xs>
+                                <MuiLink
+                                    component={Link}
+                                    to="/register/employer"
+                                    variant="body2"
+                                >
+                                    Register as an Employer
+                                </MuiLink>
+                            </Grid>
+                            <Grid item>
+                                <MuiLink
+                                    component={Link}
+                                    to="/login"
+                                    variant="body2"
+                                >
+                                    Already have an account? Sign in
+                                </MuiLink>
+                            </Grid>
+                        </Grid>
+                    </Box>
+                </Paper>
+            </Container>
+        );
+
+    return (
+        <Container
+            sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                height: "100vh",
+            }}
+        >
+            <Box sx={{ textAlign: "center" }}>
+                <CircularProgress size={60} />
+                <Typography variant="h6" sx={{ mt: 2 }}>
+                    You're already logged in. Redirecting...
+                </Typography>
+            </Box>
         </Container>
     );
 };

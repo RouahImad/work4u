@@ -2,14 +2,24 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Home from "../components/Home";
 import { Theme } from "@mui/material";
 import NavBar from "../components/NavBar";
-import EmployeeDashboard from "../components/dashboards/EmployeeDashboard";
-import EmployerDashboard from "../components/dashboards/EmployerDashboard";
-import AdminDashboard from "../components/dashboards/AdminDashboard";
-import JobsFeed from "../components/jobs/JobsFeed";
 import Login from "../components/auth/Login";
 import EmployeeRegister from "../components/auth/EmployeeRegister";
 import EmployerRegister from "../components/auth/EmployerRegister";
 import { useAuth } from "../contexts/AuthContext";
+import { lazy, Suspense } from "react";
+import LoadingAnimation from "../components/LoadingAnimation";
+
+// Lazy load these components since they don't need to be loaded immediately
+const EmployeeDashboard = lazy(
+    () => import("../components/dashboards/EmployeeDashboard")
+);
+const EmployerDashboard = lazy(
+    () => import("../components/dashboards/EmployerDashboard")
+);
+const AdminDashboard = lazy(
+    () => import("../components/dashboards/AdminDashboard")
+);
+const JobsFeed = lazy(() => import("../components/jobs/JobsFeed"));
 
 // Protected route wrapper component
 const ProtectedRoute = ({
@@ -45,7 +55,7 @@ const ProtectedRoute = ({
                 setDarkMode={setDarkMode}
                 theme={theme}
             />
-            {children}
+            <Suspense fallback={<LoadingAnimation />}>{children}</Suspense>
         </>
     );
 };
@@ -63,7 +73,7 @@ const AppRoutes = ({
     return (
         <BrowserRouter>
             <Routes>
-                {/* Public routes */}
+                {/* Public routes - no loading animation */}
                 <Route
                     path="/"
                     element={
@@ -96,7 +106,7 @@ const AppRoutes = ({
                     element={<EmployerRegister />}
                 />
 
-                {/* Role-specific dashboard routes */}
+                {/* Role-specific dashboard routes with loading animation */}
                 <Route
                     path="/employee/dashboard"
                     element={

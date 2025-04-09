@@ -31,6 +31,7 @@ import { format, isAfter, parseISO } from "date-fns";
 import JobApplication from "./JobApplication";
 import { useState } from "react";
 import { Job } from "../../types/Job.types";
+import { useAuth } from "../../contexts/AuthContext";
 
 interface JobDetailViewProps {
     job: Job;
@@ -48,6 +49,8 @@ const JobDetailView = ({
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
     const [applicationOpen, setApplicationOpen] = useState(false);
+
+    const { userRole } = useAuth();
 
     const formatDate = (dateString: string) => {
         try {
@@ -501,7 +504,9 @@ const JobDetailView = ({
 
                         <motion.div
                             whileTap={
-                                !applicationClosed ? { scale: 0.95 } : undefined
+                                userRole == "employee" && !applicationClosed
+                                    ? { scale: 0.95 }
+                                    : undefined
                             }
                             style={{
                                 alignSelf: isMobile ? "stretch" : "flex-end",
@@ -511,43 +516,44 @@ const JobDetailView = ({
                                 title={
                                     applicationClosed
                                         ? "Application deadline has passed"
-                                        : ""
+                                        : userRole === "admin"
+                                        ? "Admins cannot apply"
+                                        : "Click to apply"
                                 }
                                 placement="top"
                                 arrow
                             >
-                                <span>
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        fullWidth={isMobile}
-                                        disabled={applicationClosed}
-                                        startIcon={
-                                            applicationClosed ? (
-                                                <ErrorOutline />
-                                            ) : undefined
-                                        }
-                                        onClick={
-                                            !applicationClosed
-                                                ? handleApplyClick
-                                                : undefined
-                                        }
-                                        sx={{
-                                            px: 4,
-                                            py: 1.5,
-                                            opacity: applicationClosed
-                                                ? 0.7
-                                                : 1,
-                                            borderRadius: 2,
-                                            boxShadow: 2,
-                                            fontWeight: "medium",
-                                        }}
-                                    >
-                                        {applicationClosed
-                                            ? "Applications Closed"
-                                            : "Apply Now"}
-                                    </Button>
-                                </span>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    fullWidth={isMobile}
+                                    disabled={
+                                        applicationClosed ||
+                                        userRole === "admin"
+                                    }
+                                    startIcon={
+                                        applicationClosed ? (
+                                            <ErrorOutline />
+                                        ) : undefined
+                                    }
+                                    onClick={
+                                        !applicationClosed
+                                            ? handleApplyClick
+                                            : undefined
+                                    }
+                                    sx={{
+                                        px: 3.8,
+                                        py: 1.2,
+                                        opacity: applicationClosed ? 0.7 : 1,
+                                        borderRadius: 2,
+                                        boxShadow: 2,
+                                        fontWeight: "medium",
+                                    }}
+                                >
+                                    {applicationClosed
+                                        ? "Applications Closed"
+                                        : "Apply Now"}
+                                </Button>
                             </Tooltip>
                         </motion.div>
                     </Box>

@@ -7,7 +7,6 @@ import {
     Grid,
     CardContent,
     InputAdornment,
-    CircularProgress,
     Theme,
     CardActionArea,
     Chip,
@@ -18,6 +17,13 @@ import {
     Avatar,
     Paper,
     Divider,
+    MenuItem,
+    FormControl,
+    Select,
+    SelectChangeEvent,
+    useMediaQuery,
+    useTheme,
+    Tooltip,
 } from "@mui/material";
 import {
     Search,
@@ -29,14 +35,27 @@ import {
     WorkOutline,
     AttachMoney,
     AccessTime,
+    Sort as SortIcon,
 } from "@mui/icons-material";
 import JobDetailView from "./JobDetailView";
 import { format, formatDistanceToNow, isAfter } from "date-fns";
 import ReportJobDialog from "./ReportJobDialog";
 import { useJobPost } from "../../contexts/JobPostContext";
 import { Job } from "../../types/Job.types";
+import JobItemSkeleton from "./JobItemSkeleton";
+import ScrollToTop from "../ScrollToTop";
+
+// Define type for sort options
+type SortOption = {
+    value: string;
+    label: string;
+    sortFn: (a: Job, b: Job) => number;
+};
 
 const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
+    const materialTheme = useTheme();
+    const isMobile = useMediaQuery(materialTheme.breakpoints.down("sm"));
+
     const [searchTerm, setSearchTerm] = useState("");
     const [loading, setLoading] = useState(false);
     const [filters, setFilters] = useState({
@@ -383,212 +402,181 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
                 </Box>
             )}
 
-            {/* Job listings */}
-            {loading ? (
-                <Box
-                    sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        my: 4,
-                    }}
-                >
-                    <CircularProgress sx={{ mb: 2 }} />
-                    <Typography variant="body2" color="text.secondary">
-                        Loading job opportunities...
-                    </Typography>
-                </Box>
-            ) : (
-                <Grid container spacing={3}>
-                    {filteredJobs.length > 0 ? (
-                        filteredJobs.map((job) => (
-                            <Grid item xs={12} key={job.id}>
-                                <Paper
-                                    elevation={1}
+            {/* Job listings with skeleton loading */}
+            <Grid container spacing={3}>
+                {loading ? (
+                    Array.from(new Array(3)).map((_, index) => (
+                        <Grid item xs={12} key={`skeleton-${index}`}>
+                            <JobItemSkeleton />
+                        </Grid>
+                    ))
+                ) : jobs.length === 0 ? (
+                    <Grid item xs={12}>
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                textAlign: "center",
+                                py: 5,
+                                px: 3,
+                                borderRadius: 2,
+                                bgcolor: `${theme.palette.primary.main}05`,
+                                border: `1px dashed ${theme.palette.primary.main}40`,
+                            }}
+                        >
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    mb: 2,
+                                }}
+                            >
+                                <Search
                                     sx={{
-                                        borderRadius: 2,
-                                        overflow: "hidden",
-                                        transition:
-                                            "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
-                                        "&:hover": {
-                                            transform: "translateY(-4px)",
-                                            boxShadow: 4,
-                                        },
+                                        fontSize: 60,
+                                        color: `${theme.palette.primary.main}40`,
                                     }}
+                                />
+                            </Box>
+                            <Typography variant="h6" sx={{ mb: 1 }}>
+                                No jobs available at the moment
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                Please check back later
+                            </Typography>
+                        </Paper>
+                    </Grid>
+                ) : filteredJobs.length > 0 ? (
+                    filteredJobs.map((job) => (
+                        <Grid item xs={12} key={job.id}>
+                            <Paper
+                                elevation={1}
+                                sx={{
+                                    borderRadius: 2,
+                                    overflow: "hidden",
+                                    transition:
+                                        "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+                                    "&:hover": {
+                                        transform: "translateY(-4px)",
+                                        boxShadow: 4,
+                                    },
+                                }}
+                            >
+                                <CardActionArea
+                                    onClick={() => handleJobClick(job)}
                                 >
-                                    <CardActionArea
-                                        onClick={() => handleJobClick(job)}
-                                    >
-                                        <CardContent sx={{ p: 0 }}>
-                                            <Box
-                                                sx={{
-                                                    p: 3,
-                                                    borderLeft: `5px solid ${theme.palette.primary.main}`,
-                                                }}
+                                    <CardContent sx={{ p: 0 }}>
+                                        <Box
+                                            sx={{
+                                                p: 3,
+                                                borderLeft: `5px solid ${theme.palette.primary.main}`,
+                                            }}
+                                        >
+                                            {/* Job header section */}
+                                            <Grid
+                                                container
+                                                spacing={2}
+                                                alignItems="center"
                                             >
-                                                {/* Job header section */}
-                                                <Grid
-                                                    container
-                                                    spacing={2}
-                                                    alignItems="center"
-                                                >
-                                                    <Grid item xs={12} md={8}>
-                                                        <Box
+                                                <Grid item xs={12} md={8}>
+                                                    <Box
+                                                        sx={{
+                                                            display: "flex",
+                                                            alignItems:
+                                                                "flex-start",
+                                                            gap: 2,
+                                                        }}
+                                                    >
+                                                        <Avatar
                                                             sx={{
-                                                                display: "flex",
-                                                                alignItems:
-                                                                    "flex-start",
-                                                                gap: 2,
+                                                                bgcolor: `${theme.palette.primary.main}15`,
+                                                                color: theme
+                                                                    .palette
+                                                                    .primary
+                                                                    .main,
+                                                                display: {
+                                                                    xs: "none",
+                                                                    sm: "flex",
+                                                                },
                                                             }}
                                                         >
-                                                            <Avatar
+                                                            <WorkOutline />
+                                                        </Avatar>
+                                                        <Box>
+                                                            <Typography
+                                                                variant="h6"
+                                                                component="h2"
                                                                 sx={{
-                                                                    bgcolor: `${theme.palette.primary.main}15`,
+                                                                    fontWeight: 600,
+                                                                    mb: 0.5,
                                                                     color: theme
                                                                         .palette
-                                                                        .primary
-                                                                        .main,
-                                                                    display: {
-                                                                        xs: "none",
-                                                                        sm: "flex",
-                                                                    },
+                                                                        .text
+                                                                        .primary,
                                                                 }}
                                                             >
-                                                                <WorkOutline />
-                                                            </Avatar>
-                                                            <Box>
-                                                                <Typography
-                                                                    variant="h6"
-                                                                    component="h2"
-                                                                    sx={{
-                                                                        fontWeight: 600,
-                                                                        mb: 0.5,
-                                                                        color: theme
-                                                                            .palette
-                                                                            .text
-                                                                            .primary,
-                                                                    }}
-                                                                >
-                                                                    {job.title}
-                                                                </Typography>
-                                                                <Typography
-                                                                    variant="subtitle1"
-                                                                    color="text.secondary"
-                                                                    sx={{
-                                                                        display:
-                                                                            "flex",
-                                                                        alignItems:
-                                                                            "center",
-                                                                        gap: 1,
-                                                                    }}
-                                                                >
-                                                                    <Business fontSize="small" />
-                                                                    {
-                                                                        job.company_name
-                                                                    }
-                                                                    {job.company_address && (
-                                                                        <>
-                                                                            <Typography
-                                                                                component="span"
-                                                                                sx={{
-                                                                                    mx: 0.5,
-                                                                                }}
-                                                                            >
-                                                                                •
-                                                                            </Typography>
-                                                                            <LocationOn fontSize="small" />
-                                                                            {
-                                                                                job.company_address
-                                                                            }
-                                                                        </>
-                                                                    )}
-                                                                </Typography>
-                                                            </Box>
+                                                                {job.title}
+                                                            </Typography>
+                                                            <Typography
+                                                                variant="subtitle1"
+                                                                color="text.secondary"
+                                                                sx={{
+                                                                    display:
+                                                                        "flex",
+                                                                    alignItems:
+                                                                        "center",
+                                                                    gap: 1,
+                                                                }}
+                                                            >
+                                                                <Business fontSize="small" />
+                                                                {
+                                                                    job.company_name
+                                                                }
+                                                                {job.company_address && (
+                                                                    <>
+                                                                        <Typography
+                                                                            component="span"
+                                                                            sx={{
+                                                                                mx: 0.5,
+                                                                            }}
+                                                                        >
+                                                                            •
+                                                                        </Typography>
+                                                                        <LocationOn fontSize="small" />
+                                                                        {
+                                                                            job.company_address
+                                                                        }
+                                                                    </>
+                                                                )}
+                                                            </Typography>
                                                         </Box>
-                                                    </Grid>
+                                                    </Box>
+                                                </Grid>
 
-                                                    <Grid item xs={12} md={4}>
-                                                        <Box
-                                                            sx={{
-                                                                display: "flex",
-                                                                gap: 1,
-                                                                justifyContent:
-                                                                    {
-                                                                        xs: "flex-start",
-                                                                        md: "flex-end",
-                                                                    },
-                                                                flexWrap:
-                                                                    "wrap",
-                                                            }}
-                                                        >
-                                                            {job.salaire && (
-                                                                <Chip
-                                                                    icon={
-                                                                        <AttachMoney fontSize="small" />
-                                                                    }
-                                                                    label={`${job.salaire}`}
-                                                                    size="small"
-                                                                    sx={{
-                                                                        bgcolor: `${theme.palette.success.main}15`,
-                                                                        color: theme
-                                                                            .palette
-                                                                            .success
-                                                                            .dark,
-                                                                        borderColor:
-                                                                            "transparent",
-                                                                        fontWeight: 500,
-                                                                        "& .MuiChip-icon":
-                                                                            {
-                                                                                color: "inherit",
-                                                                            },
-                                                                    }}
-                                                                />
-                                                            )}
-
+                                                <Grid item xs={12} md={4}>
+                                                    <Box
+                                                        sx={{
+                                                            display: "flex",
+                                                            gap: 1,
+                                                            justifyContent: {
+                                                                xs: "flex-start",
+                                                                md: "flex-end",
+                                                            },
+                                                            flexWrap: "wrap",
+                                                        }}
+                                                    >
+                                                        {job.salaire && (
                                                             <Chip
                                                                 icon={
-                                                                    <CalendarToday fontSize="small" />
+                                                                    <AttachMoney fontSize="small" />
                                                                 }
-                                                                label={`${
-                                                                    isAfter(
-                                                                        new Date(),
-                                                                        new Date(
-                                                                            job.final_date
-                                                                        )
-                                                                    )
-                                                                        ? "Closed"
-                                                                        : "Deadline"
-                                                                }: ${format(
-                                                                    new Date(
-                                                                        job.final_date
-                                                                    ),
-                                                                    "MMM d, yyyy"
-                                                                )}`}
+                                                                label={`${job.salaire}`}
                                                                 size="small"
                                                                 sx={{
-                                                                    bgcolor:
-                                                                        isAfter(
-                                                                            new Date(),
-                                                                            new Date(
-                                                                                job.final_date
-                                                                            )
-                                                                        )
-                                                                            ? `${theme.palette.error.main}15`
-                                                                            : `${theme.palette.primary.main}15`,
-                                                                    color: isAfter(
-                                                                        new Date(),
-                                                                        new Date(
-                                                                            job.final_date
-                                                                        )
-                                                                    )
-                                                                        ? theme
-                                                                              .palette
-                                                                              .error
-                                                                              .main
-                                                                        : theme
-                                                                              .palette
-                                                                              .primary
-                                                                              .main,
+                                                                    bgcolor: `${theme.palette.success.main}15`,
+                                                                    color: theme
+                                                                        .palette
+                                                                        .success
+                                                                        .dark,
                                                                     borderColor:
                                                                         "transparent",
                                                                     fontWeight: 500,
@@ -598,147 +586,193 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
                                                                         },
                                                                 }}
                                                             />
-                                                        </Box>
-                                                    </Grid>
+                                                        )}
+
+                                                        <Chip
+                                                            icon={
+                                                                <CalendarToday fontSize="small" />
+                                                            }
+                                                            label={`${
+                                                                isAfter(
+                                                                    new Date(),
+                                                                    new Date(
+                                                                        job.final_date
+                                                                    )
+                                                                )
+                                                                    ? "Closed"
+                                                                    : "Deadline"
+                                                            }: ${format(
+                                                                new Date(
+                                                                    job.final_date
+                                                                ),
+                                                                "MMM d, yyyy"
+                                                            )}`}
+                                                            size="small"
+                                                            sx={{
+                                                                bgcolor:
+                                                                    isAfter(
+                                                                        new Date(),
+                                                                        new Date(
+                                                                            job.final_date
+                                                                        )
+                                                                    )
+                                                                        ? `${theme.palette.error.main}15`
+                                                                        : `${theme.palette.primary.main}15`,
+                                                                color: isAfter(
+                                                                    new Date(),
+                                                                    new Date(
+                                                                        job.final_date
+                                                                    )
+                                                                )
+                                                                    ? theme
+                                                                          .palette
+                                                                          .error
+                                                                          .main
+                                                                    : theme
+                                                                          .palette
+                                                                          .primary
+                                                                          .main,
+                                                                borderColor:
+                                                                    "transparent",
+                                                                fontWeight: 500,
+                                                                "& .MuiChip-icon":
+                                                                    {
+                                                                        color: "inherit",
+                                                                    },
+                                                            }}
+                                                        />
+                                                    </Box>
                                                 </Grid>
+                                            </Grid>
 
-                                                <Divider sx={{ my: 2 }} />
+                                            <Divider sx={{ my: 2 }} />
 
-                                                {/* Job description preview */}
-                                                <Typography
-                                                    variant="body2"
-                                                    sx={{
-                                                        color: theme.palette
-                                                            .text.secondary,
-                                                        lineHeight: 1.6,
-                                                        mb: 2,
-                                                        overflow: "hidden",
-                                                        textOverflow:
-                                                            "ellipsis",
-                                                        display: "-webkit-box",
-                                                        WebkitLineClamp: 2,
-                                                        WebkitBoxOrient:
-                                                            "vertical",
-                                                    }}
-                                                >
-                                                    {job.description}
-                                                </Typography>
+                                            {/* Job description preview */}
+                                            <Typography
+                                                variant="body2"
+                                                sx={{
+                                                    color: theme.palette.text
+                                                        .secondary,
+                                                    lineHeight: 1.6,
+                                                    mb: 2,
+                                                    overflow: "hidden",
+                                                    textOverflow: "ellipsis",
+                                                    display: "-webkit-box",
+                                                    WebkitLineClamp: 2,
+                                                    WebkitBoxOrient: "vertical",
+                                                }}
+                                            >
+                                                {job.description}
+                                            </Typography>
 
-                                                {/* Job footer */}
+                                            {/* Job footer */}
+                                            <Box
+                                                sx={{
+                                                    display: "flex",
+                                                    justifyContent:
+                                                        "space-between",
+                                                    alignItems: "center",
+                                                    mt: 1,
+                                                }}
+                                            >
                                                 <Box
                                                     sx={{
                                                         display: "flex",
-                                                        justifyContent:
-                                                            "space-between",
                                                         alignItems: "center",
-                                                        mt: 1,
+                                                        gap: 0.5,
                                                     }}
                                                 >
-                                                    <Box
+                                                    <AccessTime
                                                         sx={{
-                                                            display: "flex",
-                                                            alignItems:
-                                                                "center",
-                                                            gap: 0.5,
+                                                            fontSize: 16,
+                                                            color: theme.palette
+                                                                .text.secondary,
                                                         }}
+                                                    />
+                                                    <Typography
+                                                        variant="body2"
+                                                        color="text.secondary"
                                                     >
-                                                        <AccessTime
-                                                            sx={{
-                                                                fontSize: 16,
-                                                                color: theme
-                                                                    .palette
-                                                                    .text
-                                                                    .secondary,
-                                                            }}
-                                                        />
-                                                        <Typography
-                                                            variant="body2"
-                                                            color="text.secondary"
-                                                        >
-                                                            Posted{" "}
-                                                            {formatPostedDate(
-                                                                job.uploaded_at ??
-                                                                    new Date().toISOString()
-                                                            )}
-                                                        </Typography>
-                                                    </Box>
-
-                                                    <Button
-                                                        variant="text"
-                                                        color="primary"
-                                                        size="small"
-                                                        sx={{
-                                                            fontWeight: 600,
-                                                            px: 1.5,
-                                                            "&:hover": {
-                                                                bgcolor: `${theme.palette.primary.main}15`,
-                                                            },
-                                                        }}
-                                                        endIcon={
-                                                            <Box
-                                                                component="span"
-                                                                sx={{
-                                                                    transition:
-                                                                        "transform 0.2s",
-                                                                    display:
-                                                                        "inline-flex",
-                                                                }}
-                                                            >
-                                                                →
-                                                            </Box>
-                                                        }
-                                                    >
-                                                        View Details
-                                                    </Button>
+                                                        Posted{" "}
+                                                        {formatPostedDate(
+                                                            job.uploaded_at ??
+                                                                new Date().toISOString()
+                                                        )}
+                                                    </Typography>
                                                 </Box>
+
+                                                <Button
+                                                    variant="text"
+                                                    color="primary"
+                                                    size="small"
+                                                    sx={{
+                                                        fontWeight: 600,
+                                                        px: 1.5,
+                                                        "&:hover": {
+                                                            bgcolor: `${theme.palette.primary.main}15`,
+                                                        },
+                                                    }}
+                                                    endIcon={
+                                                        <Box
+                                                            component="span"
+                                                            sx={{
+                                                                transition:
+                                                                    "transform 0.2s",
+                                                                display:
+                                                                    "inline-flex",
+                                                            }}
+                                                        >
+                                                            →
+                                                        </Box>
+                                                    }
+                                                >
+                                                    View Details
+                                                </Button>
                                             </Box>
-                                        </CardContent>
-                                    </CardActionArea>
-                                </Paper>
-                            </Grid>
-                        ))
-                    ) : (
-                        <Grid item xs={12}>
-                            <Paper
-                                elevation={0}
-                                sx={{
-                                    textAlign: "center",
-                                    py: 5,
-                                    px: 3,
-                                    borderRadius: 2,
-                                    bgcolor: `${theme.palette.primary.main}05`,
-                                    border: `1px dashed ${theme.palette.primary.main}40`,
-                                }}
-                            >
-                                <Box
-                                    sx={{
-                                        display: "flex",
-                                        justifyContent: "center",
-                                        mb: 2,
-                                    }}
-                                >
-                                    <Search
-                                        sx={{
-                                            fontSize: 60,
-                                            color: `${theme.palette.primary.main}40`,
-                                        }}
-                                    />
-                                </Box>
-                                <Typography variant="h6" sx={{ mb: 1 }}>
-                                    No jobs found matching your criteria
-                                </Typography>
-                                <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                >
-                                    Try adjusting your search terms or filters
-                                    to find more opportunities
-                                </Typography>
+                                        </Box>
+                                    </CardContent>
+                                </CardActionArea>
                             </Paper>
                         </Grid>
-                    )}
-                </Grid>
-            )}
+                    ))
+                ) : (
+                    <Grid item xs={12}>
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                textAlign: "center",
+                                py: 5,
+                                px: 3,
+                                borderRadius: 2,
+                                bgcolor: `${theme.palette.primary.main}05`,
+                                border: `1px dashed ${theme.palette.primary.main}40`,
+                            }}
+                        >
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    mb: 2,
+                                }}
+                            >
+                                <Search
+                                    sx={{
+                                        fontSize: 60,
+                                        color: `${theme.palette.primary.main}40`,
+                                    }}
+                                />
+                            </Box>
+                            <Typography variant="h6" sx={{ mb: 1 }}>
+                                No jobs found matching your criteria
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                Try adjusting your search terms or filters to
+                                find more opportunities
+                            </Typography>
+                        </Paper>
+                    </Grid>
+                )}
+            </Grid>
 
             {/* Job Detail View */}
             {selectedJob && (
@@ -756,6 +790,7 @@ const JobsFeed = ({ darkmode, theme }: { darkmode: boolean; theme: Theme }) => {
                 jobId={currentJobId}
                 darkmode={darkmode}
             />
+            <ScrollToTop />
         </Container>
     );
 };
