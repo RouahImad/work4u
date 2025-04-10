@@ -29,8 +29,8 @@ import {
     Person,
     Visibility,
 } from "@mui/icons-material";
-import { format } from "date-fns";
 import { EmployeeDashboardStats } from "../../../types/Stats.types";
+import { formatDate } from "../../../services/utils";
 
 // Define props interface
 interface OverviewTabProps {
@@ -350,18 +350,6 @@ const OverviewTab = ({
     // Helper function for safely accessing interview history
     const getSafeInterviewHistory = () => {
         return employeeStats?.interview_history || [];
-    };
-
-    // Format date function
-    const formatDate = (dateString: string, withHour = false) => {
-        try {
-            if (withHour) {
-                return format(new Date(dateString), "MMM dd, yyyy HH:mm");
-            }
-            return format(new Date(dateString), "MMM dd, yyyy");
-        } catch (error) {
-            return "Invalid date";
-        }
     };
 
     return (

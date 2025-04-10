@@ -1,12 +1,9 @@
-import { Fragment } from "react";
 import {
     Box,
     Typography,
     Grid,
     Paper,
     Button,
-    List,
-    ListItem,
     Divider,
     Chip,
     Table,
@@ -25,6 +22,7 @@ import {
     Badge,
     LinearProgress,
     Skeleton,
+    Avatar,
 } from "@mui/material";
 import {
     MoreVert,
@@ -37,9 +35,10 @@ import {
     Schedule,
     TrendingUp,
     Visibility,
+    ArrowForward,
 } from "@mui/icons-material";
-import { format } from "date-fns";
 import { EmployerDashboardStats } from "../../../types/Stats.types";
+import { formatDate } from "../../../services/utils";
 
 // Define props interface for EmployerOverviewTab
 interface EmployerOverviewProps {
@@ -74,15 +73,6 @@ const EmployerOverview = ({
     handleMenuClick,
     handleMenuClose,
 }: EmployerOverviewProps) => {
-    // Helper function to format date
-    const formatDate = (dateString: string) => {
-        try {
-            return format(new Date(dateString), "MMM dd, yyyy");
-        } catch (error) {
-            return "Invalid date";
-        }
-    };
-
     // If loading or employerStats is null, show loading state
     if (loading || !employerStats) {
         return (
@@ -241,12 +231,12 @@ const EmployerOverview = ({
 
     // Calculate reusable values
     const acceptedApplicationsCount =
-        employerStats?.applications?.filter((a: any) => a.status === "accepte")
+        employerStats?.applications?.filter((a) => a.status === "accepte")
             ?.length || 0;
 
     const recentPostsCount =
         employerStats?.my_posts?.filter(
-            (p: any) =>
+            (p) =>
                 new Date(p.uploaded_at) >
                 new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
         )?.length || 0;
@@ -256,8 +246,7 @@ const EmployerOverview = ({
         employerStats?.my_posts && employerStats.my_posts.length > 0
             ? Math.round(
                   employerStats.my_posts.reduce(
-                      (sum: number, post: any) =>
-                          sum + Number(post.salaire || 0),
+                      (sum: number, post) => sum + Number(post.salaire || 0),
                       0
                   ) / employerStats.my_posts.length
               )
@@ -266,7 +255,7 @@ const EmployerOverview = ({
     return (
         <>
             {/* Stats Overview Cards */}
-            <Grid item xs={12} md={8}>
+            <Grid item xs={12}>
                 <Paper
                     sx={{
                         p: 3,
@@ -571,8 +560,301 @@ const EmployerOverview = ({
                 </Paper>
             </Grid>
 
-            {/* Platform Activity */}
+            {/* Recent Applicants */}
             <Grid item xs={12} md={8}>
+                <Paper
+                    sx={{
+                        p: 2,
+                        display: "flex",
+                        flexDirection: "column",
+                        mb: 3,
+                        height: "100%",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                        borderRadius: 2,
+                    }}
+                >
+                    <Typography
+                        component="h2"
+                        variant="h6"
+                        color="primary"
+                        gutterBottom
+                        sx={{ px: 1, pt: 1 }}
+                    >
+                        Recent Applicants
+                    </Typography>
+
+                    {loading ? (
+                        <Box
+                            sx={{
+                                display: "flex",
+                                justifyContent: "center",
+                                p: 2,
+                            }}
+                        >
+                            <CircularProgress />
+                        </Box>
+                    ) : error ? (
+                        <Alert severity="error">{error}</Alert>
+                    ) : employerStats?.applications &&
+                      employerStats.applications.length > 0 ? (
+                        <Box sx={{ overflow: "hidden", flexGrow: 1 }}>
+                            {employerStats.applications
+                                .slice(0, 5)
+                                .map((applicant, i) => (
+                                    <>
+                                        {i !== 0 && (
+                                            <Divider
+                                                sx={{
+                                                    my: 1,
+                                                    borderColor: "divider",
+                                                }}
+                                            />
+                                        )}
+                                        <Box
+                                            key={applicant.id}
+                                            sx={{
+                                                mb: 1.5,
+                                                backgroundColor:
+                                                    "background.paper",
+                                                borderRadius: 2,
+                                                p: 1.5,
+                                                transition: "all 0.2s",
+                                                "&:hover": {
+                                                    backgroundColor:
+                                                        "action.hover",
+                                                    transform:
+                                                        "translateY(-2px)",
+                                                    boxShadow:
+                                                        "0 4px 10px rgba(0,0,0,0.08)",
+                                                },
+                                            }}
+                                        >
+                                            <Box
+                                                sx={{
+                                                    display: "flex",
+                                                    justifyContent:
+                                                        "space-between",
+                                                    alignItems: "flex-start",
+                                                    mb: 1,
+                                                }}
+                                            >
+                                                <Box
+                                                    sx={{
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        gap: 1.5,
+                                                        flexGrow: 1,
+                                                    }}
+                                                >
+                                                    <Avatar
+                                                        sx={{
+                                                            bgcolor:
+                                                                applicant.status ===
+                                                                "accepte"
+                                                                    ? "success.light"
+                                                                    : applicant.status ===
+                                                                      "refuse"
+                                                                    ? "error.light"
+                                                                    : "warning.light",
+                                                            width: 36,
+                                                            height: 36,
+                                                        }}
+                                                    >
+                                                        {applicant.applicant_email
+                                                            .substring(0, 1)
+                                                            .toUpperCase()}
+                                                    </Avatar>
+                                                    <Box>
+                                                        <Typography
+                                                            variant="body1"
+                                                            fontWeight={500}
+                                                            noWrap
+                                                            sx={{
+                                                                maxWidth: {
+                                                                    xs: "150px",
+                                                                    sm: "200px",
+                                                                    md: "150px",
+                                                                    lg: "200px",
+                                                                },
+                                                            }}
+                                                        >
+                                                            {
+                                                                applicant.applicant_email
+                                                            }
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="caption"
+                                                            color="text.secondary"
+                                                            noWrap
+                                                            sx={{
+                                                                maxWidth: {
+                                                                    xs: "150px",
+                                                                    sm: "200px",
+                                                                    md: "150px",
+                                                                    lg: "200px",
+                                                                },
+                                                                display:
+                                                                    "block",
+                                                            }}
+                                                        >
+                                                            {
+                                                                applicant.post_title
+                                                            }
+                                                        </Typography>
+                                                    </Box>
+                                                </Box>
+                                                <Chip
+                                                    label={
+                                                        applicant.status ===
+                                                        "accepte"
+                                                            ? "Accepted"
+                                                            : applicant.status ===
+                                                              "refuse"
+                                                            ? "Rejected"
+                                                            : "Pending"
+                                                    }
+                                                    size="small"
+                                                    color={
+                                                        applicant.status ===
+                                                        "accepte"
+                                                            ? "success"
+                                                            : applicant.status ===
+                                                              "refuse"
+                                                            ? "error"
+                                                            : "warning"
+                                                    }
+                                                    sx={{
+                                                        minWidth: 70,
+                                                        justifyContent:
+                                                            "center",
+                                                        fontSize: "0.7rem",
+                                                        height: 24,
+                                                        color: "#fff",
+                                                    }}
+                                                />
+                                            </Box>
+
+                                            <Box
+                                                sx={{
+                                                    mt: 0.5,
+                                                    display: "flex",
+                                                    justifyContent:
+                                                        "space-between",
+                                                    alignItems: "center",
+                                                }}
+                                            >
+                                                <Box>
+                                                    {applicant.test?.score !=
+                                                        undefined && (
+                                                        <Chip
+                                                            label={`Score: ${applicant.test.score}%`}
+                                                            size="small"
+                                                            color="primary"
+                                                            sx={{
+                                                                height: 20,
+                                                                fontSize:
+                                                                    "0.65rem",
+                                                            }}
+                                                        /> // here
+                                                    )}
+                                                    {applicant.interview_id !=
+                                                        null &&
+                                                        applicant.test?.score ==
+                                                            undefined && (
+                                                            <Chip
+                                                                icon={
+                                                                    <Schedule
+                                                                        sx={{
+                                                                            fontSize: 12,
+                                                                        }}
+                                                                    />
+                                                                }
+                                                                label="Interview scheduled"
+                                                                size="small"
+                                                                color="primary"
+                                                                sx={{
+                                                                    py: 1.4,
+                                                                    height: 20,
+                                                                    fontSize:
+                                                                        "0.65rem",
+                                                                }}
+                                                            />
+                                                        )}
+                                                </Box>
+                                                <Typography
+                                                    variant="caption"
+                                                    color="text.secondary"
+                                                    sx={{
+                                                        whiteSpace: "nowrap",
+                                                        fontSize: "0.7rem",
+                                                    }}
+                                                >
+                                                    {formatDate(
+                                                        applicant.application_date
+                                                    )}
+                                                </Typography>
+                                            </Box>
+                                        </Box>
+                                    </>
+                                ))}
+                        </Box>
+                    ) : (
+                        <Box
+                            sx={{
+                                textAlign: "center",
+                                py: 4,
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                flexGrow: 1,
+                            }}
+                        >
+                            <PersonOutline
+                                sx={{
+                                    fontSize: 40,
+                                    color: "text.disabled",
+                                    mb: 1,
+                                }}
+                            />
+                            <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                fontWeight={500}
+                            >
+                                No applications received yet
+                            </Typography>
+                            <Typography
+                                variant="caption"
+                                color="text.disabled"
+                                sx={{ maxWidth: "80%", mt: 0.5 }}
+                            >
+                                Applications will appear here when candidates
+                                apply to your job postings
+                            </Typography>
+                        </Box>
+                    )}
+
+                    {employerStats?.applications &&
+                        employerStats.applications.length > 0 && (
+                            <Button
+                                size="small"
+                                endIcon={<ArrowForward sx={{ fontSize: 16 }} />}
+                                sx={{
+                                    mt: "auto",
+                                    pt: 1,
+                                    alignSelf: "flex-end",
+                                }}
+                                onClick={handleViewApplicants}
+                            >
+                                View all applicants
+                            </Button>
+                        )}
+                </Paper>
+            </Grid>
+
+            {/* Platform Activity */}
+            <Grid item xs={12}>
                 <Paper
                     sx={{
                         p: 3,
@@ -690,168 +972,8 @@ const EmployerOverview = ({
                     </Grid>
                 </Paper>
             </Grid>
-            {/* Recent Applicants */}
-            <Grid item xs={12} md={4}>
-                <Paper
-                    sx={{
-                        p: 2,
-                        display: "flex",
-                        flexDirection: "column",
-                        mb: 3,
-                        height: "100%",
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                    }}
-                >
-                    <Typography
-                        component="h2"
-                        variant="h6"
-                        color="primary"
-                        gutterBottom
-                    >
-                        Recent Applicants
-                    </Typography>
-                    {loading ? (
-                        <Box
-                            sx={{
-                                display: "flex",
-                                justifyContent: "center",
-                                p: 2,
-                            }}
-                        >
-                            <CircularProgress />
-                        </Box>
-                    ) : error ? (
-                        <Alert severity="error">{error}</Alert>
-                    ) : employerStats?.applications &&
-                      employerStats.applications.length > 0 ? (
-                        <List dense sx={{ overflow: "hidden" }}>
-                            {employerStats.applications
-                                .slice(0, 5)
-                                .map((applicant: any) => (
-                                    <Fragment key={applicant.id}>
-                                        <ListItem>
-                                            <Box
-                                                sx={{
-                                                    width: "100%",
-                                                }}
-                                            >
-                                                <Box
-                                                    sx={{
-                                                        display: "flex",
-                                                        justifyContent:
-                                                            "space-between",
-                                                        mb: 0.5,
-                                                        flexWrap: {
-                                                            xs: "wrap",
-                                                            sm: "nowrap",
-                                                        },
-                                                        gap: 0.5,
-                                                    }}
-                                                >
-                                                    <Typography
-                                                        variant="body1"
-                                                        noWrap
-                                                        sx={{
-                                                            maxWidth: {
-                                                                xs: "100%",
-                                                                sm: "60%",
-                                                            },
-                                                            flexGrow: 1,
-                                                        }}
-                                                    >
-                                                        {
-                                                            applicant.applicant_email.split(
-                                                                "@"
-                                                            )[0]
-                                                        }
-                                                    </Typography>
-                                                    <Chip
-                                                        label={
-                                                            applicant.status ===
-                                                            "accepte"
-                                                                ? "Accepted"
-                                                                : "Pending"
-                                                        }
-                                                        size="small"
-                                                        color={
-                                                            applicant.status ===
-                                                            "accepte"
-                                                                ? "success"
-                                                                : "warning"
-                                                        }
-                                                        sx={{
-                                                            minWidth: 70,
-                                                            justifyContent:
-                                                                "center",
-                                                        }}
-                                                    />
-                                                </Box>
-                                                <Box
-                                                    sx={{
-                                                        display: "flex",
-                                                        justifyContent:
-                                                            "space-between",
-                                                        alignItems: "center",
-                                                        flexWrap: {
-                                                            xs: "wrap",
-                                                            sm: "nowrap",
-                                                        },
-                                                        gap: 0.5,
-                                                    }}
-                                                >
-                                                    <Typography
-                                                        variant="body2"
-                                                        color="text.secondary"
-                                                        noWrap
-                                                        sx={{
-                                                            maxWidth: {
-                                                                xs: "100%",
-                                                                sm: "70%",
-                                                            },
-                                                            flexGrow: 1,
-                                                        }}
-                                                    >
-                                                        {applicant.post_title}
-                                                    </Typography>
-                                                    <Typography
-                                                        variant="caption"
-                                                        color="text.secondary"
-                                                        sx={{
-                                                            whiteSpace:
-                                                                "nowrap",
-                                                            textAlign: {
-                                                                xs: "left",
-                                                                sm: "right",
-                                                            },
-                                                        }}
-                                                    >
-                                                        {formatDate(
-                                                            applicant.application_date
-                                                        )}
-                                                    </Typography>
-                                                </Box>
-                                            </Box>
-                                        </ListItem>
-                                        <Divider component="li" />
-                                    </Fragment>
-                                ))}
-                        </List>
-                    ) : (
-                        <Box sx={{ textAlign: "center", py: 2 }}>
-                            <Typography variant="body2" color="text.secondary">
-                                No applications received yet
-                            </Typography>
-                        </Box>
-                    )}
-                    <Button
-                        size="small"
-                        sx={{ mt: "auto", pt: 1, alignSelf: "flex-end" }}
-                        onClick={handleViewApplicants}
-                    >
-                        View all applicants
-                    </Button>
-                </Paper>
-            </Grid>
+
+            {/* was here */}
 
             {/* Job Postings List */}
             <Grid item xs={12}>
@@ -914,7 +1036,7 @@ const EmployerOverview = ({
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {employerStats.my_posts.map((job: any) => (
+                                    {employerStats.my_posts.map((job) => (
                                         <TableRow key={job.id}>
                                             <TableCell>{job.title}</TableCell>
                                             <TableCell>{job.salaire}</TableCell>

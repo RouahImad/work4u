@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, ReactNode } from "react";
-import { dashboardApi } from "../services/api";
+import { dashboardApi, postApi } from "../services/api";
 import { useNotification } from "../components/notifications/SlideInNotifications";
 import { logError } from "../services/errorUtils";
 import {
@@ -17,6 +17,11 @@ interface DashboardContextType {
     fetchEmployeeStats: () => Promise<void>;
     fetchEmployerStats: () => Promise<void>;
     fetchAdminStats: () => Promise<void>;
+    updateApplicationStatus: (
+        applicationId: number,
+        status: "accepte" | "refuse",
+        interviewId?: number
+    ) => Promise<void>;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(
@@ -41,7 +46,6 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
             setError(null);
 
             const response = await dashboardApi.getRoleBasedStats();
-            console.clear();
 
             setEmployeeStats(response.data);
         } catch (err: any) {
@@ -94,6 +98,45 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    const updateApplicationStatus = async (
+        applicationId: number,
+        status: "accepte" | "refuse",
+        interviewId?: number
+    ) => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            await postApi.updateApplicationStatus({
+                application_id: applicationId,
+                status,
+                interview_id: interviewId,
+            });
+
+            // Refresh employer stats after status update
+            await fetchEmployerStats();
+
+            pushNotification(
+                `Application ${
+                    status === "accepte" ? "accepted" : "rejected"
+                } successfully`,
+                "success"
+            );
+
+            return Promise.resolve();
+        } catch (err: any) {
+            const errorMessage =
+                err.response?.data?.detail ||
+                "Failed to update application status";
+            setError(errorMessage);
+            pushNotification(errorMessage, "error");
+            logError(err, "updateApplicationStatus");
+            return Promise.reject(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <DashboardContext.Provider
             value={{
@@ -105,6 +148,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
                 fetchEmployeeStats,
                 fetchEmployerStats,
                 fetchAdminStats,
+                updateApplicationStatus,
             }}
         >
             {children}

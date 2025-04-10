@@ -29,8 +29,8 @@ import ChangePasswordDialog from "../profile/ChangePasswordDialog";
 import DeleteAccountDialog from "../profile/DeleteAccountDialog";
 import EditProfileDialog from "../profile/EditProfileDialog";
 import InterviewDialog from "../jobs/InterviewDialog";
-import { format } from "date-fns";
 import Overview from "./employee/OverView";
+import { formatDate } from "../../services/utils";
 
 const statusColors: Record<string, string> = {
     Applied: "#3498db",
@@ -66,15 +66,6 @@ const EmployeeDashboard = () => {
         fetchEmployeeStats();
     }, []);
 
-    // Format date function
-    const formatDate = (dateString: string) => {
-        try {
-            return format(new Date(dateString), "MMM dd, yyyy");
-        } catch (error) {
-            return "Invalid date";
-        }
-    };
-
     // Dialog handlers
     const handleEditProfileOpen = () => setEditProfileOpen(true);
     const handleEditProfileClose = () => setEditProfileOpen(false);
@@ -99,6 +90,7 @@ const EmployeeDashboard = () => {
         // Refresh data after interview completion
         fetchEmployeeStats();
     };
+    console.log(employeeStats);
 
     return (
         <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
@@ -299,7 +291,8 @@ const EmployeeDashboard = () => {
                                                                                 Applied
                                                                                 on{" "}
                                                                                 {formatDate(
-                                                                                    application.application_date
+                                                                                    application.application_date,
+                                                                                    true
                                                                                 )}
                                                                             </Typography>
                                                                         </Box>

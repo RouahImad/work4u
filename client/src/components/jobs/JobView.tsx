@@ -27,10 +27,11 @@ import {
     WorkOutline,
     AccessTime,
 } from "@mui/icons-material";
-import { format, isAfter, parseISO } from "date-fns";
+import { isAfter, parseISO } from "date-fns";
 import { useJobPost } from "../../contexts/JobPostContext";
 import { useTheme } from "@mui/material/styles";
 import { JobPost, Job } from "../../types/Job.types";
+import { formatDate } from "../../services/utils";
 
 interface JobViewProps {
     open: boolean;
@@ -85,14 +86,6 @@ const JobView: React.FC<JobViewProps> = ({
             }
         };
     }, [open, setViewedJob]);
-
-    const formatDate = (dateString: string) => {
-        try {
-            return format(new Date(dateString), "MMMM d, yyyy");
-        } catch (error) {
-            return "Invalid date";
-        }
-    };
 
     const isApplicationClosed = (job: JobPost) => {
         try {

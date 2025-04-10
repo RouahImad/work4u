@@ -20,6 +20,11 @@ import {
     Tabs,
     Tab,
     IconButton,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
 } from "@mui/material";
 import {
     EditOutlined,
@@ -30,6 +35,13 @@ import {
     Visibility,
     Edit,
     Delete,
+    ThumbUp,
+    ThumbDown,
+    School,
+    Schedule,
+    HourglassEmpty,
+    PersonOutline,
+    Add,
 } from "@mui/icons-material";
 import { useNotification } from "../notifications/SlideInNotifications";
 import { useAuth } from "../../contexts/AuthContext";
@@ -37,13 +49,13 @@ import { useDashboard } from "../../contexts/DashboardContext";
 import EmployerProfileDialog from "../profile/EmployerProfileDialog";
 import ChangePasswordDialog from "../profile/ChangePasswordDialog";
 import DeleteAccountDialog from "../profile/DeleteAccountDialog";
-import { format } from "date-fns";
 import CreateJobDialog from "../jobs/CreateJobDialog";
 import UpdateJobDialog from "../jobs/UpdateJobDialog";
 import { useJobPost } from "../../contexts/JobPostContext";
 import JobView from "../jobs/JobView";
 import { JobPost } from "../../types/Job.types";
 import EmployerOverview from "./employer/OverView";
+import { formatDate } from "../../services/utils";
 
 const EmployerDashboard = () => {
     const [tabValue, setTabValue] = useState(0);
@@ -51,8 +63,13 @@ const EmployerDashboard = () => {
     const [viewedJob, setViewedJob] = useState<JobPost | null>(null);
     const { pushNotification } = useNotification();
     const { user } = useAuth();
-    const { employerStats, loading, error, fetchEmployerStats } =
-        useDashboard();
+    const {
+        employerStats,
+        loading,
+        error,
+        fetchEmployerStats,
+        updateApplicationStatus,
+    } = useDashboard();
 
     const [editProfileOpen, setEditProfileOpen] = useState(false);
     const [changePasswordOpen, setChangePasswordOpen] = useState(false);
@@ -62,6 +79,14 @@ const EmployerDashboard = () => {
     const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
     const [jobViewOpen, setJobViewOpen] = useState(false);
     const { updateJob, deleteJob } = useJobPost();
+
+    // Status update confirmation dialog
+    const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+    const [selectedApplication, setSelectedApplication] = useState<{
+        id: number;
+        status: "accepte" | "refuse";
+        interviewId?: number;
+    } | null>(null);
 
     useEffect(() => {
         fetchEmployerStats();
@@ -81,7 +106,6 @@ const EmployerDashboard = () => {
 
     const handleMenuClose = () => {
         setAnchorEl(null);
-        // setSelectedJobId(null);
     };
 
     const handleCreateJob = () => {
@@ -145,14 +169,42 @@ const EmployerDashboard = () => {
         handleMenuClose();
     };
 
-    // Format date function
-    const formatDate = (dateString: string) => {
-        try {
-            return format(new Date(dateString), "MMM dd, yyyy");
-        } catch (error) {
-            return "Invalid date";
-        }
+    const handleUpdateApplicationStatus = (
+        id: number,
+        status: "accepte" | "refuse"
+    ) => {
+        setSelectedApplication({ id, status });
+        setConfirmDialogOpen(true);
     };
+
+    const handleConfirmDialogClose = () => {
+        setConfirmDialogOpen(false);
+        setSelectedApplication(null);
+    };
+
+    const handleConfirmStatusUpdate = async () => {
+        if (selectedApplication) {
+            try {
+                await updateApplicationStatus(
+                    selectedApplication.id,
+                    selectedApplication.status
+                );
+                pushNotification(
+                    `Application status updated to ${selectedApplication.status}`,
+                    "success"
+                );
+                fetchEmployerStats();
+            } catch (error) {
+                pushNotification(
+                    "Failed to update application status",
+                    "error"
+                );
+            }
+        }
+        handleConfirmDialogClose();
+    };
+
+    // Format date function
 
     // Get company information from user data
     const companyName = user?.company_name || "undefined";
@@ -306,14 +358,47 @@ const EmployerDashboard = () => {
 
                 {tabValue === 1 && (
                     <Grid item xs={12}>
-                        <Paper sx={{ p: 3 }}>
-                            <Typography
-                                variant="h6"
-                                component="h2"
-                                gutterBottom
+                        <Paper
+                            sx={{
+                                p: { xs: 2, sm: 3 },
+                                borderRadius: 2,
+                                boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                            }}
+                        >
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    mb: 3,
+                                    flexDirection: { xs: "column", sm: "row" },
+                                    gap: 2,
+                                }}
                             >
-                                Applicant Management
-                            </Typography>
+                                <Typography
+                                    variant="h6"
+                                    component="h2"
+                                    gutterBottom={false}
+                                >
+                                    Applicant Management
+                                </Typography>
+                                <Box>
+                                    <Chip
+                                        icon={<Group sx={{ fontSize: 16 }} />}
+                                        label={`${
+                                            employerStats?.total_applications ||
+                                            0
+                                        } Total Applicants`}
+                                        color="primary"
+                                        variant="outlined"
+                                        size="small"
+                                        sx={{
+                                            py: 0.8,
+                                            px: 1.4,
+                                        }}
+                                    />
+                                </Box>
+                            </Box>
 
                             {loading ? (
                                 <Box
@@ -329,87 +414,351 @@ const EmployerDashboard = () => {
                                 <Alert severity="error">{error}</Alert>
                             ) : employerStats?.applications &&
                               employerStats.applications.length > 0 ? (
-                                <TableContainer>
-                                    <Table>
+                                <Box
+                                    sx={{
+                                        width: "100%",
+                                        overflow: "auto",
+                                        "&::-webkit-scrollbar": {
+                                            height: 8,
+                                        },
+                                        "&::-webkit-scrollbar-thumb": {
+                                            backgroundColor: "rgba(0,0,0,0.1)",
+                                            borderRadius: 4,
+                                        },
+                                    }}
+                                >
+                                    <Table sx={{ minWidth: 650 }}>
                                         <TableHead>
                                             <TableRow>
                                                 <TableCell>Applicant</TableCell>
                                                 <TableCell>
                                                     Job Position
                                                 </TableCell>
-                                                <TableCell>
-                                                    Application Date
-                                                </TableCell>
                                                 <TableCell>Status</TableCell>
-                                                <TableCell>Actions</TableCell>
+                                                <TableCell align="center">
+                                                    Actions
+                                                </TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
                                             {employerStats.applications.map(
-                                                (app: any) => (
-                                                    <TableRow key={app.id}>
-                                                        <TableCell>
-                                                            {
-                                                                app.applicant_email
-                                                            }
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            {app.post_title}
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            {formatDate(
-                                                                app.application_date
-                                                            )}
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <Chip
-                                                                label={
-                                                                    app.status ===
-                                                                    "accepte"
-                                                                        ? "Accepted"
-                                                                        : "Pending"
-                                                                }
-                                                                color={
-                                                                    app.status ===
-                                                                    "accepte"
-                                                                        ? "success"
-                                                                        : "warning"
-                                                                }
-                                                                size="small"
-                                                            />
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <Button
-                                                                size="small"
-                                                                variant="outlined"
-                                                                onClick={() =>
-                                                                    pushNotification(
-                                                                        "Viewing CV feature coming soon!",
-                                                                        "info"
-                                                                    )
-                                                                }
-                                                            >
-                                                                View CV
-                                                            </Button>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                )
+                                                (app) => {
+                                                    // Determine if actions should be disabled
+                                                    const isInterviewComplete =
+                                                        app.test &&
+                                                        app.test.score !== null;
+                                                    const actionsDisabled =
+                                                        !isInterviewComplete;
+
+                                                    return (
+                                                        <TableRow
+                                                            key={app.id}
+                                                            sx={{
+                                                                "&:hover": {
+                                                                    backgroundColor:
+                                                                        "action.hover",
+                                                                },
+                                                            }}
+                                                        >
+                                                            <TableCell>
+                                                                <Box
+                                                                    sx={{
+                                                                        display:
+                                                                            "flex",
+                                                                        alignItems:
+                                                                            "center",
+                                                                        gap: 2,
+                                                                    }}
+                                                                >
+                                                                    <Avatar
+                                                                        sx={{
+                                                                            width: 40,
+                                                                            height: 40,
+                                                                            bgcolor:
+                                                                                app.status ===
+                                                                                "accepte"
+                                                                                    ? "success.light"
+                                                                                    : "warning.light",
+                                                                        }}
+                                                                    >
+                                                                        {app.applicant_email
+                                                                            .charAt(
+                                                                                0
+                                                                            )
+                                                                            .toUpperCase()}
+                                                                    </Avatar>
+                                                                    <Box>
+                                                                        <Typography
+                                                                            variant="body1"
+                                                                            fontWeight={
+                                                                                500
+                                                                            }
+                                                                        >
+                                                                            {
+                                                                                app.applicant_email
+                                                                            }
+                                                                        </Typography>
+                                                                        <Typography
+                                                                            variant="caption"
+                                                                            color="text.secondary"
+                                                                        >
+                                                                            Applied
+                                                                            on{" "}
+                                                                            {formatDate(
+                                                                                app.application_date,
+                                                                                true
+                                                                            )}
+                                                                        </Typography>
+                                                                    </Box>
+                                                                </Box>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Typography
+                                                                    variant="body2"
+                                                                    fontWeight={
+                                                                        500
+                                                                    }
+                                                                >
+                                                                    {
+                                                                        app.post_title
+                                                                    }
+                                                                </Typography>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Box
+                                                                    sx={{
+                                                                        display:
+                                                                            "flex",
+                                                                        flexDirection:
+                                                                            "column",
+                                                                        gap: 1,
+                                                                    }}
+                                                                >
+                                                                    <Chip
+                                                                        label={
+                                                                            app.status ===
+                                                                            "accepte"
+                                                                                ? "Accepted"
+                                                                                : app.status ===
+                                                                                  "refuse"
+                                                                                ? "Rejected"
+                                                                                : "Pending"
+                                                                        }
+                                                                        color={
+                                                                            app.status ===
+                                                                            "accepte"
+                                                                                ? "success"
+                                                                                : app.status ===
+                                                                                  "refuse"
+                                                                                ? "error"
+                                                                                : "warning"
+                                                                        }
+                                                                        size="small"
+                                                                        sx={{
+                                                                            fontWeight: 500,
+                                                                            color: "#fff",
+                                                                        }}
+                                                                    />
+
+                                                                    {app.test &&
+                                                                        app.test
+                                                                            .score !==
+                                                                            null && (
+                                                                            <Chip
+                                                                                icon={
+                                                                                    <School fontSize="small" />
+                                                                                }
+                                                                                label={`Score: ${app.test.score}%`}
+                                                                                size="small"
+                                                                                color="primary"
+                                                                                sx={{
+                                                                                    maxWidth:
+                                                                                        "100%",
+                                                                                }}
+                                                                            />
+                                                                        )}
+
+                                                                    {app.interview_id &&
+                                                                        app.test
+                                                                            .score ==
+                                                                            null && (
+                                                                            <Chip
+                                                                                icon={
+                                                                                    <Schedule fontSize="small" />
+                                                                                }
+                                                                                label="Interview scheduled"
+                                                                                size="small"
+                                                                                color="primary"
+                                                                            />
+                                                                        )}
+
+                                                                    {!app.interview_id &&
+                                                                        (app
+                                                                            .test
+                                                                            .score ==
+                                                                            null ||
+                                                                            app
+                                                                                .test
+                                                                                .score ===
+                                                                                null) && (
+                                                                            <Chip
+                                                                                icon={
+                                                                                    <HourglassEmpty fontSize="small" />
+                                                                                }
+                                                                                label="Awaiting interview"
+                                                                                size="small"
+                                                                                color="default"
+                                                                                variant="outlined"
+                                                                            />
+                                                                        )}
+                                                                </Box>
+                                                            </TableCell>
+                                                            <TableCell align="center">
+                                                                <Box
+                                                                    sx={{
+                                                                        display:
+                                                                            "flex",
+                                                                        flexDirection:
+                                                                            {
+                                                                                xs: "column",
+                                                                                md: "row",
+                                                                            },
+                                                                        gap: 1,
+                                                                        justifyContent:
+                                                                            "center",
+                                                                    }}
+                                                                >
+                                                                    <Button
+                                                                        size="small"
+                                                                        variant="contained"
+                                                                        color="success"
+                                                                        startIcon={
+                                                                            <ThumbUp />
+                                                                        }
+                                                                        onClick={() =>
+                                                                            handleUpdateApplicationStatus(
+                                                                                app.id,
+                                                                                "accepte"
+                                                                            )
+                                                                        }
+                                                                        disabled={
+                                                                            actionsDisabled ||
+                                                                            app.status ===
+                                                                                "accepte"
+                                                                        }
+                                                                        sx={{
+                                                                            minWidth:
+                                                                                "100px",
+                                                                            color: "#fff",
+                                                                        }}
+                                                                    >
+                                                                        Accept
+                                                                    </Button>
+                                                                    <Button
+                                                                        size="small"
+                                                                        variant="contained"
+                                                                        color="error"
+                                                                        startIcon={
+                                                                            <ThumbDown />
+                                                                        }
+                                                                        onClick={() =>
+                                                                            handleUpdateApplicationStatus(
+                                                                                app.id,
+                                                                                "refuse"
+                                                                            )
+                                                                        }
+                                                                        disabled={
+                                                                            actionsDisabled ||
+                                                                            app.status ===
+                                                                                "refuse"
+                                                                        }
+                                                                        sx={{
+                                                                            minWidth:
+                                                                                "100px",
+                                                                            color: "#fff",
+                                                                        }}
+                                                                    >
+                                                                        Reject
+                                                                    </Button>
+                                                                </Box>
+                                                                {actionsDisabled && (
+                                                                    <Typography
+                                                                        variant="caption"
+                                                                        color="text.secondary"
+                                                                        sx={{
+                                                                            display:
+                                                                                "block",
+                                                                            mt: 1,
+                                                                            fontStyle:
+                                                                                "italic",
+                                                                        }}
+                                                                    >
+                                                                        Interview
+                                                                        must be
+                                                                        completed
+                                                                        before
+                                                                        decision
+                                                                    </Typography>
+                                                                )}
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    );
+                                                }
                                             )}
                                         </TableBody>
                                     </Table>
-                                </TableContainer>
+                                </Box>
                             ) : (
-                                <Box sx={{ textAlign: "center", py: 3 }}>
-                                    <Typography variant="body1">
+                                <Box
+                                    sx={{
+                                        textAlign: "center",
+                                        py: 5,
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        alignItems: "center",
+                                        gap: 2,
+                                    }}
+                                >
+                                    <Box
+                                        sx={{
+                                            width: 80,
+                                            height: 80,
+                                            borderRadius: "50%",
+                                            display: "flex",
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            backgroundColor: "action.hover",
+                                        }}
+                                    >
+                                        <PersonOutline
+                                            sx={{
+                                                fontSize: 40,
+                                                color: "text.secondary",
+                                            }}
+                                        />
+                                    </Box>
+                                    <Typography
+                                        variant="h6"
+                                        color="text.primary"
+                                    >
                                         No applicants found
                                     </Typography>
                                     <Typography
                                         variant="body2"
                                         color="text.secondary"
+                                        sx={{ maxWidth: 400, mx: "auto" }}
                                     >
                                         Applications will appear here when
                                         candidates apply to your job postings
                                     </Typography>
+                                    <Button
+                                        variant="contained"
+                                        onClick={() => setTabValue(2)}
+                                        startIcon={<Add />}
+                                        sx={{ mt: 2 }}
+                                    >
+                                        Post a New Job
+                                    </Button>
                                 </Box>
                             )}
                         </Paper>
@@ -469,7 +818,7 @@ const EmployerDashboard = () => {
                                         </TableHead>
                                         <TableBody>
                                             {employerStats.my_posts.map(
-                                                (job: any) => (
+                                                (job) => (
                                                     <TableRow key={job.id}>
                                                         <TableCell>
                                                             {job.title}
@@ -577,7 +926,7 @@ const EmployerDashboard = () => {
                     </Grid>
                 )}
 
-                {tabValue === 4 && (
+                {tabValue === 3 && (
                     <Grid item xs={12}>
                         <Paper
                             sx={{
@@ -955,6 +1304,35 @@ const EmployerDashboard = () => {
                     onEdit={handleEditJob}
                     setViewedJob={setViewedJob}
                 />
+            )}
+            {confirmDialogOpen && (
+                <Dialog
+                    open={confirmDialogOpen}
+                    onClose={handleConfirmDialogClose}
+                >
+                    <DialogTitle>Confirm Status Update</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            Are you sure you want to update the application
+                            status to{" "}
+                            {selectedApplication?.status === "accepte"
+                                ? "Accepted"
+                                : "Rejected"}
+                            ?
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleConfirmDialogClose}>
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleConfirmStatusUpdate}
+                            color="primary"
+                        >
+                            Confirm
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             )}
         </Container>
     );

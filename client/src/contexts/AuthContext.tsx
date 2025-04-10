@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 setUser(response.data);
                 setIsAuthenticated(true);
             } catch (err) {
-                console.error("Failed to fetch user data", err);
+                logError(err, "fetchUser");
                 logout();
             } finally {
                 setLoading(false);

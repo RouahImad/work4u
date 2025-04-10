@@ -45,11 +45,12 @@ import {
     Edit,
     Sort,
 } from "@mui/icons-material";
-import { format, isAfter, parseISO } from "date-fns";
 import { useJobPost } from "../../../contexts/JobPostContext";
 import { Job } from "../../../types/Job.types";
 import JobView from "../../../components/jobs/JobView";
 import UpdateJobDialog from "../../../components/jobs/UpdateJobDialog";
+import { formatDate } from "../../../services/utils";
+import { isAfter, parseISO } from "date-fns";
 
 const JobsManagement = () => {
     const theme = useTheme();
@@ -200,15 +201,6 @@ const JobsManagement = () => {
     // Handle closing the update job dialog
     const handleUpdateJobDialogClose = () => {
         setUpdateJobDialogOpen(false);
-    };
-
-    // Format date function
-    const formatDate = (dateString: string) => {
-        try {
-            return format(new Date(dateString), "MMM dd, yyyy");
-        } catch (error) {
-            return "Invalid date";
-        }
     };
 
     // Check if application is closed

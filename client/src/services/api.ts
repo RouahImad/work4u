@@ -229,6 +229,12 @@ export const postApi = {
 
     reportPost: (reportData: { post_id: number; description: string }) =>
         apiClient.post("/post/report/", reportData),
+
+    updateApplicationStatus: (applicationData: {
+        application_id: number;
+        status: "accepte" | "refuse";
+        interview_id?: number;
+    }) => apiClient.patch("/post/update-application/", applicationData),
 };
 
 // CV and interview services

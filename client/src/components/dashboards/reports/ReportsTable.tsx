@@ -16,7 +16,7 @@ import {
     Chip,
 } from "@mui/material";
 import { Search, Clear, Flag } from "@mui/icons-material";
-import { format } from "date-fns";
+import { formatDate } from "../../../services/utils";
 
 interface ReportDetail {
     id: number;
@@ -65,14 +65,6 @@ const ReportsTable = ({
         setFilteredReports(filtered);
         setPage(0); // Reset to first page when filtering
     }, [searchTerm, reports]);
-
-    const formatDate = (dateString: string) => {
-        try {
-            return format(new Date(dateString), "MMM dd, yyyy");
-        } catch (error) {
-            return "Invalid date";
-        }
-    };
 
     const handleChangePage = (_event: unknown, newPage: number) => {
         setPage(newPage);

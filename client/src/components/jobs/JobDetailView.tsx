@@ -27,11 +27,12 @@ import {
     AccessTime,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
-import { format, isAfter, parseISO } from "date-fns";
+import { isAfter, parseISO } from "date-fns";
 import JobApplication from "./JobApplication";
 import { useState } from "react";
 import { Job } from "../../types/Job.types";
 import { useAuth } from "../../contexts/AuthContext";
+import { formatDate } from "../../services/utils";
 
 interface JobDetailViewProps {
     job: Job;
@@ -51,15 +52,6 @@ const JobDetailView = ({
     const [applicationOpen, setApplicationOpen] = useState(false);
 
     const { userRole } = useAuth();
-
-    const formatDate = (dateString: string) => {
-        try {
-            return format(new Date(dateString), "MMMM d, yyyy");
-        } catch (error) {
-            console.error("Date formatting error:", error);
-            return "Unknown date";
-        }
-    };
 
     // Check if the application deadline has passed
     const isApplicationClosed = () => {

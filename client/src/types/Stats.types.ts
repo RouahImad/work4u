@@ -36,37 +36,45 @@ interface ReportDetail {
 }
 
 // Employer Dashboard Stats
-export interface EmployerDashboardStats {
-    my_posts: EmployerPost[];
-    total_posts: number;
-    applications: EmployerApplication[];
-    total_applications: number;
-    pending_applications: number;
-}
+// export interface EmployerDashboardStats {
+//     my_posts: EmployerPost[];
+//     total_posts: number;
+//     applications: EmployerApplication[];
+//     total_applications: number;
+//     pending_applications: number;
+// }
 
 interface EmployerPost {
     id: number;
     title: string;
     salaire: string;
     uploaded_at: string;
-    final_date?: string;
+    final_date: string;
 }
 
 interface InterviewTest {
-    question: string;
-    answer: string;
-    score: number;
+    question: string | null;
+    answer: string | null;
+    score: number | null;
 }
 
-interface EmployerApplication {
+interface EmployerDashboardApplication {
     id: number;
     post_title: string;
     applicant_email: string;
     cv_id: number;
     interview_id: number | null;
     application_date: string;
-    status: string; // "accepte" | "en_attente" would be better
-    test: InterviewTest | null;
+    status: string;
+    test: InterviewTest;
+}
+
+export interface EmployerDashboardStats {
+    my_posts: EmployerPost[];
+    total_posts: number;
+    applications: EmployerDashboardApplication[];
+    total_applications: number;
+    pending_applications: number;
 }
 
 // Employee Dashboard Stats
@@ -91,5 +99,4 @@ interface Application {
     interview_id: number | null;
     status: string;
     application_date: string;
-    company_name?: string; // This would be useful to display
 }
