@@ -36,13 +36,6 @@ interface ReportDetail {
 }
 
 // Employer Dashboard Stats
-// export interface EmployerDashboardStats {
-//     my_posts: EmployerPost[];
-//     total_posts: number;
-//     applications: EmployerApplication[];
-//     total_applications: number;
-//     pending_applications: number;
-// }
 
 interface EmployerPost {
     id: number;
@@ -53,20 +46,21 @@ interface EmployerPost {
 }
 
 interface InterviewTest {
-    question: string | null;
-    answer: string | null;
+    question: string[] | null;
+    answer: string[] | null;
     score: number | null;
 }
 
-interface EmployerDashboardApplication {
+export interface EmployerDashboardApplication {
     id: number;
     post_title: string;
     applicant_email: string;
     cv_id: number;
+    post_id: number;
     interview_id: number | null;
     application_date: string;
     status: string;
-    test: InterviewTest;
+    test: InterviewTest | null;
 }
 
 export interface EmployerDashboardStats {
@@ -87,10 +81,10 @@ export interface EmployeeDashboardStats {
 interface InterviewHistory {
     id: number;
     post_title: string;
-    question: string;
-    answer: string;
-    score: number;
-    response_date: string;
+    question: string[] | null;
+    answer: string[] | null;
+    score: number | null;
+    final_date: string;
 }
 interface Application {
     application_id: number;

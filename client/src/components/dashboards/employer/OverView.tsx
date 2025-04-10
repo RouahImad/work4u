@@ -37,8 +37,13 @@ import {
     Visibility,
     ArrowForward,
 } from "@mui/icons-material";
-import { EmployerDashboardStats } from "../../../types/Stats.types";
+import {
+    EmployerDashboardStats,
+    EmployerDashboardApplication,
+} from "../../../types/Stats.types";
 import { formatDate } from "../../../services/utils";
+import { useState } from "react";
+import JobApplicantsView from "./job/JobApplicantsView";
 
 // Define props interface for EmployerOverviewTab
 interface EmployerOverviewProps {
@@ -73,6 +78,13 @@ const EmployerOverview = ({
     handleMenuClick,
     handleMenuClose,
 }: EmployerOverviewProps) => {
+    // State for job applicants view dialog
+    const [jobApplicantsOpen, setJobApplicantsOpen] = useState(false);
+    const [selectedJobApplicants, setSelectedJobApplicants] = useState<
+        EmployerDashboardApplication[]
+    >([]);
+    const [selectedJobTitle, setSelectedJobTitle] = useState("");
+
     // If loading or employerStats is null, show loading state
     if (loading || !employerStats) {
         return (
@@ -251,6 +263,31 @@ const EmployerOverview = ({
                   ) / employerStats.my_posts.length
               )
             : 0;
+
+    // Function to handle viewing job applicants
+    const handleViewJobApplicants = (jobId: number) => {
+        if (employerStats && employerStats.applications) {
+            // Filter applications that match the selected job's post_id
+            const filteredApplicants = employerStats.applications.filter(
+                (app) => app.post_id === jobId
+            );
+
+            // Find the job title
+            const job = employerStats.my_posts.find((job) => job.id === jobId);
+
+            // Set the data for the JobApplicantsView component
+            setSelectedJobApplicants(filteredApplicants);
+            setSelectedJobTitle(job?.title || "Unknown Job");
+            setJobApplicantsOpen(true);
+
+            // Close the menu
+            handleMenuClose();
+        }
+    };
+
+    const handleCloseJobApplicants = () => {
+        setJobApplicantsOpen(false);
+    };
 
     return (
         <>
@@ -744,19 +781,20 @@ const EmployerOverview = ({
                                                 }}
                                             >
                                                 <Box>
-                                                    {applicant.test?.score !=
-                                                        undefined && (
-                                                        <Chip
-                                                            label={`Score: ${applicant.test.score}%`}
-                                                            size="small"
-                                                            color="primary"
-                                                            sx={{
-                                                                height: 20,
-                                                                fontSize:
-                                                                    "0.65rem",
-                                                            }}
-                                                        /> // here
-                                                    )}
+                                                    {applicant.test &&
+                                                        applicant.test?.score !=
+                                                            undefined && (
+                                                            <Chip
+                                                                label={`Score: ${applicant.test.score}%`}
+                                                                size="small"
+                                                                color="primary"
+                                                                sx={{
+                                                                    height: 20,
+                                                                    fontSize:
+                                                                        "0.65rem",
+                                                                }}
+                                                            />
+                                                        )}
                                                     {applicant.interview_id !=
                                                         null &&
                                                         applicant.test?.score ==
@@ -973,8 +1011,6 @@ const EmployerOverview = ({
                 </Paper>
             </Grid>
 
-            {/* was here */}
-
             {/* Job Postings List */}
             <Grid item xs={12}>
                 <Paper
@@ -1085,7 +1121,12 @@ const EmployerOverview = ({
                         open={Boolean(anchorEl)}
                         onClose={handleMenuClose}
                     >
-                        <MenuItem onClick={handleMenuClose}>
+                        <MenuItem
+                            onClick={() =>
+                                selectedJobId &&
+                                handleViewJobApplicants(selectedJobId)
+                            }
+                        >
                             View Applicants
                         </MenuItem>
                         <MenuItem
@@ -1105,6 +1146,16 @@ const EmployerOverview = ({
                     </Menu>
                 </Paper>
             </Grid>
+
+            {/* Job Applicants Dialog */}
+            <JobApplicantsView
+                applications={selectedJobApplicants}
+                jobTitle={selectedJobTitle}
+                loading={loading}
+                error={error}
+                open={jobApplicantsOpen}
+                onClose={handleCloseJobApplicants}
+            />
         </>
     );
 };

@@ -22,6 +22,7 @@ import {
     AccountCircle,
     EditOutlined,
     List as ListIcon,
+    AccessTime,
 } from "@mui/icons-material";
 import { useAuth } from "../../contexts/AuthContext";
 import { useDashboard } from "../../contexts/DashboardContext";
@@ -35,8 +36,9 @@ import { formatDate } from "../../services/utils";
 const statusColors: Record<string, string> = {
     Applied: "#3498db",
     Interview: "#f39c12",
-    Rejected: "#e74c3c",
+    refuse: "#e74c3c",
     accepte: "#2ecc71",
+    passed: "#9e9e9e", // Gray color for passed interviews
 };
 
 const EmployeeDashboard = () => {
@@ -89,6 +91,14 @@ const EmployeeDashboard = () => {
         setSelectedPostTitle("");
         // Refresh data after interview completion
         fetchEmployeeStats();
+    };
+
+    // Helper function to check if an interview final date has passed
+    const hasInterviewDatePassed = (date: string | undefined): boolean => {
+        if (!date) return false;
+        const finalDate = new Date(date);
+        const today = new Date();
+        return finalDate < today;
     };
 
     return (
@@ -252,91 +262,174 @@ const EmployeeDashboard = () => {
                                         >
                                             <Grid container spacing={2}>
                                                 {employeeStats.applications.map(
-                                                    (application, index) => (
-                                                        <Grid
-                                                            item
-                                                            xs={12}
-                                                            key={index}
-                                                        >
-                                                            <Card variant="outlined">
-                                                                <CardContent>
-                                                                    <Box
-                                                                        sx={{
-                                                                            display:
-                                                                                "flex",
-                                                                            justifyContent:
-                                                                                "space-between",
-                                                                            alignItems:
-                                                                                "flex-start",
-                                                                        }}
-                                                                    >
-                                                                        <Box>
-                                                                            <Typography
-                                                                                variant="h6"
-                                                                                component="div"
+                                                    (application, index) => {
+                                                        const interviewDetails =
+                                                            employeeStats.interview_history?.find(
+                                                                (interview) =>
+                                                                    interview.id ===
+                                                                    application.interview_id
+                                                            );
+
+                                                        const interviewPassed =
+                                                            interviewDetails &&
+                                                            hasInterviewDatePassed(
+                                                                interviewDetails.final_date
+                                                            );
+
+                                                        return (
+                                                            <Grid
+                                                                item
+                                                                xs={12}
+                                                                key={index}
+                                                            >
+                                                                <Card variant="outlined">
+                                                                    <CardContent>
+                                                                        <Box
+                                                                            sx={{
+                                                                                display:
+                                                                                    "flex",
+                                                                                justifyContent:
+                                                                                    "space-between",
+                                                                                alignItems:
+                                                                                    "flex-start",
+                                                                            }}
+                                                                        >
+                                                                            <Box>
+                                                                                <Typography
+                                                                                    variant="h6"
+                                                                                    component="div"
+                                                                                    sx={{
+                                                                                        mb: 1,
+                                                                                    }}
+                                                                                >
+                                                                                    {
+                                                                                        application.post_title
+                                                                                    }
+                                                                                </Typography>
+                                                                                <Typography
+                                                                                    variant="caption"
+                                                                                    display="block"
+                                                                                    gutterBottom
+                                                                                    color="primary"
+                                                                                >
+                                                                                    Applied
+                                                                                    on{" "}
+                                                                                    {formatDate(
+                                                                                        application.application_date,
+                                                                                        true
+                                                                                    )}
+                                                                                </Typography>
+                                                                                {interviewDetails &&
+                                                                                    interviewPassed && (
+                                                                                        <Typography
+                                                                                            variant="caption"
+                                                                                            display="block"
+                                                                                            sx={{
+                                                                                                color: "text.secondary",
+                                                                                                display:
+                                                                                                    "flex",
+                                                                                                alignItems:
+                                                                                                    "center",
+                                                                                                gap: 0.5,
+                                                                                            }}
+                                                                                        >
+                                                                                            <AccessTime fontSize="small" />
+                                                                                            Interview
+                                                                                            deadline
+                                                                                            passed:{" "}
+                                                                                            {formatDate(
+                                                                                                interviewDetails.final_date
+                                                                                            )}
+                                                                                        </Typography>
+                                                                                    )}
+                                                                            </Box>
+                                                                            <Box
                                                                                 sx={{
-                                                                                    mb: 1,
+                                                                                    display:
+                                                                                        "flex",
+                                                                                    gap: 1,
+                                                                                    flexDirection:
+                                                                                        "column",
+                                                                                    alignItems:
+                                                                                        "flex-end",
                                                                                 }}
                                                                             >
-                                                                                {
-                                                                                    application.post_title
-                                                                                }
-                                                                            </Typography>
-                                                                            <Typography
-                                                                                variant="caption"
-                                                                                display="block"
-                                                                                gutterBottom
-                                                                            >
-                                                                                Applied
-                                                                                on{" "}
-                                                                                {formatDate(
-                                                                                    application.application_date,
-                                                                                    true
-                                                                                )}
-                                                                            </Typography>
-                                                                        </Box>
-                                                                        <Chip
-                                                                            label={
-                                                                                application.status ===
-                                                                                "accepte"
-                                                                                    ? "Accepted"
-                                                                                    : "Pending"
-                                                                            }
-                                                                            sx={{
-                                                                                bgcolor:
-                                                                                    statusColors[
-                                                                                        application
-                                                                                            .status
-                                                                                    ] ||
-                                                                                    statusColors.Applied,
-                                                                                color: "white",
-                                                                            }}
-                                                                        />
-                                                                    </Box>
-                                                                    <Box
-                                                                        sx={{
-                                                                            display:
-                                                                                "flex",
-                                                                            justifyContent:
-                                                                                "flex-end",
-                                                                            mt: 2,
-                                                                            gap: 1,
-                                                                        }}
-                                                                    >
-                                                                        <Button
-                                                                            size="small"
-                                                                            variant="text"
-                                                                        >
-                                                                            View
-                                                                            Details
-                                                                        </Button>
+                                                                                <Chip
+                                                                                    label={
+                                                                                        application.status ===
+                                                                                        "accepte"
+                                                                                            ? "Accepted"
+                                                                                            : application.status ===
+                                                                                              "refuse"
+                                                                                            ? "Rejected"
+                                                                                            : "Pending"
+                                                                                    }
+                                                                                    sx={{
+                                                                                        bgcolor:
+                                                                                            interviewPassed &&
+                                                                                            application.status ===
+                                                                                                "en_attente"
+                                                                                                ? statusColors.passed
+                                                                                                : statusColors[
+                                                                                                      application
+                                                                                                          .status
+                                                                                                  ] ||
+                                                                                                  statusColors.Applied,
+                                                                                        color: "white",
+                                                                                    }}
+                                                                                />
 
-                                                                        {/* Interview button */}
-                                                                        {application.interview_id ===
-                                                                            0 &&
-                                                                            application.status !==
-                                                                                "accepte" && (
-                                                                                <Tooltip title="Take an automated interview for this position">
+                                                                                {interviewDetails && (
+                                                                                    <Chip
+                                                                                        size="small"
+                                                                                        label={`Score: ${interviewDetails.score}%`}
+                                                                                        color="primary"
+                                                                                        variant="outlined"
+                                                                                        sx={{
+                                                                                            fontSize:
+                                                                                                "0.75rem",
+                                                                                        }}
+                                                                                    />
+                                                                                )}
+
+                                                                                {interviewPassed && (
+                                                                                    <Chip
+                                                                                        size="small"
+                                                                                        label="Deadline Passed"
+                                                                                        color="default"
+                                                                                        sx={{
+                                                                                            fontSize:
+                                                                                                "0.75rem",
+                                                                                            bgcolor:
+                                                                                                statusColors.passed,
+                                                                                            color: "white",
+                                                                                        }}
+                                                                                    />
+                                                                                )}
+                                                                            </Box>
+                                                                        </Box>
+                                                                        <Box
+                                                                            sx={{
+                                                                                display:
+                                                                                    "flex",
+                                                                                justifyContent:
+                                                                                    "flex-end",
+                                                                                mt: 2,
+                                                                                gap: 1,
+                                                                            }}
+                                                                        >
+                                                                            {/* Interview button */}
+                                                                            <Tooltip
+                                                                                title={
+                                                                                    application.interview_id !=
+                                                                                    null
+                                                                                        ? interviewPassed
+                                                                                            ? "Interview deadline has passed"
+                                                                                            : "Interview already taken"
+                                                                                        : "Take an automated interview for this position"
+                                                                                }
+                                                                            >
+                                                                                <span>
                                                                                     <Button
                                                                                         size="small"
                                                                                         variant="outlined"
@@ -350,27 +443,27 @@ const EmployeeDashboard = () => {
                                                                                                 application.post_title
                                                                                             )
                                                                                         }
+                                                                                        disabled={
+                                                                                            application.interview_id !=
+                                                                                                null ||
+                                                                                            interviewPassed
+                                                                                        }
                                                                                     >
-                                                                                        Take
-                                                                                        Interview
+                                                                                        {interviewPassed
+                                                                                            ? "Interview Expired"
+                                                                                            : application.interview_id !=
+                                                                                              null
+                                                                                            ? "Interview Completed"
+                                                                                            : "Take Interview"}
                                                                                     </Button>
-                                                                                </Tooltip>
-                                                                            )}
-
-                                                                        <Button
-                                                                            size="small"
-                                                                            variant="contained"
-                                                                        >
-                                                                            {application.status ===
-                                                                            "accepte"
-                                                                                ? "Contact Employer"
-                                                                                : "Follow Up"}
-                                                                        </Button>
-                                                                    </Box>
-                                                                </CardContent>
-                                                            </Card>
-                                                        </Grid>
-                                                    )
+                                                                                </span>
+                                                                            </Tooltip>
+                                                                        </Box>
+                                                                    </CardContent>
+                                                                </Card>
+                                                            </Grid>
+                                                        );
+                                                    }
                                                 )}
                                             </Grid>
                                         </Box>

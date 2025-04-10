@@ -716,11 +716,10 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
                                     }
                                     disabled={submitting || interviewCompleted} // Disable if submitting or completed
                                     sx={{ mb: 3 }}
-                                    inputProps={{
-                                        onCopy: (e) => e.preventDefault(), // Disable copy
-                                        onPaste: (e) => e.preventDefault(), // Disable paste
-                                        onCut: (e) => e.preventDefault(), // Disable cut
-                                    }}
+                                    onCopy={(e) => e.preventDefault()} // Disable copy
+                                    onPaste={(e) => e.preventDefault()} // Disable paste
+                                    onCut={(e) => e.preventDefault()} // Disable cut
+                                    onDrop={(e) => e.preventDefault()} // Disable drop
                                 />
 
                                 <Grid

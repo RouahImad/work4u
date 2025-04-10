@@ -28,6 +28,7 @@ import {
     WorkOutline,
     Person,
     Visibility,
+    AccessTime,
 } from "@mui/icons-material";
 import { EmployeeDashboardStats } from "../../../types/Stats.types";
 import { formatDate } from "../../../services/utils";
@@ -350,6 +351,16 @@ const OverviewTab = ({
     // Helper function for safely accessing interview history
     const getSafeInterviewHistory = () => {
         return employeeStats?.interview_history || [];
+    };
+
+    // Helper function to check if an interview deadline has passed
+    const hasInterviewDeadlinePassed = (
+        finalDate: string | undefined
+    ): boolean => {
+        if (!finalDate) return false;
+        const deadline = new Date(finalDate);
+        const today = new Date();
+        return deadline < today;
     };
 
     return (
@@ -813,11 +824,13 @@ const OverviewTab = ({
                                         <ListItem>
                                             <ListItemText
                                                 primary={`Interviewed for ${interview.post_title}`}
-                                                secondary={`On ${formatDate(
-                                                    interview.response_date
-                                                )} - Score: ${interview.score.toFixed(
-                                                    1
-                                                )}%`}
+                                                secondary={`Score: ${
+                                                    interview.score
+                                                        ? interview.score.toFixed(
+                                                              1
+                                                          )
+                                                        : 0
+                                                }%`}
                                             />
                                         </ListItem>
                                         <Divider component="li" />
@@ -916,25 +929,109 @@ const OverviewTab = ({
                         <List>
                             {getSafeInterviewHistory()
                                 .slice(0, 3)
-                                .map((interview) => (
-                                    <Fragment key={interview.id}>
-                                        <ListItem>
-                                            <ListItemText
-                                                primary={`Interview for ${interview.post_title}`}
-                                                secondary={`Question: ${
-                                                    interview.question
-                                                }\nAnswer: ${
-                                                    interview.answer
-                                                }\nScore: ${interview.score.toFixed(
-                                                    1
-                                                )}%\nDate: ${formatDate(
-                                                    interview.response_date
-                                                )}`}
-                                            />
-                                        </ListItem>
-                                        <Divider component="li" />
-                                    </Fragment>
-                                ))}
+                                .map((interview) => {
+                                    const isExpired =
+                                        hasInterviewDeadlinePassed(
+                                            interview.final_date
+                                        );
+
+                                    return (
+                                        <Fragment key={interview.id}>
+                                            <ListItem>
+                                                <Box sx={{ width: "100%" }}>
+                                                    <Box
+                                                        sx={{
+                                                            display: "flex",
+                                                            justifyContent:
+                                                                "space-between",
+                                                            alignItems:
+                                                                "flex-start",
+                                                            mb: 1,
+                                                        }}
+                                                    >
+                                                        <Typography variant="subtitle1">
+                                                            {
+                                                                interview.post_title
+                                                            }
+                                                        </Typography>
+
+                                                        {isExpired && (
+                                                            <Chip
+                                                                size="small"
+                                                                label="Deadline Passed"
+                                                                color="default"
+                                                                icon={
+                                                                    <AccessTime fontSize="small" />
+                                                                }
+                                                                sx={{
+                                                                    fontSize:
+                                                                        "0.7rem",
+                                                                    bgcolor:
+                                                                        "#9e9e9e",
+                                                                    color: "white",
+                                                                }}
+                                                            />
+                                                        )}
+
+                                                        <Chip
+                                                            size="small"
+                                                            label={`Score: ${
+                                                                interview.score ||
+                                                                0
+                                                            }%`}
+                                                            color={
+                                                                interview.score !==
+                                                                    null &&
+                                                                interview.score >=
+                                                                    70
+                                                                    ? "success"
+                                                                    : "warning"
+                                                            }
+                                                        />
+                                                    </Box>
+
+                                                    {interview.final_date && (
+                                                        <Typography
+                                                            variant="body2"
+                                                            color="text.secondary"
+                                                            sx={{ mb: 1 }}
+                                                        >
+                                                            Deadline:{" "}
+                                                            {formatDate(
+                                                                interview.final_date
+                                                            )}
+                                                        </Typography>
+                                                    )}
+
+                                                    <Typography
+                                                        variant="body2"
+                                                        color="text.secondary"
+                                                    >
+                                                        {Array.isArray(
+                                                            interview.question
+                                                        ) &&
+                                                        interview.question
+                                                            .length > 0
+                                                            ? `${
+                                                                  interview
+                                                                      .question
+                                                                      .length
+                                                              } question${
+                                                                  interview
+                                                                      .question
+                                                                      .length >
+                                                                  1
+                                                                      ? "s"
+                                                                      : ""
+                                                              } answered`
+                                                            : "No questions recorded"}
+                                                    </Typography>
+                                                </Box>
+                                            </ListItem>
+                                            <Divider component="li" />
+                                        </Fragment>
+                                    );
+                                })}
                             {getSafeInterviewHistory().length > 3 && (
                                 <Box sx={{ textAlign: "center", mt: 1 }}>
                                     <Button
@@ -975,46 +1072,104 @@ const OverviewTab = ({
                             {getSafeApplications()
                                 .filter((app) => app.status === "en_attente")
                                 .slice(0, 3)
-                                .map((app, index: number) => (
-                                    <Fragment key={index}>
-                                        <ListItem>
-                                            <ListItemText
-                                                primary={`Application for ${app.post_title}`}
-                                                secondary={`Date: ${formatDate(
-                                                    app.application_date,
-                                                    true
-                                                )}`}
-                                            />
-                                            <Button
-                                                size="small"
-                                                variant="outlined"
-                                                onClick={() =>
-                                                    handleInterviewStart(
-                                                        app.application_id,
-                                                        app.post_title
-                                                    )
-                                                }
-                                                sx={{
-                                                    px: {
-                                                        xs: 3,
-                                                        sm: 2,
-                                                    },
-                                                    borderRadius: 1.5,
-                                                    whiteSpace: "nowrap",
-                                                    alignSelf: "flex-end",
-                                                    color: "#05D9E8",
-                                                    borderColor: "currentcolor",
-                                                    backgroundColor: "#E0F7FA",
-                                                    textTransform: "capitalize",
-                                                    fontSize: "0.875rem",
-                                                }}
-                                            >
-                                                Start Interview
-                                            </Button>
-                                        </ListItem>
-                                        <Divider component="li" />
-                                    </Fragment>
-                                ))}
+                                .map((app, index: number) => {
+                                    // Find if this application has a linked interview
+                                    const linkedInterview = app.interview_id
+                                        ? getSafeInterviewHistory().find(
+                                              (interview) =>
+                                                  interview.id ===
+                                                  app.interview_id
+                                          )
+                                        : null;
+
+                                    // Check if interview deadline has passed
+                                    const deadlinePassed = linkedInterview
+                                        ? hasInterviewDeadlinePassed(
+                                              linkedInterview.final_date
+                                          )
+                                        : false;
+
+                                    return (
+                                        <Fragment key={index}>
+                                            <ListItem>
+                                                <ListItemText
+                                                    primary={
+                                                        <Box
+                                                            sx={{
+                                                                display: "flex",
+                                                                alignItems:
+                                                                    "center",
+                                                                gap: 1,
+                                                            }}
+                                                        >
+                                                            <Typography variant="body1">
+                                                                {app.post_title}
+                                                            </Typography>
+                                                            {deadlinePassed && (
+                                                                <Chip
+                                                                    size="small"
+                                                                    label="Deadline Passed"
+                                                                    color="default"
+                                                                    icon={
+                                                                        <AccessTime fontSize="small" />
+                                                                    }
+                                                                    sx={{
+                                                                        fontSize:
+                                                                            "0.7rem",
+                                                                        bgcolor:
+                                                                            "#9e9e9e",
+                                                                        color: "white",
+                                                                    }}
+                                                                />
+                                                            )}
+                                                        </Box>
+                                                    }
+                                                    secondary={`Applied on: ${formatDate(
+                                                        app.application_date,
+                                                        true
+                                                    )}`}
+                                                />
+                                                <Button
+                                                    size="small"
+                                                    variant="outlined"
+                                                    onClick={() =>
+                                                        handleInterviewStart(
+                                                            app.application_id,
+                                                            app.post_title
+                                                        )
+                                                    }
+                                                    disabled={deadlinePassed}
+                                                    sx={{
+                                                        px: {
+                                                            xs: 3,
+                                                            sm: 2,
+                                                        },
+                                                        borderRadius: 1.5,
+                                                        whiteSpace: "nowrap",
+                                                        alignSelf: "flex-end",
+                                                        color: deadlinePassed
+                                                            ? "text.disabled"
+                                                            : "#05D9E8",
+                                                        borderColor:
+                                                            "currentcolor",
+                                                        backgroundColor:
+                                                            deadlinePassed
+                                                                ? "action.disabledBackground"
+                                                                : "#E0F7FA",
+                                                        textTransform:
+                                                            "capitalize",
+                                                        fontSize: "0.875rem",
+                                                    }}
+                                                >
+                                                    {deadlinePassed
+                                                        ? "Expired"
+                                                        : "Start Interview"}
+                                                </Button>
+                                            </ListItem>
+                                            <Divider component="li" />
+                                        </Fragment>
+                                    );
+                                })}
                             {getSafeApplications().filter(
                                 (app) => app.status === "en_attente"
                             ).length > 3 && (
