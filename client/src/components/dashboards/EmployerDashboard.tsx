@@ -19,14 +19,17 @@ import {
     Chip,
     Tabs,
     Tab,
+    IconButton,
 } from "@mui/material";
 import {
     EditOutlined,
     Dashboard,
     Group,
-    BarChart,
     AccountCircle,
     WorkOutline,
+    Visibility,
+    Edit,
+    Delete,
 } from "@mui/icons-material";
 import { useNotification } from "../notifications/SlideInNotifications";
 import { useAuth } from "../../contexts/AuthContext";
@@ -272,11 +275,6 @@ const EmployerDashboard = () => {
                                 label="Jobs"
                             />
                             <Tab
-                                icon={<BarChart />}
-                                iconPosition="start"
-                                label="Analytics"
-                            />
-                            <Tab
                                 icon={<AccountCircle />}
                                 iconPosition="start"
                                 label="Profile"
@@ -293,13 +291,10 @@ const EmployerDashboard = () => {
                         error={error}
                         handleViewApplicants={handleViewApplicants}
                         handleCreateJob={handleCreateJob}
-                        handleViewJob={handleViewJob}
                         handleCloseJob={handleCloseJob}
                         handleDeleteJob={handleDeleteJob}
                         setActiveTab={(tab: string) => {
-                            // Map tab string to tabValue
                             if (tab === "applicants") setTabValue(1);
-                            else if (tab === "analytics") setTabValue(3);
                             else if (tab === "profile") setTabValue(4);
                         }}
                         selectedJobId={selectedJobId}
@@ -439,6 +434,7 @@ const EmployerDashboard = () => {
                                     variant="contained"
                                     startIcon={<WorkOutline />}
                                     onClick={handleCreateJob}
+                                    size="small"
                                 >
                                     Post New Job
                                 </Button>
@@ -505,39 +501,50 @@ const EmployerDashboard = () => {
                                                                         : "success"
                                                                 }
                                                                 size="small"
+                                                                sx={{
+                                                                    color: "#fff",
+                                                                }}
                                                             />
                                                         </TableCell>
                                                         <TableCell>
-                                                            <Button
+                                                            <IconButton
                                                                 size="small"
-                                                                variant="outlined"
+                                                                color="primary"
                                                                 onClick={() =>
                                                                     handleViewJob(
                                                                         job.id
                                                                     )
                                                                 }
-                                                                sx={{
-                                                                    mr: 1,
-                                                                    mb: {
-                                                                        xs: 1,
-                                                                        sm: 0,
-                                                                    },
-                                                                }}
+                                                                sx={{ mr: 1 }}
+                                                                title="View"
                                                             >
-                                                                View
-                                                            </Button>
-                                                            <Button
+                                                                <Visibility fontSize="small" />
+                                                            </IconButton>
+                                                            <IconButton
                                                                 size="small"
-                                                                variant="outlined"
-                                                                color="secondary"
+                                                                color="success"
                                                                 onClick={() =>
                                                                     handleEditJob(
                                                                         job.id
                                                                     )
                                                                 }
+                                                                sx={{ mr: 1 }}
+                                                                title="Edit"
                                                             >
-                                                                Edit
-                                                            </Button>
+                                                                <Edit fontSize="small" />
+                                                            </IconButton>
+                                                            <IconButton
+                                                                size="small"
+                                                                color="error"
+                                                                onClick={() =>
+                                                                    handleDeleteJob(
+                                                                        job.id
+                                                                    )
+                                                                }
+                                                                title="Delete"
+                                                            >
+                                                                <Delete fontSize="small" />
+                                                            </IconButton>
                                                         </TableCell>
                                                     </TableRow>
                                                 )
@@ -566,25 +573,6 @@ const EmployerDashboard = () => {
                                     </Button>
                                 </Box>
                             )}
-                        </Paper>
-                    </Grid>
-                )}
-
-                {tabValue === 3 && (
-                    <Grid item xs={12}>
-                        <Paper sx={{ p: 3 }}>
-                            <Typography
-                                variant="h6"
-                                component="h2"
-                                gutterBottom
-                            >
-                                Recruitment Analytics
-                            </Typography>
-
-                            {/* Add analytics UI here */}
-                            <Typography variant="body1">
-                                Detailed analytics content would go here...
-                            </Typography>
                         </Paper>
                     </Grid>
                 )}

@@ -48,7 +48,6 @@ interface EmployerOverviewProps {
     error: string | null;
     handleViewApplicants: () => void;
     handleCreateJob: () => void;
-    handleViewJob: (jobId: number) => void;
     handleCloseJob: (jobId: number) => void;
     handleDeleteJob: (jobId: number) => void;
     setActiveTab: (tab: string) => void;
@@ -67,7 +66,6 @@ const EmployerOverview = ({
     error,
     handleViewApplicants,
     handleCreateJob,
-    handleViewJob,
     handleCloseJob,
     handleDeleteJob,
     setActiveTab,
@@ -965,13 +963,6 @@ const EmployerOverview = ({
                         open={Boolean(anchorEl)}
                         onClose={handleMenuClose}
                     >
-                        <MenuItem
-                            onClick={() =>
-                                selectedJobId && handleViewJob(selectedJobId)
-                            }
-                        >
-                            View Details
-                        </MenuItem>
                         <MenuItem onClick={handleMenuClose}>
                             View Applicants
                         </MenuItem>

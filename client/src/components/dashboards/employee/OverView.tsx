@@ -912,7 +912,7 @@ const OverviewTab = ({
             </Grid>
 
             {/* Bottom Row - Interview History and Pending Applications */}
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={5}>
                 <Paper
                     sx={{
                         p: 3,
@@ -968,7 +968,7 @@ const OverviewTab = ({
                 </Paper>
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={7}>
                 <Paper
                     sx={{
                         p: 3,
@@ -1000,13 +1000,26 @@ const OverviewTab = ({
                                             <Button
                                                 size="small"
                                                 variant="outlined"
-                                                color="secondary"
                                                 onClick={() =>
                                                     handleInterviewStart(
                                                         app.application_id,
                                                         app.post_title
                                                     )
                                                 }
+                                                sx={{
+                                                    px: {
+                                                        xs: 3,
+                                                        sm: 2,
+                                                    },
+                                                    borderRadius: 1.5,
+                                                    whiteSpace: "nowrap",
+                                                    alignSelf: "flex-end",
+                                                    color: "#05D9E8",
+                                                    borderColor: "currentcolor",
+                                                    backgroundColor: "#E0F7FA",
+                                                    textTransform: "capitalize",
+                                                    fontSize: "0.875rem",
+                                                }}
                                             >
                                                 Start Interview
                                             </Button>
