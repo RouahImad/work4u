@@ -543,8 +543,8 @@ const JobDetailView = ({
                                                 : undefined
                                         }
                                         sx={{
-                                            px: 3.8,
-                                            py: 1.2,
+                                            px: 3.3,
+                                            py: 1,
                                             opacity: applicationClosed
                                                 ? 0.7
                                                 : 1,

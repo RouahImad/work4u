@@ -1,4 +1,4 @@
-import { useState, Fragment, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
     Box,
     Container,
@@ -6,44 +6,27 @@ import {
     Grid,
     Paper,
     Button,
-    List,
-    ListItem,
-    Divider,
-    Chip,
     Table,
     TableBody,
     TableCell,
     TableContainer,
     TableHead,
     TableRow,
-    IconButton,
-    Menu,
-    MenuItem,
-    Theme,
     Card,
-    CardContent,
     Avatar,
     CircularProgress,
     Alert,
-    Badge,
-    LinearProgress,
+    Chip,
+    Tabs,
+    Tab,
 } from "@mui/material";
 import {
-    MoreVert,
-    Add,
     EditOutlined,
-    WorkOutline,
-    BusinessCenter,
-    PersonOutline,
-    CheckCircle,
-    AssignmentInd,
-    Schedule,
-    TrendingUp,
-    Visibility,
     Dashboard,
     Group,
     BarChart,
     AccountCircle,
+    WorkOutline,
 } from "@mui/icons-material";
 import { useNotification } from "../notifications/SlideInNotifications";
 import { useAuth } from "../../contexts/AuthContext";
@@ -57,9 +40,10 @@ import UpdateJobDialog from "../jobs/UpdateJobDialog";
 import { useJobPost } from "../../contexts/JobPostContext";
 import JobView from "../jobs/JobView";
 import { JobPost } from "../../types/Job.types";
+import EmployerOverview from "./employer/OverView";
 
-const EmployerDashboard = ({ theme }: { theme: Theme }) => {
-    const [activeTab, setActiveTab] = useState("overview");
+const EmployerDashboard = () => {
+    const [tabValue, setTabValue] = useState(0);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [viewedJob, setViewedJob] = useState<JobPost | null>(null);
     const { pushNotification } = useNotification();
@@ -80,6 +64,10 @@ const EmployerDashboard = ({ theme }: { theme: Theme }) => {
         fetchEmployerStats();
     }, []);
 
+    const handleTabChange = (newValue: number) => {
+        setTabValue(newValue);
+    };
+
     const handleMenuClick = (
         event: React.MouseEvent<HTMLButtonElement>,
         id: number
@@ -98,7 +86,7 @@ const EmployerDashboard = ({ theme }: { theme: Theme }) => {
     };
 
     const handleViewApplicants = () => {
-        pushNotification("Viewing all applicants feature coming soon!", "info");
+        setTabValue(1); // Switch to applicants tab
     };
 
     const handleEditProfileOpen = () => setEditProfileOpen(true);
@@ -151,7 +139,6 @@ const EmployerDashboard = ({ theme }: { theme: Theme }) => {
     const handleViewJob = (jobId: number) => {
         setSelectedJobId(jobId);
         setJobViewOpen(true);
-
         handleMenuClose();
     };
 
@@ -170,28 +157,6 @@ const EmployerDashboard = ({ theme }: { theme: Theme }) => {
     const companyWebsite = user?.company_website || "undefined";
 
     const displayName = user ? `${user.first_name} ${user.last_name}` : "User";
-
-    const acceptedApplicationsCount =
-        employerStats?.applications?.filter((a) => a.status === "accepte")
-            ?.length || 0;
-
-    const recentPostsCount =
-        employerStats?.my_posts?.filter(
-            (p) =>
-                new Date(p.uploaded_at) >
-                new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-        )?.length || 0;
-
-    // Calculate average salary once
-    const averageSalary =
-        employerStats?.my_posts && employerStats.my_posts.length > 0
-            ? Math.round(
-                  employerStats.my_posts.reduce(
-                      (sum, post) => sum + Number(post.salaire || 0),
-                      0
-                  ) / employerStats.my_posts.length
-              )
-            : 0;
 
     return (
         <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
@@ -277,854 +242,74 @@ const EmployerDashboard = ({ theme }: { theme: Theme }) => {
                     </Paper>
                 </Grid>
 
-                {/* Dashboard Navigation */}
+                {/* Dashboard Navigation with Tabs */}
                 <Grid item xs={12}>
                     <Box
-                        sx={{
-                            borderBottom: 1,
-                            borderColor: "divider",
-                            mb: 2,
-                            display: "flex",
-                            overflow: "auto",
-                        }}
+                        sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}
                     >
-                        <Button
-                            onClick={() => setActiveTab("overview")}
-                            sx={{
-                                mr: 2,
-                                color:
-                                    activeTab === "overview"
-                                        ? "primary.main"
-                                        : "text.primary",
-                                borderBottom:
-                                    activeTab === "overview"
-                                        ? `2px solid ${theme.palette.primary.main}`
-                                        : "none",
-                                borderRadius: 0,
-                                pb: 1,
-                            }}
-                            startIcon={<Dashboard />}
+                        <Tabs
+                            value={tabValue}
+                            onChange={(_e, newValue) =>
+                                handleTabChange(newValue)
+                            }
+                            aria-label="employer dashboard tabs"
+                            variant="scrollable"
+                            scrollButtons="auto"
                         >
-                            Overview
-                        </Button>
-                        <Button
-                            onClick={() => setActiveTab("applicants")}
-                            sx={{
-                                mr: 2,
-                                color:
-                                    activeTab === "applicants"
-                                        ? "primary.main"
-                                        : "text.primary",
-                                borderBottom:
-                                    activeTab === "applicants"
-                                        ? `2px solid ${theme.palette.primary.main}`
-                                        : "none",
-                                borderRadius: 0,
-                                pb: 1,
-                            }}
-                            startIcon={<Group />}
-                        >
-                            Applicants
-                        </Button>
-                        <Button
-                            onClick={() => setActiveTab("analytics")}
-                            sx={{
-                                mr: 2,
-                                color:
-                                    activeTab === "analytics"
-                                        ? "primary.main"
-                                        : "text.primary",
-                                borderBottom:
-                                    activeTab === "analytics"
-                                        ? `2px solid ${theme.palette.primary.main}`
-                                        : "none",
-                                borderRadius: 0,
-                                pb: 1,
-                            }}
-                            startIcon={<BarChart />}
-                        >
-                            Analytics
-                        </Button>
-                        <Button
-                            onClick={() => setActiveTab("profile")}
-                            sx={{
-                                mr: 2,
-                                color:
-                                    activeTab === "profile"
-                                        ? "primary.main"
-                                        : "text.primary",
-                                borderBottom:
-                                    activeTab === "profile"
-                                        ? `2px solid ${theme.palette.primary.main}`
-                                        : "none",
-                                borderRadius: 0,
-                                pb: 1,
-                            }}
-                            startIcon={<AccountCircle />}
-                        >
-                            Profile
-                        </Button>
+                            <Tab
+                                icon={<Dashboard />}
+                                iconPosition="start"
+                                label="Overview"
+                            />
+                            <Tab
+                                icon={<Group />}
+                                iconPosition="start"
+                                label="Applicants"
+                            />
+                            <Tab
+                                icon={<WorkOutline />}
+                                iconPosition="start"
+                                label="Jobs"
+                            />
+                            <Tab
+                                icon={<BarChart />}
+                                iconPosition="start"
+                                label="Analytics"
+                            />
+                            <Tab
+                                icon={<AccountCircle />}
+                                iconPosition="start"
+                                label="Profile"
+                            />
+                        </Tabs>
                     </Box>
                 </Grid>
 
-                {activeTab === "overview" && (
-                    <>
-                        {/* Stats Overview Cards */}
-                        <Grid item xs={12} md={8}>
-                            <Paper
-                                sx={{
-                                    p: 3,
-                                    height: "100%",
-                                    borderRadius: 2,
-                                }}
-                            >
-                                <Typography variant="h6" gutterBottom>
-                                    Recruitment Overview
-                                </Typography>
-                                <Grid container spacing={3}>
-                                    <Grid item xs={6} sm={3}>
-                                        <Box
-                                            sx={{
-                                                textAlign: "center",
-                                                p: 1,
-                                            }}
-                                        >
-                                            <Typography
-                                                variant="h4"
-                                                color="primary.main"
-                                            >
-                                                {employerStats?.total_posts ||
-                                                    0}
-                                            </Typography>
-                                            <Typography
-                                                variant="body2"
-                                                color="text.secondary"
-                                            >
-                                                Job Posts
-                                            </Typography>
-                                        </Box>
-                                    </Grid>
-
-                                    <Grid item xs={6} sm={3}>
-                                        <Box
-                                            sx={{
-                                                textAlign: "center",
-                                                p: 1,
-                                            }}
-                                        >
-                                            <Typography
-                                                variant="h4"
-                                                color="primary.main"
-                                            >
-                                                {employerStats?.total_applications ||
-                                                    0}
-                                            </Typography>
-                                            <Typography
-                                                variant="body2"
-                                                color="text.secondary"
-                                            >
-                                                Total Applicants
-                                            </Typography>
-                                        </Box>
-                                    </Grid>
-
-                                    <Grid item xs={6} sm={3}>
-                                        <Box
-                                            sx={{
-                                                textAlign: "center",
-                                                p: 1,
-                                            }}
-                                        >
-                                            <Typography
-                                                variant="h4"
-                                                color="warning.main"
-                                            >
-                                                {employerStats?.pending_applications ||
-                                                    0}
-                                            </Typography>
-                                            <Typography
-                                                variant="body2"
-                                                color="text.secondary"
-                                            >
-                                                Pending Review
-                                            </Typography>
-                                        </Box>
-                                    </Grid>
-
-                                    <Grid item xs={6} sm={3}>
-                                        <Box
-                                            sx={{
-                                                textAlign: "center",
-                                                p: 1,
-                                            }}
-                                        >
-                                            <Typography
-                                                variant="h4"
-                                                color="success.main"
-                                            >
-                                                {acceptedApplicationsCount}
-                                            </Typography>
-                                            <Typography
-                                                variant="body2"
-                                                color="text.secondary"
-                                            >
-                                                Accepted
-                                            </Typography>
-                                        </Box>
-                                    </Grid>
-                                </Grid>
-
-                                <Box sx={{ mt: 2 }}>
-                                    <Divider />
-                                    <Grid container spacing={2} sx={{ mt: 2 }}>
-                                        <Grid item xs={4}>
-                                            <Badge
-                                                badgeContent={
-                                                    employerStats?.pending_applications ||
-                                                    0
-                                                }
-                                                color="warning"
-                                                max={999}
-                                            >
-                                                <Chip
-                                                    icon={<AssignmentInd />}
-                                                    label="Pending"
-                                                    variant="outlined"
-                                                />
-                                            </Badge>
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                            <Badge
-                                                badgeContent={
-                                                    acceptedApplicationsCount
-                                                }
-                                                color="success"
-                                                max={999}
-                                            >
-                                                <Chip
-                                                    icon={<CheckCircle />}
-                                                    label="Accepted"
-                                                    variant="outlined"
-                                                />
-                                            </Badge>
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                            <Badge
-                                                badgeContent={recentPostsCount}
-                                                color="primary"
-                                                max={999}
-                                            >
-                                                <Chip
-                                                    icon={<Schedule />}
-                                                    label="Recent Posts"
-                                                    variant="outlined"
-                                                />
-                                            </Badge>
-                                        </Grid>
-                                    </Grid>
-                                </Box>
-                            </Paper>
-                        </Grid>
-
-                        {/* Activity Stats */}
-                        <Grid item xs={12} md={4}>
-                            <Paper
-                                sx={{
-                                    p: 3,
-                                    height: "100%",
-                                    borderRadius: 2,
-                                }}
-                            >
-                                <Typography variant="h6" gutterBottom>
-                                    Recruitment Progress
-                                </Typography>
-
-                                <Box sx={{ mb: 3, mt: 2 }}>
-                                    <Box
-                                        sx={{
-                                            display: "flex",
-                                            justifyContent: "space-between",
-                                            mb: 1,
-                                        }}
-                                    >
-                                        <Typography variant="body2">
-                                            Application Rate
-                                        </Typography>
-                                        <Typography variant="body2">
-                                            {(() => {
-                                                const totalPosts = Math.max(
-                                                    employerStats?.total_posts ||
-                                                        0,
-                                                    1
-                                                );
-                                                const totalApps =
-                                                    employerStats?.total_applications ||
-                                                    0;
-                                                return `${Math.min(
-                                                    100,
-                                                    Math.round(
-                                                        (totalApps /
-                                                            totalPosts) *
-                                                            100
-                                                    )
-                                                )}%`;
-                                            })()}
-                                        </Typography>
-                                    </Box>
-                                    <LinearProgress
-                                        variant="determinate"
-                                        value={(() => {
-                                            const totalPosts = Math.max(
-                                                employerStats?.total_posts || 0,
-                                                1
-                                            );
-                                            const totalApps =
-                                                employerStats?.total_applications ||
-                                                0;
-                                            return Math.min(
-                                                100,
-                                                (totalApps / totalPosts) * 100
-                                            );
-                                        })()}
-                                        sx={{
-                                            height: 8,
-                                            borderRadius: 4,
-                                        }}
-                                        color="primary"
-                                    />
-                                </Box>
-
-                                <Box sx={{ mb: 3 }}>
-                                    <Box
-                                        sx={{
-                                            display: "flex",
-                                            justifyContent: "space-between",
-                                            mb: 1,
-                                        }}
-                                    >
-                                        <Typography variant="body2">
-                                            Review Progress
-                                        </Typography>
-                                        <Typography variant="body2">
-                                            {(() => {
-                                                const totalApps = Math.max(
-                                                    employerStats?.total_applications ||
-                                                        0,
-                                                    1
-                                                );
-                                                const pendingApps =
-                                                    employerStats?.pending_applications ||
-                                                    0;
-                                                return `${Math.round(
-                                                    100 -
-                                                        (pendingApps /
-                                                            totalApps) *
-                                                            100
-                                                )}%`;
-                                            })()}
-                                        </Typography>
-                                    </Box>
-                                    <LinearProgress
-                                        variant="determinate"
-                                        value={(() => {
-                                            const totalApps = Math.max(
-                                                employerStats?.total_applications ||
-                                                    0,
-                                                1
-                                            );
-                                            const pendingApps =
-                                                employerStats?.pending_applications ||
-                                                0;
-                                            return (
-                                                100 -
-                                                (pendingApps / totalApps) * 100
-                                            );
-                                        })()}
-                                        sx={{
-                                            height: 8,
-                                            borderRadius: 4,
-                                        }}
-                                        color="warning"
-                                    />
-                                </Box>
-
-                                <Box sx={{ mb: 3 }}>
-                                    <Box
-                                        sx={{
-                                            display: "flex",
-                                            justifyContent: "space-between",
-                                            mb: 1,
-                                        }}
-                                    >
-                                        <Typography variant="body2">
-                                            Acceptance Rate
-                                        </Typography>
-                                        <Typography variant="body2">
-                                            {(() => {
-                                                const totalApps = Math.max(
-                                                    employerStats?.total_applications ||
-                                                        0,
-                                                    1
-                                                );
-                                                return `${Math.round(
-                                                    (acceptedApplicationsCount /
-                                                        totalApps) *
-                                                        100
-                                                )}%`;
-                                            })()}
-                                        </Typography>
-                                    </Box>
-                                    <LinearProgress
-                                        variant="determinate"
-                                        value={(() => {
-                                            const totalApps = Math.max(
-                                                employerStats?.total_applications ||
-                                                    0,
-                                                1
-                                            );
-                                            return (
-                                                (acceptedApplicationsCount /
-                                                    totalApps) *
-                                                100
-                                            );
-                                        })()}
-                                        sx={{
-                                            height: 8,
-                                            borderRadius: 4,
-                                        }}
-                                        color="success"
-                                    />
-                                </Box>
-
-                                <Button
-                                    variant="outlined"
-                                    startIcon={<Visibility />}
-                                    onClick={() => setActiveTab("applicants")}
-                                    fullWidth
-                                    sx={{ mt: 1 }}
-                                >
-                                    View All Applicants
-                                </Button>
-                            </Paper>
-                        </Grid>
-
-                        {/* Platform Activity */}
-                        <Grid item xs={12}>
-                            <Paper sx={{ p: 3, borderRadius: 2 }}>
-                                <Typography variant="h6" gutterBottom>
-                                    Recruitment Activity
-                                </Typography>
-                                <Grid container spacing={3} sx={{ mt: 1 }}>
-                                    <Grid item xs={12} sm={6} md={3}>
-                                        <Card
-                                            elevation={0}
-                                            sx={{
-                                                bgcolor: "background.default",
-                                                borderRadius: 2,
-                                            }}
-                                        >
-                                            <CardContent
-                                                sx={{ textAlign: "center" }}
-                                            >
-                                                <WorkOutline
-                                                    color="primary"
-                                                    sx={{ fontSize: 40, mb: 1 }}
-                                                />
-                                                <Typography variant="h6">
-                                                    {employerStats?.total_posts ||
-                                                        0}
-                                                </Typography>
-                                                <Typography
-                                                    variant="body2"
-                                                    color="text.secondary"
-                                                >
-                                                    Active Job Posts
-                                                </Typography>
-                                            </CardContent>
-                                        </Card>
-                                    </Grid>
-
-                                    <Grid item xs={12} sm={6} md={3}>
-                                        <Card
-                                            elevation={0}
-                                            sx={{
-                                                bgcolor: "background.default",
-                                                borderRadius: 2,
-                                            }}
-                                        >
-                                            <CardContent
-                                                sx={{ textAlign: "center" }}
-                                            >
-                                                <PersonOutline
-                                                    color="primary"
-                                                    sx={{ fontSize: 40, mb: 1 }}
-                                                />
-                                                <Typography variant="h6">
-                                                    {employerStats?.total_applications ||
-                                                        0}
-                                                </Typography>
-                                                <Typography
-                                                    variant="body2"
-                                                    color="text.secondary"
-                                                >
-                                                    Total Applicants
-                                                </Typography>
-                                            </CardContent>
-                                        </Card>
-                                    </Grid>
-
-                                    <Grid item xs={12} sm={6} md={3}>
-                                        <Card
-                                            elevation={0}
-                                            sx={{
-                                                bgcolor: "background.default",
-                                                borderRadius: 2,
-                                            }}
-                                        >
-                                            <CardContent
-                                                sx={{ textAlign: "center" }}
-                                            >
-                                                <BusinessCenter
-                                                    color="primary"
-                                                    sx={{ fontSize: 40, mb: 1 }}
-                                                />
-                                                <Typography variant="h6">
-                                                    {acceptedApplicationsCount}
-                                                </Typography>
-                                                <Typography
-                                                    variant="body2"
-                                                    color="text.secondary"
-                                                >
-                                                    Positions Filled
-                                                </Typography>
-                                            </CardContent>
-                                        </Card>
-                                    </Grid>
-
-                                    <Grid item xs={12} sm={6} md={3}>
-                                        <Card
-                                            elevation={0}
-                                            sx={{
-                                                bgcolor: "background.default",
-                                                borderRadius: 2,
-                                            }}
-                                        >
-                                            <CardContent
-                                                sx={{ textAlign: "center" }}
-                                            >
-                                                <TrendingUp
-                                                    color="primary"
-                                                    sx={{ fontSize: 40, mb: 1 }}
-                                                />
-                                                <Typography variant="h6">
-                                                    ${averageSalary}
-                                                </Typography>
-                                                <Typography
-                                                    variant="body2"
-                                                    color="text.secondary"
-                                                >
-                                                    Average Salary
-                                                </Typography>
-                                            </CardContent>
-                                        </Card>
-                                    </Grid>
-                                </Grid>
-                            </Paper>
-                        </Grid>
-
-                        {/* Job Postings List */}
-                        <Grid item xs={12}>
-                            <Paper
-                                sx={{
-                                    p: 2,
-                                    display: "flex",
-                                    flexDirection: "column",
-                                }}
-                            >
-                                <Box
-                                    sx={{
-                                        display: "flex",
-                                        justifyContent: "space-between",
-                                        alignItems: "center",
-                                        mb: 2,
-                                    }}
-                                >
-                                    <Typography
-                                        component="h2"
-                                        variant="h6"
-                                        color="primary"
-                                        gutterBottom
-                                    >
-                                        Your Job Postings
-                                    </Typography>
-                                    <Button
-                                        variant="contained"
-                                        size="small"
-                                        startIcon={<Add />}
-                                        onClick={handleCreateJob}
-                                    >
-                                        Post New Job
-                                    </Button>
-                                </Box>
-
-                                {loading ? (
-                                    <Box
-                                        sx={{
-                                            display: "flex",
-                                            justifyContent: "center",
-                                            p: 3,
-                                        }}
-                                    >
-                                        <CircularProgress />
-                                    </Box>
-                                ) : error ? (
-                                    <Alert severity="error">{error}</Alert>
-                                ) : employerStats?.my_posts &&
-                                  employerStats.my_posts.length > 0 ? (
-                                    <TableContainer>
-                                        <Table size="medium">
-                                            <TableHead>
-                                                <TableRow>
-                                                    <TableCell>
-                                                        Job Title
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        Salary
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        Posted Date
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        Actions
-                                                    </TableCell>
-                                                </TableRow>
-                                            </TableHead>
-                                            <TableBody>
-                                                {employerStats.my_posts.map(
-                                                    (job) => (
-                                                        <TableRow key={job.id}>
-                                                            <TableCell>
-                                                                {job.title}
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                {job.salaire}
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                {formatDate(
-                                                                    job.uploaded_at
-                                                                )}
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <IconButton
-                                                                    size="small"
-                                                                    onClick={(
-                                                                        event
-                                                                    ) =>
-                                                                        handleMenuClick(
-                                                                            event,
-                                                                            job.id
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    <MoreVert fontSize="small" />
-                                                                </IconButton>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    )
-                                                )}
-                                            </TableBody>
-                                        </Table>
-                                    </TableContainer>
-                                ) : (
-                                    <Box
-                                        sx={{
-                                            textAlign: "center",
-                                            py: 3,
-                                        }}
-                                    >
-                                        <Typography variant="body1">
-                                            No job postings found
-                                        </Typography>
-                                        <Typography
-                                            variant="body2"
-                                            color="text.secondary"
-                                        >
-                                            Create your first job posting to
-                                            start receiving applications
-                                        </Typography>
-                                    </Box>
-                                )}
-
-                                <Menu
-                                    id="job-actions-menu"
-                                    anchorEl={anchorEl}
-                                    keepMounted
-                                    open={Boolean(anchorEl)}
-                                    onClose={handleMenuClose}
-                                >
-                                    <MenuItem
-                                        onClick={() =>
-                                            selectedJobId &&
-                                            handleViewJob(selectedJobId)
-                                        }
-                                    >
-                                        View Details
-                                    </MenuItem>
-                                    <MenuItem onClick={handleMenuClose}>
-                                        View Applicants
-                                    </MenuItem>
-                                    <MenuItem
-                                        onClick={() =>
-                                            selectedJobId &&
-                                            handleCloseJob(selectedJobId)
-                                        }
-                                    >
-                                        Close Posting
-                                    </MenuItem>
-                                    <MenuItem
-                                        onClick={() =>
-                                            selectedJobId &&
-                                            handleDeleteJob(selectedJobId)
-                                        }
-                                    >
-                                        Delete
-                                    </MenuItem>
-                                </Menu>
-                            </Paper>
-                        </Grid>
-
-                        {/* Sidebar */}
-                        <Grid item xs={12} md={4}>
-                            {/* Recent Applicants */}
-                            <Paper
-                                sx={{
-                                    p: 2,
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    mb: 3,
-                                }}
-                            >
-                                <Typography
-                                    component="h2"
-                                    variant="h6"
-                                    color="primary"
-                                    gutterBottom
-                                >
-                                    Recent Applicants
-                                </Typography>
-                                {loading ? (
-                                    <Box
-                                        sx={{
-                                            display: "flex",
-                                            justifyContent: "center",
-                                            p: 2,
-                                        }}
-                                    >
-                                        <CircularProgress />
-                                    </Box>
-                                ) : error ? (
-                                    <Alert severity="error">{error}</Alert>
-                                ) : employerStats?.applications &&
-                                  employerStats.applications.length > 0 ? (
-                                    <List dense>
-                                        {employerStats.applications
-                                            .slice(0, 5)
-                                            .map((applicant) => (
-                                                <Fragment key={applicant.id}>
-                                                    <ListItem>
-                                                        <Box
-                                                            sx={{
-                                                                width: "100%",
-                                                            }}
-                                                        >
-                                                            <Box
-                                                                sx={{
-                                                                    display:
-                                                                        "flex",
-                                                                    justifyContent:
-                                                                        "space-between",
-                                                                    mb: 0.5,
-                                                                }}
-                                                            >
-                                                                <Typography variant="body1">
-                                                                    {
-                                                                        applicant.applicant_email.split(
-                                                                            "@"
-                                                                        )[0]
-                                                                    }
-                                                                </Typography>
-                                                                <Chip
-                                                                    label={`${
-                                                                        applicant.status ===
-                                                                        "accepte"
-                                                                            ? "Accepted"
-                                                                            : "Pending"
-                                                                    }`}
-                                                                    size="small"
-                                                                    color={
-                                                                        applicant.status ===
-                                                                        "accepte"
-                                                                            ? "success"
-                                                                            : "warning"
-                                                                    }
-                                                                />
-                                                            </Box>
-                                                            <Box
-                                                                sx={{
-                                                                    display:
-                                                                        "flex",
-                                                                    justifyContent:
-                                                                        "space-between",
-                                                                    alignItems:
-                                                                        "center",
-                                                                }}
-                                                            >
-                                                                <Typography
-                                                                    variant="body2"
-                                                                    color="text.secondary"
-                                                                >
-                                                                    {
-                                                                        applicant.post_title
-                                                                    }
-                                                                </Typography>
-                                                                <Typography
-                                                                    variant="caption"
-                                                                    color="text.secondary"
-                                                                >
-                                                                    {formatDate(
-                                                                        applicant.application_date
-                                                                    )}
-                                                                </Typography>
-                                                            </Box>
-                                                        </Box>
-                                                    </ListItem>
-                                                    <Divider component="li" />
-                                                </Fragment>
-                                            ))}
-                                    </List>
-                                ) : (
-                                    <Box sx={{ textAlign: "center", py: 2 }}>
-                                        <Typography
-                                            variant="body2"
-                                            color="text.secondary"
-                                        >
-                                            No applications received yet
-                                        </Typography>
-                                    </Box>
-                                )}
-                                <Button
-                                    size="small"
-                                    sx={{ mt: 1, alignSelf: "flex-end" }}
-                                    onClick={handleViewApplicants}
-                                >
-                                    View all applicants
-                                </Button>
-                            </Paper>
-                        </Grid>
-                    </>
+                {/* Tab Content */}
+                {tabValue === 0 && (
+                    <EmployerOverview
+                        employerStats={employerStats}
+                        loading={loading}
+                        error={error}
+                        handleViewApplicants={handleViewApplicants}
+                        handleCreateJob={handleCreateJob}
+                        handleViewJob={handleViewJob}
+                        handleCloseJob={handleCloseJob}
+                        handleDeleteJob={handleDeleteJob}
+                        setActiveTab={(tab: string) => {
+                            // Map tab string to tabValue
+                            if (tab === "applicants") setTabValue(1);
+                            else if (tab === "analytics") setTabValue(3);
+                            else if (tab === "profile") setTabValue(4);
+                        }}
+                        selectedJobId={selectedJobId}
+                        anchorEl={anchorEl}
+                        handleMenuClick={handleMenuClick}
+                        handleMenuClose={handleMenuClose}
+                    />
                 )}
 
-                {activeTab === "applicants" && (
+                {tabValue === 1 && (
                     <Grid item xs={12}>
                         <Paper sx={{ p: 3 }}>
                             <Typography
@@ -1166,7 +351,7 @@ const EmployerDashboard = ({ theme }: { theme: Theme }) => {
                                         </TableHead>
                                         <TableBody>
                                             {employerStats.applications.map(
-                                                (app) => (
+                                                (app: any) => (
                                                     <TableRow key={app.id}>
                                                         <TableCell>
                                                             {
@@ -1236,7 +421,156 @@ const EmployerDashboard = ({ theme }: { theme: Theme }) => {
                     </Grid>
                 )}
 
-                {activeTab === "analytics" && (
+                {tabValue === 2 && (
+                    <Grid item xs={12}>
+                        <Paper sx={{ p: 3 }}>
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    mb: 3,
+                                }}
+                            >
+                                <Typography variant="h6" component="h2">
+                                    Jobs Management
+                                </Typography>
+                                <Button
+                                    variant="contained"
+                                    startIcon={<WorkOutline />}
+                                    onClick={handleCreateJob}
+                                >
+                                    Post New Job
+                                </Button>
+                            </Box>
+
+                            {loading ? (
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        p: 3,
+                                    }}
+                                >
+                                    <CircularProgress />
+                                </Box>
+                            ) : error ? (
+                                <Alert severity="error">{error}</Alert>
+                            ) : employerStats?.my_posts &&
+                              employerStats.my_posts.length > 0 ? (
+                                <TableContainer>
+                                    <Table>
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>Job Title</TableCell>
+                                                <TableCell>Salary</TableCell>
+                                                <TableCell>
+                                                    Posted Date
+                                                </TableCell>
+                                                <TableCell>Status</TableCell>
+                                                <TableCell>Actions</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {employerStats.my_posts.map(
+                                                (job: any) => (
+                                                    <TableRow key={job.id}>
+                                                        <TableCell>
+                                                            {job.title}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {job.salaire}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {formatDate(
+                                                                job.uploaded_at
+                                                            )}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Chip
+                                                                label={
+                                                                    new Date(
+                                                                        job.final_date
+                                                                    ) <
+                                                                    new Date()
+                                                                        ? "Closed"
+                                                                        : "Active"
+                                                                }
+                                                                color={
+                                                                    new Date(
+                                                                        job.final_date
+                                                                    ) <
+                                                                    new Date()
+                                                                        ? "error"
+                                                                        : "success"
+                                                                }
+                                                                size="small"
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Button
+                                                                size="small"
+                                                                variant="outlined"
+                                                                onClick={() =>
+                                                                    handleViewJob(
+                                                                        job.id
+                                                                    )
+                                                                }
+                                                                sx={{
+                                                                    mr: 1,
+                                                                    mb: {
+                                                                        xs: 1,
+                                                                        sm: 0,
+                                                                    },
+                                                                }}
+                                                            >
+                                                                View
+                                                            </Button>
+                                                            <Button
+                                                                size="small"
+                                                                variant="outlined"
+                                                                color="secondary"
+                                                                onClick={() =>
+                                                                    handleEditJob(
+                                                                        job.id
+                                                                    )
+                                                                }
+                                                            >
+                                                                Edit
+                                                            </Button>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                )
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
+                            ) : (
+                                <Box sx={{ textAlign: "center", py: 3 }}>
+                                    <Typography variant="body1">
+                                        No job postings found
+                                    </Typography>
+                                    <Typography
+                                        variant="body2"
+                                        color="text.secondary"
+                                    >
+                                        Create your first job posting to start
+                                        receiving applications
+                                    </Typography>
+                                    <Button
+                                        variant="contained"
+                                        onClick={handleCreateJob}
+                                        sx={{ mt: 2 }}
+                                    >
+                                        Post a Job
+                                    </Button>
+                                </Box>
+                            )}
+                        </Paper>
+                    </Grid>
+                )}
+
+                {tabValue === 3 && (
                     <Grid item xs={12}>
                         <Paper sx={{ p: 3 }}>
                             <Typography
@@ -1255,7 +589,7 @@ const EmployerDashboard = ({ theme }: { theme: Theme }) => {
                     </Grid>
                 )}
 
-                {activeTab === "profile" && (
+                {tabValue === 4 && (
                     <Grid item xs={12}>
                         <Paper
                             sx={{
