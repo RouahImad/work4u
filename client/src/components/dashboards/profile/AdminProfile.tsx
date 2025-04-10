@@ -152,38 +152,6 @@ const AdminProfile = () => {
                                     </Typography>
                                 </Box>
 
-                                <Box sx={{ mb: 3 }}>
-                                    <Typography
-                                        variant="subtitle2"
-                                        color="text.secondary"
-                                        gutterBottom
-                                    >
-                                        Username
-                                    </Typography>
-                                    <Typography
-                                        variant="body1"
-                                        fontWeight="medium"
-                                    >
-                                        {user?.username || "Not available"}
-                                    </Typography>
-                                </Box>
-                                {/* 
-                                <Box sx={{ mb: 3 }}>
-                                    <Typography
-                                        variant="subtitle2"
-                                        color="text.secondary"
-                                        gutterBottom
-                                    >
-                                        Account Created
-                                    </Typography>
-                                    <Typography
-                                        variant="body1"
-                                        fontWeight="medium"
-                                    >
-                                        {joinDate}
-                                    </Typography>
-                                </Box> */}
-
                                 <Button
                                     variant="contained"
                                     size="medium"

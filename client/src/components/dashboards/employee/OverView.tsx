@@ -219,7 +219,7 @@ const OverviewTab = ({
                     </Paper>
                 </Grid>
 
-                {/* Upcoming Events Skeleton */}
+                {/*  Events Skeleton */}
                 <Grid item xs={12} md={4}>
                     <Paper
                         sx={{
@@ -864,7 +864,7 @@ const OverviewTab = ({
                             fontWeight="500"
                             component="div"
                         >
-                            Upcoming Events
+                            Events
                         </Typography>
                     </Box>
                     <List dense>
@@ -903,7 +903,7 @@ const OverviewTab = ({
                         ) : (
                             <ListItem>
                                 <ListItemText
-                                    primary="No upcoming events"
+                                    primary="No events"
                                     secondary="Events will appear here when scheduled"
                                 />
                             </ListItem>
@@ -1059,7 +1059,7 @@ const OverviewTab = ({
                         p: 3,
                         borderRadius: 2,
                         boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                        height: "100%",
+                        // height: "100%",
                     }}
                 >
                     <Typography variant="h6" fontWeight="500" gutterBottom>
@@ -1147,15 +1147,11 @@ const OverviewTab = ({
                                                         borderRadius: 1.5,
                                                         whiteSpace: "nowrap",
                                                         alignSelf: "flex-end",
-                                                        color: deadlinePassed
-                                                            ? "text.disabled"
-                                                            : "#05D9E8",
+                                                        color: "#333",
                                                         borderColor:
                                                             "currentcolor",
                                                         backgroundColor:
-                                                            deadlinePassed
-                                                                ? "action.disabledBackground"
-                                                                : "#E0F7FA",
+                                                            "#E0F7FA",
                                                         textTransform:
                                                             "capitalize",
                                                         fontSize: "0.875rem",

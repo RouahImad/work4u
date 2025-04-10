@@ -53,7 +53,7 @@ const AdminOverviewTab = ({
                             p: 3,
                             height: "100%",
                             borderRadius: 2,
-                            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
                         }}
                     >
                         <Skeleton variant="text" width="40%" height={40} />
@@ -105,7 +105,7 @@ const AdminOverviewTab = ({
                             p: 3,
                             height: "100%",
                             borderRadius: 2,
-                            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
                         }}
                     >
                         <Skeleton variant="text" width="40%" height={40} />
@@ -186,7 +186,7 @@ const AdminOverviewTab = ({
                         p: 3,
                         height: "100%",
                         borderRadius: 2,
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
                     }}
                 >
                     <Typography variant="h6" fontWeight="500" gutterBottom>
@@ -218,7 +218,7 @@ const AdminOverviewTab = ({
                                     p: 1,
                                 }}
                             >
-                                <Typography variant="h4" color="text.secondary">
+                                <Typography variant="h4" color="primary">
                                     {adminStats?.cvs?.total || 0}
                                 </Typography>
                                 <Typography
@@ -327,7 +327,7 @@ const AdminOverviewTab = ({
                         p: 3,
                         height: "100%",
                         borderRadius: 2,
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
                     }}
                 >
                     <Typography variant="h6" fontWeight="500" gutterBottom>
@@ -405,13 +405,16 @@ const AdminOverviewTab = ({
                                 }}
                             >
                                 <Typography variant="h4" color="success.main">
-                                    {((adminStats?.applications?.accepted ||
-                                        0) /
-                                        Math.max(
-                                            1,
-                                            adminStats?.applications?.total || 1
-                                        )) *
-                                        100}
+                                    {Math.round(
+                                        ((adminStats?.applications?.accepted ||
+                                            0) /
+                                            Math.max(
+                                                1,
+                                                adminStats?.applications
+                                                    ?.total || 1
+                                            )) *
+                                            100
+                                    )}
                                     %
                                 </Typography>
                                 <Typography
@@ -462,7 +465,7 @@ const AdminOverviewTab = ({
                     sx={{
                         p: 3,
                         borderRadius: 2,
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
                         mb: 3,
                     }}
                 >
@@ -501,7 +504,7 @@ const AdminOverviewTab = ({
                     sx={{
                         p: 3,
                         borderRadius: 2,
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
                     }}
                 >
                     <Typography variant="h6" fontWeight="500" gutterBottom>
