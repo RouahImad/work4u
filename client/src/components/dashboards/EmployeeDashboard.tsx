@@ -90,7 +90,6 @@ const EmployeeDashboard = () => {
         // Refresh data after interview completion
         fetchEmployeeStats();
     };
-    console.log(employeeStats);
 
     return (
         <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>

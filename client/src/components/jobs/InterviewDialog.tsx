@@ -24,6 +24,7 @@ import {
     CheckCircleOutline,
     Assignment,
     HelpOutline,
+    VisibilityOff,
 } from "@mui/icons-material";
 import { useCVInterview } from "../../contexts/CVInterviewContext";
 import { useNotification } from "../notifications/SlideInNotifications";
@@ -61,6 +62,17 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
     const [interviewSuccess, setInterviewSuccess] = useState(false);
     const [terminateDialogOpen, setTerminateDialogOpen] = useState(false); // State for termination confirmation dialog
 
+    // Focus tracking state
+    const [unfocusTimestamp, setUnfocusTimestamp] = useState<number | null>(
+        null
+    );
+    const [penaltySeconds, setPenaltySeconds] = useState(0);
+    const [showUnfocusedWarning, setShowUnfocusedWarning] = useState(false);
+    const [lastPenaltyTime, setLastPenaltyTime] = useState(0);
+    const UNFOCUS_PENALTY_SECONDS = 360; // 6 minutes (360 seconds) penalty for each unfocus event
+    const PENALTY_COOLDOWN_MS = 5000; // 5 seconds cooldown between penalties
+    const unfocusTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
     // Timer state
     const [timeRemaining, setTimeRemaining] = useState(interviewTime * 60); // Convert minutes to seconds
     const [timerActive, setTimerActive] = useState(false);
@@ -78,7 +90,6 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
         }
     }, [open]);
 
-    // Transform questions into objects when they change
     useEffect(() => {
         if (questions.length > 0) {
             const formattedQuestions = questions.map((q) => ({
@@ -88,6 +99,86 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
             setTransformedQuestions(formattedQuestions);
         }
     }, [questions]);
+
+    // Track page visibility
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (!interviewStarted || interviewCompleted) return;
+
+            const isHidden = document.hidden;
+            const currentTime = Date.now();
+
+            if (isHidden) {
+                // User switched tabs or minimized window
+                setUnfocusTimestamp(currentTime);
+
+                unfocusTimeoutRef.current = setTimeout(() => {
+                    setShowUnfocusedWarning(true);
+                }, 400);
+            } else {
+                setShowUnfocusedWarning(false);
+
+                if (unfocusTimestamp) {
+                    // Check if enough time has passed since the last penalty
+                    const timeSinceLastPenalty = currentTime - lastPenaltyTime;
+
+                    if (timeSinceLastPenalty > PENALTY_COOLDOWN_MS) {
+                        // Apply time penalty (6 minutes per switch)
+                        const newPenalty = UNFOCUS_PENALTY_SECONDS;
+                        setPenaltySeconds((prev) => prev + newPenalty);
+                        setTimeRemaining((prev) =>
+                            Math.max(0, prev - newPenalty)
+                        );
+
+                        // Update the last penalty time
+                        setLastPenaltyTime(currentTime);
+
+                        // Show notification about the penalty
+                        pushNotification(
+                            `Leaving the interview window reduces your time. ${Math.floor(
+                                newPenalty / 60
+                            )} minutes deducted.`,
+                            "warning"
+                        );
+                    } else {
+                        // Show a different notification for rapid switching
+                        pushNotification(
+                            "Rapid tab switching detected. Please stay focused on the interview.",
+                            "error"
+                        );
+                    }
+
+                    setUnfocusTimestamp(null);
+                }
+
+                // Clear the warning timeout if it exists
+                if (unfocusTimeoutRef.current) {
+                    clearTimeout(unfocusTimeoutRef.current);
+                }
+            }
+        };
+
+        // Add visibility change event listener
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+
+        return () => {
+            document.removeEventListener(
+                "visibilitychange",
+                handleVisibilityChange
+            );
+
+            if (unfocusTimeoutRef.current) {
+                clearTimeout(unfocusTimeoutRef.current);
+            }
+        };
+    }, [
+        interviewStarted,
+        interviewCompleted,
+        unfocusTimestamp,
+        UNFOCUS_PENALTY_SECONDS,
+        lastPenaltyTime,
+        PENALTY_COOLDOWN_MS,
+    ]);
 
     // Timer logic
     useEffect(() => {
@@ -239,6 +330,8 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
             setTimeRemaining(interviewTime * 60);
             setTimerActive(false);
             setInterviewSuccess(false);
+            setPenaltySeconds(0);
+            setLastPenaltyTime(0);
             onClose();
         }
     };
@@ -300,6 +393,20 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
                                     color="text.secondary"
                                 >
                                     Time Remaining: {formatTimeRemaining()}
+                                    {penaltySeconds > 0 && (
+                                        <span
+                                            style={{
+                                                color: "#f44336",
+                                                marginLeft: "4px",
+                                            }}
+                                        >
+                                            (-{Math.floor(penaltySeconds / 60)}:
+                                            {(penaltySeconds % 60)
+                                                .toString()
+                                                .padStart(2, "0")}
+                                            )
+                                        </span>
+                                    )}
                                 </Typography>
                             </Box>
                         )}
@@ -351,6 +458,45 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
                         },
                     }}
                 />
+            )}
+
+            {/* Unfocus warning overlay */}
+            {showUnfocusedWarning && (
+                <Box
+                    sx={{
+                        position: "absolute",
+                        zIndex: 10,
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: "rgba(0,0,0,0.85)",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "white",
+                    }}
+                >
+                    <VisibilityOff
+                        sx={{ fontSize: 60, mb: 2, color: "#f44336" }}
+                    />
+                    <Typography variant="h5" gutterBottom align="center">
+                        Return to the Interview
+                    </Typography>
+                    <Typography variant="body1" align="center" sx={{ mb: 2 }}>
+                        Leaving this window reduces your time limit!
+                    </Typography>
+                    <Typography
+                        variant="body2"
+                        align="center"
+                        sx={{ maxWidth: "80%" }}
+                    >
+                        Each time you leave the interview,{" "}
+                        {Math.floor(UNFOCUS_PENALTY_SECONDS / 60)} minutes will
+                        be deducted from your time.
+                    </Typography>
+                </Box>
             )}
 
             <DialogContent
@@ -482,6 +628,23 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
                                         disabled in the answer input field.
                                     </Typography>
                                 </li>
+                                <li>
+                                    <Typography
+                                        variant="body2"
+                                        sx={{
+                                            color: "error.main",
+                                            fontWeight: "bold",
+                                        }}
+                                    >
+                                        Switching to other tabs or windows
+                                        during the interview will reduce your
+                                        time limit by{" "}
+                                        {Math.floor(
+                                            UNFOCUS_PENALTY_SECONDS / 60
+                                        )}{" "}
+                                        minutes each time.
+                                    </Typography>
+                                </li>
                             </ul>
                         </Box>
 
@@ -491,7 +654,6 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
                         </Typography>
                     </Box>
                 ) : (
-                    // Interview questions
                     <Box sx={{ height: "100%" }}>
                         {transformedQuestions.map((item, index) => (
                             <Box
@@ -531,6 +693,8 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
                                             variant="h6"
                                             component="div"
                                             sx={{ lineHeight: 1.4 }}
+                                            onCopy={(e) => e.preventDefault()}
+                                            onCut={(e) => e.preventDefault()}
                                         >
                                             {item.question}
                                         </Typography>
