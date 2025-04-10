@@ -60,7 +60,7 @@ export interface EmployerDashboardApplication {
     interview_id: number | null;
     application_date: string;
     status: string;
-    test: InterviewTest | null;
+    test: InterviewTest;
 }
 
 export interface EmployerDashboardStats {
