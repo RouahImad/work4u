@@ -141,6 +141,7 @@ export { secureStorage };
 // Auth services
 export const authApi = {
     register: (userData: {
+        username: string;
         first_name: string;
         last_name: string;
         email: string;
@@ -151,12 +152,13 @@ export const authApi = {
         company_website?: string;
     }) => apiClient.post("/api/register/", userData),
 
-    login: (credentials: { username: string; password: string }) =>
+    login: (credentials: { email: string; password: string }) =>
         apiClient.post("/api/token/", credentials),
 
     getCurrentUser: () => apiClient.get("/api/current-user/"),
 
     updateUser: (userData: {
+        username?: string;
         first_name?: string;
         last_name?: string;
         email?: string;

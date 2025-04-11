@@ -80,7 +80,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             setError(null);
             setLoading(true);
-            const response = await authApi.login({ username: email, password });
+            const response = await authApi.login({ email: email, password });
             const { access, refresh } = response.data;
 
             localStorage.setItem("accessToken", access);

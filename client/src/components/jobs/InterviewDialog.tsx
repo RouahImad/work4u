@@ -730,7 +730,24 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
                                         alignItems: "center",
                                     }}
                                 >
-                                    <Grid item>
+                                    {/* First group - Previous button and question counter */}
+                                    <Grid
+                                        item
+                                        xs={6}
+                                        sm="auto"
+                                        sx={{
+                                            display: "flex",
+                                            flexDirection: {
+                                                xs: "column",
+                                                sm: "row",
+                                            },
+                                            alignItems: {
+                                                xs: "stretch",
+                                                sm: "center",
+                                            },
+                                            gap: { xs: 1, sm: 2 },
+                                        }}
+                                    >
                                         <Button
                                             variant="outlined"
                                             onClick={handlePreviousQuestion}
@@ -738,20 +755,49 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
                                                 currentQuestionIndex === 0 ||
                                                 submitting
                                             }
+                                            sx={{
+                                                minWidth: {
+                                                    xs: "100%",
+                                                    sm: "80px",
+                                                },
+                                            }}
                                         >
                                             Previous
                                         </Button>
-                                    </Grid>
-                                    <Grid item>
                                         <Typography
                                             variant="body2"
                                             color="text.secondary"
+                                            align="center"
+                                            sx={{
+                                                display: "flex",
+                                                justifyContent: "center",
+                                                alignItems: "center",
+                                                py: { xs: 0.5, sm: 0 },
+                                            }}
                                         >
                                             {currentQuestionIndex + 1} of{" "}
                                             {transformedQuestions.length}
                                         </Typography>
                                     </Grid>
-                                    <Grid item>
+
+                                    {/* Second group - Next/Submit button and Terminate button */}
+                                    <Grid
+                                        item
+                                        xs={6}
+                                        sm="auto"
+                                        sx={{
+                                            display: "flex",
+                                            flexDirection: {
+                                                xs: "column",
+                                                sm: "row",
+                                            },
+                                            alignItems: {
+                                                xs: "stretch",
+                                                sm: "center",
+                                            },
+                                            gap: { xs: 1, sm: 2 },
+                                        }}
+                                    >
                                         {currentQuestionIndex ===
                                         transformedQuestions.length - 1 ? (
                                             <Button
@@ -762,7 +808,13 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
                                                     interviewCompleted ||
                                                     !areAllQuestionsAnswered() ||
                                                     submitting
-                                                } // Enable only if all questions are answered
+                                                }
+                                                sx={{
+                                                    minWidth: {
+                                                        xs: "100%",
+                                                        sm: "130px",
+                                                    },
+                                                }}
                                             >
                                                 Submit Interview
                                             </Button>
@@ -771,10 +823,35 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
                                                 variant="contained"
                                                 onClick={handleNextQuestion}
                                                 disabled={submitting}
+                                                sx={{
+                                                    minWidth: {
+                                                        xs: "100%",
+                                                        sm: "80px",
+                                                    },
+                                                }}
                                             >
                                                 Next
                                             </Button>
                                         )}
+                                        <Button
+                                            variant="outlined"
+                                            color="error"
+                                            onClick={() =>
+                                                setTerminateDialogOpen(true)
+                                            }
+                                            disabled={submitting}
+                                            size="small"
+                                            sx={{
+                                                minWidth: {
+                                                    xs: "100%",
+                                                    sm: "90px",
+                                                },
+                                                fontSize: "0.75rem",
+                                                py: 0.75,
+                                            }}
+                                        >
+                                            Terminate
+                                        </Button>
                                     </Grid>
                                 </Grid>
                             </Box>
@@ -808,19 +885,6 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
                         onClick={handleClose}
                     >
                         Back to Dashboard
-                    </Button>
-                </DialogActions>
-            )}
-
-            {interviewStarted && !interviewCompleted && (
-                <DialogActions sx={{ p: 3, pt: 0 }}>
-                    <Button
-                        variant="outlined"
-                        color="error"
-                        onClick={() => setTerminateDialogOpen(true)} // Open termination confirmation dialog
-                        disabled={submitting}
-                    >
-                        Terminate Interview
                     </Button>
                 </DialogActions>
             )}

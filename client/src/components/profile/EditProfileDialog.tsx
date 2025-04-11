@@ -28,6 +28,7 @@ const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
         first_name: user?.first_name || "",
         last_name: user?.last_name || "",
         email: user?.email || "",
+        username: user?.username || "",
     });
 
     // Track the initial form data to detect changes
@@ -35,12 +36,14 @@ const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
         first_name: "",
         last_name: "",
         email: "",
+        username: "",
     });
 
     const [errors, setErrors] = useState<{
         first_name?: string;
         last_name?: string;
         email?: string;
+        username?: string;
     }>({});
 
     const [isLoading, setIsLoading] = useState(false);
@@ -53,6 +56,7 @@ const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
                 first_name: user.first_name || "",
                 last_name: user.last_name || "",
                 email: user.email || "",
+                username: user.username || "",
             };
             setFormData(userData);
             setInitialFormData(userData);
@@ -85,6 +89,7 @@ const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
             first_name?: string;
             last_name?: string;
             email?: string;
+            username?: string;
         } = {};
 
         if (!formData.first_name.trim()) {
@@ -101,6 +106,10 @@ const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
             newErrors.email = "Email is invalid";
         }
 
+        if (!formData.username.trim()) {
+            newErrors.username = "Username is required";
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -110,7 +119,8 @@ const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
         return (
             formData.first_name !== initialFormData.first_name ||
             formData.last_name !== initialFormData.last_name ||
-            formData.email !== initialFormData.email
+            formData.email !== initialFormData.email ||
+            formData.username !== initialFormData.username
         );
     };
 
@@ -120,6 +130,7 @@ const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
             !!formData.first_name.trim() ||
             !!formData.last_name.trim() ||
             !!formData.email ||
+            !!formData.username.trim() ||
             /\S+@\S+\.\S+/.test(formData.email)
         );
     };
@@ -225,6 +236,20 @@ const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
                             onChange={handleChange}
                             error={!!errors.email}
                             helperText={errors.email}
+                            disabled={isLoading}
+                            required
+                        />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                        <TextField
+                            fullWidth
+                            label="Username"
+                            name="username"
+                            value={formData.username}
+                            onChange={handleChange}
+                            error={!!errors.username}
+                            helperText={errors.username}
                             disabled={isLoading}
                             required
                         />

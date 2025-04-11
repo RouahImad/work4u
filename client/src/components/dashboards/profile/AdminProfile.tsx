@@ -142,6 +142,22 @@ const AdminProfile = () => {
                                         color="text.secondary"
                                         gutterBottom
                                     >
+                                        Username
+                                    </Typography>
+                                    <Typography
+                                        variant="body1"
+                                        fontWeight="medium"
+                                    >
+                                        {user?.username || "No username"}
+                                    </Typography>
+                                </Box>
+
+                                <Box sx={{ mb: 3 }}>
+                                    <Typography
+                                        variant="subtitle2"
+                                        color="text.secondary"
+                                        gutterBottom
+                                    >
                                         Email
                                     </Typography>
                                     <Typography

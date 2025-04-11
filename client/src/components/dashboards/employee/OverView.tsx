@@ -878,7 +878,8 @@ const OverviewTab = ({
                                             <ListItemText
                                                 primary={`Applied for ${app.post_title}`}
                                                 secondary={`Application: ${formatDate(
-                                                    app.application_date
+                                                    app.application_date,
+                                                    true
                                                 )}`}
                                             />
                                             {app.interview_id === 0 && (
@@ -912,14 +913,13 @@ const OverviewTab = ({
                 </Paper>
             </Grid>
 
-            {/* Bottom Row - Interview History and Pending Applications */}
-            <Grid item xs={12} md={5}>
+            {/* Interview History Section */}
+            <Grid item xs={12}>
                 <Paper
                     sx={{
                         p: 3,
                         borderRadius: 2,
                         boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                        height: "100%",
                     }}
                 >
                     <Typography variant="h6" fontWeight="500" gutterBottom>
@@ -927,35 +927,32 @@ const OverviewTab = ({
                     </Typography>
                     {getSafeInterviewHistory().length > 0 ? (
                         <List>
-                            {getSafeInterviewHistory()
-                                .slice(0, 3)
-                                .map((interview) => {
-                                    const isExpired =
-                                        hasInterviewDeadlinePassed(
-                                            interview.final_date
-                                        );
+                            {getSafeInterviewHistory().map((interview) => {
+                                const isExpired = hasInterviewDeadlinePassed(
+                                    interview.final_date
+                                );
 
-                                    return (
-                                        <Fragment key={interview.id}>
-                                            <ListItem>
-                                                <Box sx={{ width: "100%" }}>
-                                                    <Box
-                                                        sx={{
-                                                            display: "flex",
-                                                            justifyContent:
-                                                                "space-between",
-                                                            alignItems:
-                                                                "flex-start",
-                                                            mb: 1,
-                                                        }}
-                                                    >
-                                                        <Typography variant="subtitle1">
-                                                            {
-                                                                interview.post_title
-                                                            }
-                                                        </Typography>
+                                return (
+                                    <Fragment key={interview.id}>
+                                        <ListItem>
+                                            <Box sx={{ width: "100%" }}>
+                                                <Box
+                                                    sx={{
+                                                        display: "flex",
+                                                        justifyContent:
+                                                            "space-between",
+                                                        alignItems:
+                                                            "flex-start",
+                                                        mb: 1,
+                                                    }}
+                                                >
+                                                    <Typography variant="subtitle1">
+                                                        {interview.post_title}
+                                                    </Typography>
 
-                                                        {isExpired && (
+                                                    {isExpired &&
+                                                        interview.score ===
+                                                            null && (
                                                             <Chip
                                                                 size="small"
                                                                 label="Deadline Passed"
@@ -973,77 +970,61 @@ const OverviewTab = ({
                                                             />
                                                         )}
 
-                                                        <Chip
-                                                            size="small"
-                                                            label={`Score: ${
-                                                                interview.score ||
-                                                                0
-                                                            }%`}
-                                                            color={
-                                                                interview.score !==
-                                                                    null &&
-                                                                interview.score >=
-                                                                    70
-                                                                    ? "success"
-                                                                    : "warning"
-                                                            }
-                                                        />
-                                                    </Box>
+                                                    <Chip
+                                                        size="small"
+                                                        label={`Score: ${
+                                                            interview.score || 0
+                                                        }%`}
+                                                        color={
+                                                            interview.score !==
+                                                                null &&
+                                                            interview.score >=
+                                                                70
+                                                                ? "success"
+                                                                : "warning"
+                                                        }
+                                                    />
+                                                </Box>
 
-                                                    {interview.final_date && (
-                                                        <Typography
-                                                            variant="body2"
-                                                            color="text.secondary"
-                                                            sx={{ mb: 1 }}
-                                                        >
-                                                            Deadline:{" "}
-                                                            {formatDate(
-                                                                interview.final_date
-                                                            )}
-                                                        </Typography>
-                                                    )}
-
+                                                {interview.final_date && (
                                                     <Typography
                                                         variant="body2"
                                                         color="text.secondary"
+                                                        sx={{ mb: 1 }}
                                                     >
-                                                        {Array.isArray(
-                                                            interview.question
-                                                        ) &&
-                                                        interview.question
-                                                            .length > 0
-                                                            ? `${
-                                                                  interview
-                                                                      .question
-                                                                      .length
-                                                              } question${
-                                                                  interview
-                                                                      .question
-                                                                      .length >
-                                                                  1
-                                                                      ? "s"
-                                                                      : ""
-                                                              } answered`
-                                                            : "No questions recorded"}
+                                                        Deadline:{" "}
+                                                        {formatDate(
+                                                            interview.final_date
+                                                        )}
                                                     </Typography>
-                                                </Box>
-                                            </ListItem>
-                                            <Divider component="li" />
-                                        </Fragment>
-                                    );
-                                })}
-                            {getSafeInterviewHistory().length > 3 && (
-                                <Box sx={{ textAlign: "center", mt: 1 }}>
-                                    <Button
-                                        size="small"
-                                        onClick={() =>
-                                            setActiveTab("applications")
-                                        }
-                                    >
-                                        View More
-                                    </Button>
-                                </Box>
-                            )}
+                                                )}
+
+                                                <Typography
+                                                    variant="body2"
+                                                    color="text.secondary"
+                                                >
+                                                    {Array.isArray(
+                                                        interview.question
+                                                    ) &&
+                                                    interview.question.length >
+                                                        0
+                                                        ? `${
+                                                              interview.question
+                                                                  .length
+                                                          } question${
+                                                              interview.question
+                                                                  .length > 1
+                                                                  ? "s"
+                                                                  : ""
+                                                          } answered`
+                                                        : "No questions recorded"}
+                                                </Typography>
+                                            </Box>
+                                        </ListItem>
+                                        <Divider component="li" />
+                                    </Fragment>
+                                );
+                            })}
                         </List>
                     ) : (
                         <Typography variant="body2" color="text.secondary">
@@ -1053,13 +1034,13 @@ const OverviewTab = ({
                 </Paper>
             </Grid>
 
-            <Grid item xs={12} md={7}>
+            {/* Pending Applications Section */}
+            <Grid item xs={12}>
                 <Paper
                     sx={{
                         p: 3,
                         borderRadius: 2,
                         boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                        // height: "100%",
                     }}
                 >
                     <Typography variant="h6" fontWeight="500" gutterBottom>
@@ -1071,9 +1052,7 @@ const OverviewTab = ({
                         <List>
                             {getSafeApplications()
                                 .filter((app) => app.status === "en_attente")
-                                .slice(0, 3)
-                                .map((app, index: number) => {
-                                    // Find if this application has a linked interview
+                                .map((app) => {
                                     const linkedInterview = app.interview_id
                                         ? getSafeInterviewHistory().find(
                                               (interview) =>
@@ -1082,7 +1061,6 @@ const OverviewTab = ({
                                           )
                                         : null;
 
-                                    // Check if interview deadline has passed
                                     const deadlinePassed = linkedInterview
                                         ? hasInterviewDeadlinePassed(
                                               linkedInterview.final_date
@@ -1090,7 +1068,7 @@ const OverviewTab = ({
                                         : false;
 
                                     return (
-                                        <Fragment key={index}>
+                                        <Fragment key={app.application_id}>
                                             <ListItem>
                                                 <ListItemText
                                                     primary={
@@ -1166,20 +1144,6 @@ const OverviewTab = ({
                                         </Fragment>
                                     );
                                 })}
-                            {getSafeApplications().filter(
-                                (app) => app.status === "en_attente"
-                            ).length > 3 && (
-                                <Box sx={{ textAlign: "center", mt: 1 }}>
-                                    <Button
-                                        size="small"
-                                        onClick={() =>
-                                            setActiveTab("applications")
-                                        }
-                                    >
-                                        View More
-                                    </Button>
-                                </Box>
-                            )}
                         </List>
                     ) : (
                         <Typography variant="body2" color="text.secondary">
