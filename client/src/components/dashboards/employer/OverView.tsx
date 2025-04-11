@@ -240,6 +240,7 @@ const EmployerOverview = ({
             </Grid>
         );
     }
+    console.log(employerStats);
 
     // Calculate reusable values
     const acceptedApplicationsCount =
@@ -258,7 +259,7 @@ const EmployerOverview = ({
         employerStats?.my_posts && employerStats.my_posts.length > 0
             ? Math.round(
                   employerStats.my_posts.reduce(
-                      (sum: number, post) => sum + Number(post.salaire || 0),
+                      (sum: number, post) => sum + Number(post.salary || 0),
                       0
                   ) / employerStats.my_posts.length
               )
@@ -1075,7 +1076,7 @@ const EmployerOverview = ({
                                     {employerStats.my_posts.map((job) => (
                                         <TableRow key={job.id}>
                                             <TableCell>{job.title}</TableCell>
-                                            <TableCell>{job.salaire}</TableCell>
+                                            <TableCell>{job.salary}</TableCell>
                                             <TableCell>
                                                 {formatDate(job.uploaded_at)}
                                             </TableCell>

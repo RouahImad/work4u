@@ -816,7 +816,7 @@ const InterviewDialog: React.FC<InterviewDialogProps> = ({
                                                     },
                                                 }}
                                             >
-                                                Submit Interview
+                                                Submit
                                             </Button>
                                         ) : (
                                             <Button

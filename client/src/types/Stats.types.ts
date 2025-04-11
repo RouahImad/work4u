@@ -40,7 +40,7 @@ interface ReportDetail {
 interface EmployerPost {
     id: number;
     title: string;
-    salaire: string;
+    salary: string;
     uploaded_at: string;
     final_date: string;
 }
