@@ -181,6 +181,11 @@ export default function Home({
                                             }
                                         >
                                             <IconButton
+                                                aria-label={
+                                                    darkMode
+                                                        ? "Switch to light mode"
+                                                        : "Switch to dark mode"
+                                                }
                                                 onClick={() =>
                                                     setDarkMode(!darkMode)
                                                 }
@@ -194,14 +199,13 @@ export default function Home({
                                                 {darkMode ? (
                                                     <LightIcon
                                                         sx={{
-                                                            color: "#ffcc00",
+                                                            color: "#FFDD00",
                                                         }}
                                                     />
                                                 ) : (
                                                     <DarkIcon
                                                         sx={{
-                                                            color: theme.palette
-                                                                .primary.main,
+                                                            color: "#5E35B1",
                                                         }}
                                                     />
                                                 )}
@@ -474,7 +478,8 @@ export default function Home({
                             transition={{ duration: 0.6 }}
                         >
                             <Typography
-                                variant="h4"
+                                variant="h2"
+                                component="h2"
                                 fontWeight="bold"
                                 mb={4}
                                 sx={{ color: darkMode ? "#ffffff" : "#333" }}
@@ -533,6 +538,7 @@ export default function Home({
                                         <CardContent>
                                             <Typography
                                                 variant="h6"
+                                                component="h3"
                                                 fontWeight="bold"
                                                 gutterBottom
                                                 sx={{
@@ -597,6 +603,7 @@ export default function Home({
                             >
                                 <motion.div whileHover={{ y: -5 }}>
                                     <IconButton
+                                        aria-label="Connect with us on LinkedIn"
                                         sx={{
                                             color: "#0077B5",
                                             bgcolor: "rgba(0, 119, 181, 0.1)",
@@ -608,6 +615,7 @@ export default function Home({
                                 </motion.div>
                                 <motion.div whileHover={{ y: -5 }}>
                                     <IconButton
+                                        aria-label="Email us"
                                         sx={{
                                             color: "#EA4335",
                                             bgcolor: "rgba(234, 67, 53, 0.1)",
@@ -619,6 +627,7 @@ export default function Home({
                                 </motion.div>
                                 <motion.div whileHover={{ y: -5 }}>
                                     <IconButton
+                                        aria-label="Call us"
                                         sx={{
                                             color: "#25D366",
                                             bgcolor: "rgba(37, 211, 102, 0.1)",
