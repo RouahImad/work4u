@@ -8,7 +8,7 @@ export interface AdminDashboardStats {
     };
     posts: {
         total: number;
-        average_salaire: number;
+        average_salary: number;
     };
     cvs: {
         total: number;

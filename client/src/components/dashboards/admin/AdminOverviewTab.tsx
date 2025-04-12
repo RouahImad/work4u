@@ -360,9 +360,9 @@ const AdminOverviewTab = ({
                                 }}
                             >
                                 <Typography variant="h4" color="success.main">
-                                    {adminStats?.posts?.average_salaire
+                                    {adminStats?.posts?.average_salary
                                         ? Math.round(
-                                              adminStats.posts.average_salaire
+                                              adminStats.posts.average_salary
                                           )
                                         : 0}
                                 </Typography>
@@ -442,7 +442,7 @@ const AdminOverviewTab = ({
                                 />
                                 <Typography variant="body2">
                                     Average Salary:{" "}
-                                    {adminStats?.posts?.average_salaire?.toLocaleString() ||
+                                    {adminStats?.posts?.average_salary?.toLocaleString() ||
                                         0}
                                 </Typography>
                             </Box>
