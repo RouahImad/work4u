@@ -824,7 +824,7 @@ const EmployerDashboard = () => {
                                                             {job.title}
                                                         </TableCell>
                                                         <TableCell>
-                                                            {job.salaire}
+                                                            {job.salary}
                                                         </TableCell>
                                                         <TableCell>
                                                             {formatDate(
